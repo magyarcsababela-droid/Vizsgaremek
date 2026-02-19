@@ -1,5 +1,7 @@
 using ComputerpartsLibrary.DATA;
+using ComputerpartsLibrary.INTERFACE;
 using Microsoft.EntityFrameworkCore;
+using WebshopAPI.SERVICE;
 
 namespace ComputerpartsAPI
 {
@@ -16,6 +18,12 @@ namespace ComputerpartsAPI
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
             builder.Services.AddDbContext<ComputerpatsDbContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("Default")));
+
+            builder.Services.AddScoped<IProductService, ProductService>();
+            builder.Services.AddScoped<ICategoryService, CategoryService>();
+            builder.Services.AddScoped<IOrderService, OrderService>();
+            builder.Services.AddScoped<IOrderItemService, OrderItemService>();
+            builder.Services.AddScoped<IUserService, UserService>();
 
             var app = builder.Build();
 

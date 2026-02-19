@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using WebshopAPI.Interface;
-using WebshopAPI.MODEL;
+using ComputerpartsLibrary.INTERFACE;
+using ComputerpartsLibrary.MODEL;
 
 namespace WebshopAPI.CONTROLLER
 {
