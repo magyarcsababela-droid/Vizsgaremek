@@ -1,0 +1,6 @@
+@ComputerpartsAPI_HostAddress = http://localhost:5272
+
+GET {{ComputerpartsAPI_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
