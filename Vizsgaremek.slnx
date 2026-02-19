@@ -1,4 +1,5 @@
 <Solution>
   <Project Path="ComputerpartsAPI/ComputerpartsAPI.csproj" Id="be749b24-cfb2-4ffa-940a-3e383abecf09" />
+  <Project Path="ComputerpartsFrontendBlazor/ComputerpartsFrontendBlazor.csproj" Id="c89a1ff1-5e40-4710-8c2d-1bdeb050f8b9" />
   <Project Path="ComputerpartsLibrary/ComputerpartsLibrary.csproj" Id="a3538013-bc4f-4e7c-a280-02919b39e319" />
 </Solution>
