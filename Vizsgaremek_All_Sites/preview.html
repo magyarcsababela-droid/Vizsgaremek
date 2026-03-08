@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>PC Configurator</title>
+
+<style>
+
+body{
+font-family: Arial, sans-serif;
+background:#0f0f12;
+color:white;
+margin:0;
+}
+
+.container{
+display:flex;
+padding:40px;
+gap:40px;
+}
+
+.left{
+width:45%;
+}
+
+.right{
+width:55%;
+background:#18181f;
+padding:25px;
+border-radius:10px;
+}
+
+select{
+width:100%;
+padding:10px;
+margin-top:5px;
+margin-bottom:20px;
+background:#202028;
+color:white;
+border:none;
+border-radius:6px;
+}
+
+label{
+font-weight:bold;
+}
+
+button{
+padding:10px 15px;
+background:#ff7b00;
+border:none;
+border-radius:6px;
+cursor:pointer;
+color:white;
+font-weight:bold;
+}
+
+button:hover{
+background:#ff9a2a;
+}
+
+.summary-item{
+margin-bottom:10px;
+border-bottom:1px solid #333;
+padding-bottom:5px;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<!-- LEFT SIDE -->
+<div class="left">
+
+<h2>PC Configurator</h2>
+
+<label>CPU</label>
+<select onchange="updateSummary()">
+<option selected disabled>Choose a CPU</option>
+<option>Intel i5 14600K</option>
+<option>Intel i7 14700K</option>
+<option>AMD Ryzen 5 7600X</option>
+<option>AMD Ryzen 7 7800X3D</option>
+</select>
+
+<label>GPU</label>
+<select onchange="updateSummary()">
+<option selected disabled>Choose a GPU</option>
+<option>NVIDIA RTX 4060</option>
+<option>NVIDIA RTX 4070</option>
+<option>NVIDIA RTX 4080</option>
+<option>AMD RX 7800XT</option>
+</select>
+
+<label>Motherboard</label>
+<select onchange="updateSummary()">
+<option selected disabled>Choose a Motherboard</option>
+<option>ASUS ROG B650</option>
+<option>MSI MAG B760</option>
+<option>Gigabyte AORUS Z790</option>
+</select>
+
+<label>Memory</label>
+<select onchange="updateSummary()">
+<option selected disabled>Choose Memory</option>
+<option>16GB DDR5</option>
+<option>32GB DDR5</option>
+<option>64GB DDR5</option>
+</select>
+
+<label>Storage</label>
+<div id="storageContainer">
+
+<select onchange="updateSummary()">
+<option selected disabled>Choose Storage</option>
+<option>1TB NVMe SSD</option>
+<option>2TB NVMe SSD</option>
+<option>4TB NVMe SSD</option>
+</select>
+
+</div>
+
+<button onclick="addStorage()">Add Another Storage</button>
+
+<label>Cooling</label>
+<select onchange="updateSummary()">
+<option selected disabled>Choose Cooling</option>
+<option>Air Cooler</option>
+<option>240mm AIO</option>
+<option>360mm AIO</option>
+</select>
+
+<label>Power Supply</label>
+<select onchange="updateSummary()">
+<option selected disabled>Choose Power Supply</option>
+<option>650W Gold</option>
+<option>750W Gold</option>
+<option>850W Platinum</option>
+</select>
+
+<label>PC Case</label>
+<select onchange="updateSummary()">
+<option selected disabled>Choose a PC Case</option>
+<option>NZXT H9 Flow</option>
+<option>Lian Li O11 Dynamic</option>
+<option>Fractal Design North</option>
+</select>
+
+</div>
+
+<!-- RIGHT SIDE -->
+<div class="right">
+
+<h2>Your Build</h2>
+
+<div id="summary"></div>
+
+</div>
+
+</div>
+
+<script>
+
+function updateSummary(){
+
+let summary = document.getElementById("summary")
+summary.innerHTML = ""
+
+let selects = document.querySelectorAll("select")
+
+selects.forEach(select => {
+
+let value = select.value
+
+if(value && !value.includes("Choose")){
+
+let div = document.createElement("div")
+div.className = "summary-item"
+div.textContent = value
+
+summary.appendChild(div)
+
+}
+
+})
+
+}
+
+function addStorage(){
+
+let container = document.getElementById("storageContainer")
+
+let newSelect = document.createElement("select")
+
+newSelect.innerHTML = `
+<option selected disabled>Choose Storage</option>
+<option>1TB NVMe SSD</option>
+<option>2TB NVMe SSD</option>
+<option>4TB NVMe SSD</option>
+`
+
+newSelect.onchange = updateSummary
+
+container.appendChild(newSelect)
+
+}
+
+</script>
+
+</body>
+</html>
