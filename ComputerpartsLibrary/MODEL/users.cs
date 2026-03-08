@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace ComputerpartsLibrary.MODEL
 {
-    public class users
+    public class Users
     {
         [Key]
         public int Id { get; set; }

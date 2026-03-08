@@ -7,13 +7,13 @@ using System.Threading.Tasks;
 
 namespace ComputerpartsLibrary.MODEL
 {
-    public class products
+    public class Products
     {
         [Key]
         public int Id { get; set; }
         public string Name { get; set; } = null!;
         public int Price { get; set; }
         public int CategoryId { get; set; }
-        public categories Category { get; set; } = null!;
+        public Categories Category { get; set; } = null!;
     }
 }

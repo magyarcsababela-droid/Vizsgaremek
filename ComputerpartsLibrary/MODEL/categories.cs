@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace ComputerpartsLibrary.MODEL
 {
-    public class categories
+    public class Categories
     {
         [Key]
         public int Id { get; set; }

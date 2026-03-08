@@ -9,10 +9,10 @@ namespace ComputerpartsLibrary.INTERFACE
 {
     public interface IUserService
     {
-        Task<users> GetUserByIdAsync(int id);
-        Task<IEnumerable<users>> GetAllUsersAsync();
-        Task<users> CreateUserAsync(users user);
-        Task<users> UpdateUserAsync(users user);
-        Task<bool> DeleteUserAsync(int id);
+        Task<Users> GetUserByIdAsync(int id);
+        Task<IEnumerable<Users>> GetAllUsersAsync();
+        Task AddUserAsync(Users user);
+        Task UpdateUserAsync(Users user);
+        Task DeleteUserAsync(int id);
     }
 }
