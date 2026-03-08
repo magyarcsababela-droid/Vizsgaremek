@@ -17,7 +17,7 @@ namespace WebshopAPI.CONTROLLER
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<Category>> GetCategoryById(int id)
+        public async Task<ActionResult<categories>> GetCategoryById(int id)
         {
             var category = await _categoryService.GetCategoryByIdAsync(id);
             if (category == null)
@@ -28,28 +28,28 @@ namespace WebshopAPI.CONTROLLER
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Category>>> GetAllCategories()
+        public async Task<ActionResult<IEnumerable<categories>>> GetAllCategories()
         {
             var categories = await _categoryService.GetAllCategoriesAsync();
             return Ok(categories);
         }
 
         [HttpGet("name/{name}")]
-        public async Task<ActionResult<IEnumerable<Category>>> GetCategoriesByName(string name)
+        public async Task<ActionResult<IEnumerable<categories>>> GetCategoriesByName(string name)
         {
             var categories = await _categoryService.GetCategoriesByNameAsync(name);
             return Ok(categories);
         }
 
         [HttpPost]
-        public async Task<ActionResult<Category>> CreateCategory(Category category)
+        public async Task<ActionResult<categories>> CreateCategory(categories category)
         {
             var createdCategory = await _categoryService.CreateCategoryAsync(category);
             return CreatedAtAction(nameof(GetCategoryById), new { id = createdCategory.Id }, createdCategory);
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateCategory(int id, Category category)
+        public async Task<IActionResult> UpdateCategory(int id, categories category)
         {
             if (id != category.Id)
             {

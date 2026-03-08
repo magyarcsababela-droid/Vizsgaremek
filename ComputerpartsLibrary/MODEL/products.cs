@@ -7,13 +7,13 @@ using System.Threading.Tasks;
 
 namespace ComputerpartsLibrary.MODEL
 {
-    public class Order
+    public class products
     {
         [Key]
         public int Id { get; set; }
-        public DateTime OrderDate { get; set; }
-        public int UserId { get; set; }
-        public User User { get; set; } = null!;
-        public ICollection<OrderItem> OrderItems { get; set; } = new List<OrderItem>();
+        public string Name { get; set; } = null!;
+        public int Price { get; set; }
+        public int CategoryId { get; set; }
+        public categories Category { get; set; } = null!;
     }
 }

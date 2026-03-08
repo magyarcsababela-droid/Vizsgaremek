@@ -9,11 +9,11 @@ namespace ComputerpartsLibrary.INTERFACE
 {
     public interface IOrderService
     {
-        Task<Order> GetOrderByIdAsync(int id);
-        Task<IEnumerable<Order>> GetAllOrdersAsync();
-        Task<IEnumerable<Order>> GetOrdersByUserIdAsync(int userId);
-        Task<Order> CreateOrderAsync(Order order);
-        Task<Order> UpdateOrderAsync(Order order);
+        Task<orders> GetOrderByIdAsync(int id);
+        Task<IEnumerable<orders>> GetAllOrdersAsync();
+        Task<IEnumerable<orders>> GetOrdersByUserIdAsync(int userId);
+        Task<orders> CreateOrderAsync(orders order);
+        Task<orders> UpdateOrderAsync(orders order);
         Task<bool> DeleteOrderAsync(int id);
     }
 }

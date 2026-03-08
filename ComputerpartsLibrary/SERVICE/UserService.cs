@@ -15,32 +15,32 @@ namespace WebshopAPI.SERVICE
             _context = context;
         }
 
-        public async Task<User> GetUserByIdAsync(int id)
+        public async Task<users> GetUserByIdAsync(int id)
         {
-            return await _context.Set<User>().FindAsync(id);
+            return await _context.Set<users>().FindAsync(id);
         }
 
-        public async Task<IEnumerable<User>> GetAllUsersAsync()
+        public async Task<IEnumerable<users>> GetAllUsersAsync()
         {
-            return await _context.Set<User>().ToListAsync();
+            return await _context.Set<users>().ToListAsync();
         }
 
-        public async Task<User> CreateUserAsync(User user)
+        public async Task<users> CreateUserAsync(users user)
         {
-            var newUser = new User
+            var newUser = new users
             {
                 UserName = user.UserName,
                 Email = user.Email
             };
 
-            _context.Set<User>().Add(newUser);
+            _context.Set<users>().Add(newUser);
             await _context.SaveChangesAsync();
             return newUser;
         }
 
-        public async Task<User> UpdateUserAsync(User user)
+        public async Task<users> UpdateUserAsync(users user)
         {
-            var existingUser = await _context.Set<User>().FindAsync(user.Id);
+            var existingUser = await _context.Set<users>().FindAsync(user.Id);
             if (existingUser == null)
                 throw new ArgumentException("User not found");
 
@@ -53,11 +53,11 @@ namespace WebshopAPI.SERVICE
 
         public async Task<bool> DeleteUserAsync(int id)
         {
-            var user = await _context.Set<User>().FindAsync(id);
+            var user = await _context.Set<users>().FindAsync(id);
             if (user == null)
                 return false;
 
-            _context.Set<User>().Remove(user);
+            _context.Set<users>().Remove(user);
             await _context.SaveChangesAsync();
             return true;
         }

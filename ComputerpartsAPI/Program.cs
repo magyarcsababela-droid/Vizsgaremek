@@ -22,7 +22,6 @@ namespace ComputerpartsAPI
             builder.Services.AddScoped<IProductService, ProductService>();
             builder.Services.AddScoped<ICategoryService, CategoryService>();
             builder.Services.AddScoped<IOrderService, OrderService>();
-            builder.Services.AddScoped<IOrderItemService, OrderItemService>();
             builder.Services.AddScoped<IUserService, UserService>();
 
             var app = builder.Build();

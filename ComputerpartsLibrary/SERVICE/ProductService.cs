@@ -14,40 +14,40 @@ namespace WebshopAPI.SERVICE
             _context = context;
         }
 
-        public async Task<Product> GetProductByIdAsync(int id)
+        public async Task<products> GetProductByIdAsync(int id)
         {
-            return await _context.Set<Product>().FindAsync(id);
+            return await _context.Set<products>().FindAsync(id);
         }
 
-        public async Task<IEnumerable<Product>> GetAllProductsAsync()
+        public async Task<IEnumerable<products>> GetAllProductsAsync()
         {
-            return await _context.Set<Product>().ToListAsync();
+            return await _context.Set<products>().ToListAsync();
         }
 
-        public async Task<IEnumerable<Product>> GetProductsByCategoryIdAsync(int categoryId)
+        public async Task<IEnumerable<products>> GetProductsByCategoryIdAsync(int categoryId)
         {
-            return await _context.Set<Product>()
+            return await _context.Set<products>()
                 .Where(p => p.CategoryId == categoryId)
                 .ToListAsync();
         }
 
-        public async Task<Product> CreateProductAsync(Product product)
+        public async Task<products> CreateProductAsync(products product)
         {
-            var newProduct = new Product
+            var newProduct = new products
             {
                 Name = product.Name,
                 Price = product.Price,
                 CategoryId = product.CategoryId
             };
 
-            _context.Set<Product>().Add(newProduct);
+            _context.Set<products>().Add(newProduct);
             await _context.SaveChangesAsync();
             return newProduct;
         }
 
-        public async Task<Product> UpdateProductAsync(Product product)
+        public async Task<products> UpdateProductAsync(products product)
         {
-            var existingProduct = await _context.Set<Product>().FindAsync(product.Id);
+            var existingProduct = await _context.Set<products>().FindAsync(product.Id);
             if (existingProduct == null)
                 throw new ArgumentException("Product not found");
 
@@ -61,11 +61,11 @@ namespace WebshopAPI.SERVICE
 
         public async Task<bool> DeleteProductAsync(int id)
         {
-            var product = await _context.Set<Product>().FindAsync(id);
+            var product = await _context.Set<products>().FindAsync(id);
             if (product == null)
                 return false;
 
-            _context.Set<Product>().Remove(product);
+            _context.Set<products>().Remove(product);
             await _context.SaveChangesAsync();
             return true;
         }

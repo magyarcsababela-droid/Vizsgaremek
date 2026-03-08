@@ -7,11 +7,10 @@ using System.Threading.Tasks;
 
 namespace ComputerpartsLibrary.MODEL
 {
-    public class User
+    public class categories
     {
         [Key]
         public int Id { get; set; }
-        public string UserName { get; set; } = null!;
-        public string Email { get; set; } = null!;
+        public string Name { get; set; } = null!;
     }
 }

@@ -17,7 +17,7 @@ namespace WebshopAPI.CONTROLLER
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<Order>> GetOrderById(int id)
+        public async Task<ActionResult<orders>> GetOrderById(int id)
         {
             var order = await _orderService.GetOrderByIdAsync(id);
             if (order == null)
@@ -28,28 +28,28 @@ namespace WebshopAPI.CONTROLLER
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Order>>> GetAllOrders()
+        public async Task<ActionResult<IEnumerable<orders>>> GetAllOrders()
         {
             var orders = await _orderService.GetAllOrdersAsync();
             return Ok(orders);
         }
 
         [HttpGet("user/{userId}")]
-        public async Task<ActionResult<IEnumerable<Order>>> GetOrdersByUserId(int userId)
+        public async Task<ActionResult<IEnumerable<orders>>> GetOrdersByUserId(int userId)
         {
             var orders = await _orderService.GetOrdersByUserIdAsync(userId);
             return Ok(orders);
         }
         
         [HttpPost]
-        public async Task<ActionResult<Order>> CreateOrder(Order order)
+        public async Task<ActionResult<orders>> CreateOrder(orders order)
         {
             var createdOrder = await _orderService.CreateOrderAsync(order);
             return CreatedAtAction(nameof(GetOrderById), new { id = createdOrder.Id }, createdOrder);
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateOrder(int id, Order order)
+        public async Task<IActionResult> UpdateOrder(int id, orders order)
         {
             if (id != order.Id)
             {

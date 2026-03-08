@@ -9,10 +9,10 @@ namespace ComputerpartsLibrary.INTERFACE
 {
     public interface IProductService
     {
-        Task<Product> GetProductByIdAsync(int id);
-        Task<IEnumerable<Product>> GetAllProductsAsync();
-        Task<Product> CreateProductAsync(Product product);
-        Task<Product> UpdateProductAsync(Product product);
+        Task<products> GetProductByIdAsync(int id);
+        Task<IEnumerable<products>> GetAllProductsAsync();
+        Task<products> CreateProductAsync(products product);
+        Task<products> UpdateProductAsync(products product);
         Task<bool> DeleteProductAsync(int id);
     }
 }

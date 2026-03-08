@@ -14,34 +14,34 @@ namespace WebshopAPI.SERVICE
             _context = context;
         }
 
-        public async Task<Category> GetCategoryByIdAsync(int id)
+        public async Task<categories> GetCategoryByIdAsync(int id)
         {
-            return await _context.Set<Category>().FindAsync(id);
+            return await _context.Set<categories>().FindAsync(id);
         }
 
-        public async Task<IEnumerable<Category>> GetAllCategoriesAsync()
+        public async Task<IEnumerable<categories>> GetAllCategoriesAsync()
         {
-            return await _context.Set<Category>().ToListAsync();
+            return await _context.Set<categories>().ToListAsync();
         }
 
-        public async Task<IEnumerable<Category>> GetCategoriesByNameAsync(string name)
+        public async Task<IEnumerable<categories>> GetCategoriesByNameAsync(string name)
         {
-            return await _context.Set<Category>().Where(c => c.Name.Contains(name)).ToListAsync();
+            return await _context.Set<categories>().Where(c => c.Name.Contains(name)).ToListAsync();
         }
-        public async Task<Category> CreateCategoryAsync(Category category)
+        public async Task<categories> CreateCategoryAsync(categories category)
         {
-            var newCategory = new Category
+            var newCategory = new categories
             {
                 Name = category.Name
             };
-            _context.Set<Category>().Add(newCategory);
+            _context.Set<categories>().Add(newCategory);
             await _context.SaveChangesAsync();
             return newCategory;
         }
 
-        public async Task<Category> UpdateCategoryAsync(Category category)
+        public async Task<categories> UpdateCategoryAsync(categories category)
         {
-            var existingCategory = await _context.Set<Category>().FindAsync(category.Id);
+            var existingCategory = await _context.Set<categories>().FindAsync(category.Id);
             if (existingCategory == null) { throw new ArgumentException("Category not found"); }
             existingCategory.Name = category.Name;
             await _context.SaveChangesAsync();
@@ -50,16 +50,16 @@ namespace WebshopAPI.SERVICE
 
         public async Task<bool> DeleteCategoryAsync(int id)
         {
-            var category = await _context.Set<Category>().FindAsync(id);
+            var category = await _context.Set<categories>().FindAsync(id);
             if (category == null) {  return false; }
-            _context.Set<Category>().Remove(category);
+            _context.Set<categories>().Remove(category);
             await _context.SaveChangesAsync();
             return true;
         }
 
         public async Task<bool> CategoryExistsAsync(int id)
         {
-            return await _context.Set<Category>().AnyAsync(c => c.Id == id);
+            return await _context.Set<categories>().AnyAsync(c => c.Id == id);
         }
     }
 }

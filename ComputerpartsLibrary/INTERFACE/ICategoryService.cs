@@ -9,11 +9,11 @@ namespace ComputerpartsLibrary.INTERFACE
 {
     public interface ICategoryService
     {
-        Task<Category> GetCategoryByIdAsync(int id);
-        Task<IEnumerable<Category>> GetAllCategoriesAsync();
-        Task<IEnumerable<Category>> GetCategoriesByNameAsync(string name);
-        Task<Category> CreateCategoryAsync(Category category);
-        Task<Category> UpdateCategoryAsync(Category category);
+        Task<categories> GetCategoryByIdAsync(int id);
+        Task<IEnumerable<categories>> GetAllCategoriesAsync();
+        Task<IEnumerable<categories>> GetCategoriesByNameAsync(string name);
+        Task<categories> CreateCategoryAsync(categories category);
+        Task<categories> UpdateCategoryAsync(categories category);
         Task<bool> DeleteCategoryAsync(int id);
         Task<bool> CategoryExistsAsync(int id);
     }

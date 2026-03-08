@@ -14,46 +14,46 @@ namespace WebshopAPI.SERVICE
             _context = context;
         }
 
-        public async Task<Order> GetOrderByIdAsync(int id)
+        public async Task<orders> GetOrderByIdAsync(int id)
         {
-            return await _context.Set<Order>().FindAsync(id);
+            return await _context.Set<orders>().FindAsync(id);
         }
 
-        public async Task<IEnumerable<Order>> GetAllOrdersAsync()
+        public async Task<IEnumerable<orders>> GetAllOrdersAsync()
         {
-            return await _context.Set<Order>().ToListAsync();
+            return await _context.Set<orders>().ToListAsync();
         }
 
-        public async Task<IEnumerable<Order>> GetOrdersByUserIdAsync(int userId)
+        public async Task<IEnumerable<orders>> GetOrdersByUserIdAsync(int userId)
         {
-            return await _context.Set<Order>()
+            return await _context.Set<orders>()
                 .Where(o => o.UserId == userId)
                 .ToListAsync();
         }
 
-        public async Task<IEnumerable<Order>> GetOrdersByDateRangeAsync(DateTime startDate, DateTime endDate)
+        public async Task<IEnumerable<orders>> GetOrdersByDateRangeAsync(DateTime startDate, DateTime endDate)
         {
-            return await _context.Set<Order>()
+            return await _context.Set<orders>()
                 .Where(o => o.OrderDate >= startDate && o.OrderDate <= endDate)
                 .ToListAsync();
         }
 
-        public async Task<Order> CreateOrderAsync(Order order)
+        public async Task<orders> CreateOrderAsync(orders order)
         {
-            var newOrder = new Order
+            var newOrder = new orders
             {
                 OrderDate = order.OrderDate,
                 UserId = order.UserId
             };
 
-            _context.Set<Order>().Add(newOrder);
+            _context.Set<orders>().Add(newOrder);
             await _context.SaveChangesAsync();
             return newOrder;
         }
 
-        public async Task<Order> UpdateOrderAsync(Order order)
+        public async Task<orders> UpdateOrderAsync(orders order)
         {
-            var existingOrder = await _context.Set<Order>().FindAsync(order.Id);
+            var existingOrder = await _context.Set<orders>().FindAsync(order.Id);
             if (existingOrder == null)
                 throw new ArgumentException("Order not found");
 
@@ -66,11 +66,11 @@ namespace WebshopAPI.SERVICE
 
         public async Task<bool> DeleteOrderAsync(int id)
         {
-            var order = await _context.Set<Order>().FindAsync(id);
+            var order = await _context.Set<orders>().FindAsync(id);
             if (order == null)
                 return false;
 
-            _context.Set<Order>().Remove(order);
+            _context.Set<orders>().Remove(order);
             await _context.SaveChangesAsync();
             return true;
         }
