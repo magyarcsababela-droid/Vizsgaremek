@@ -30,8 +30,8 @@ namespace ComputerpartsLibrary.SERVICE
         }
         public async Task<IEnumerable<Products>> GetAllProductsAsync()
         {
-            var categories = await _service.GetAllProductsAsync();
-            return categories;
+            var product = await _service.GetAllProductsAsync();
+            return product;
         }
         public async Task UpdateProductAsync(Products product)
         {

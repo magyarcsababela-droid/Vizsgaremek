@@ -25,13 +25,13 @@ namespace ComputerpartsLibrary.SERVICE
         }
         public async Task<Inventory_components> GetInventoryComponentByIdAsync(int id)
         {
-            var inv_product = await _service.GetInventoryComponentByIdAsync(id);
-            return inv_product;
+            var comp = await _service.GetInventoryComponentByIdAsync(id);
+            return comp;
         }
         public async Task<IEnumerable<Inventory_components>> GetAllInventoryComponentsAsync()
         {
-            var categories = await _service.GetAllInventoryComponentsAsync();
-            return categories;
+            var comp = await _service.GetAllInventoryComponentsAsync();
+            return comp;
         }
         public async Task UpdateInventoryComponentAsync(Inventory_components inv_comp)
         {
