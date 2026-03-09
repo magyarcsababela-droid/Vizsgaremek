@@ -12,9 +12,9 @@ namespace ComputerpartsLibrary.DATA
     {
         public ComputerpatsDbContext() { }
         public ComputerpatsDbContext(DbContextOptions<ComputerpatsDbContext> options) : base(options) { }
-        public DbSet<users> Users { get; set; }
-        public DbSet<categories> Categories { get; set; }
-        public DbSet<products> Products { get; set; }
-        public DbSet<orders> Orders { get; set; }
+        public DbSet<Users> Users { get; set; }
+        public DbSet<Categories> Categories { get; set; }
+        public DbSet<Products> Products { get; set; }
+        public DbSet<Orders> Orders { get; set; }
     }
 }

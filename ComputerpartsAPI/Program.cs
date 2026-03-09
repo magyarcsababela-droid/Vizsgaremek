@@ -1,7 +1,7 @@
 using ComputerpartsLibrary.DATA;
 using ComputerpartsLibrary.INTERFACE;
 using Microsoft.EntityFrameworkCore;
-using WebshopAPI.SERVICE;
+using ComputerpartsLibrary.SERVICE;
 
 namespace ComputerpartsAPI
 {
@@ -21,7 +21,6 @@ namespace ComputerpartsAPI
 
             builder.Services.AddScoped<IProductService, ProductService>();
             builder.Services.AddScoped<ICategoryService, CategoryService>();
-            builder.Services.AddScoped<IOrderService, OrderService>();
             builder.Services.AddScoped<IUserService, UserService>();
 
             var app = builder.Build();
