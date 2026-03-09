@@ -23,12 +23,12 @@ namespace ComputerpartsLibrary.SERVICE
         {
             await _service.DeleteProductAsync(id);
         }
-        public async Task<Products> GetCategoryByIdAsync(int id)
+        public async Task<Products> GetProductByIdAsync(int id)
         {
             var product = await _service.GetProductByIdAsync(id);
             return product;
         }
-        public async Task<IEnumerable<Products>> GetAllCategoriesAsync()
+        public async Task<IEnumerable<Products>> GetAllProductsAsync()
         {
             var categories = await _service.GetAllProductsAsync();
             return categories;
