@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace ComputerpartsLibrary.SERVICE
 {
-    public class InventoryProductService
+    public class InventoryProductService : IInventoryProductService
     {
         private readonly IInventoryProductService _service;
         public InventoryProductService(IInventoryProductService service)
