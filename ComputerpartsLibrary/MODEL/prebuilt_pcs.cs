@@ -10,8 +10,8 @@ namespace ComputerpartsLibrary.MODEL
     public class Prebuilt_pcs
     {
         [Key]
-        public int PcId { get; set; }
-        public int ProductId { get; set; } 
-        public decimal AssemblyFee { get; set; }
+        public int pc_id { get; set; }
+        public int product_id { get; set; } 
+        public decimal assembly_fee { get; set; }
     }
 }

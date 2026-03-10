@@ -10,10 +10,10 @@ namespace ComputerpartsLibrary.MODEL
     public class Products
     {
         [Key]
-        public int Id { get; set; }
-        public string Name { get; set; } = null!;
-        public int Price { get; set; }
-        public int CategoryId { get; set; }
-        public Categories Category { get; set; } = null!;
+        public int id { get; set; }
+        public string name { get; set; } = null!;
+        public int price { get; set; }
+        public int category_id { get; set; }
+        public Categories category { get; set; } = null!;
     }
 }

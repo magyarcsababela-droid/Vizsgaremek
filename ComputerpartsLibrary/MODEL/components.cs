@@ -10,11 +10,11 @@ namespace ComputerpartsLibrary.MODEL
     public class Components
     {
         [Key]
-        public int Id { get; set; }
-        public int TypeId { get; set; }
-        public string? Sku { get; set; }
-        public string? Name { get; set; }
-        public string? Description { get; set; }
-        public decimal Price { get; set; }
+        public int id { get; set; }
+        public int type_id { get; set; }
+        public string? sku { get; set; }
+        public string? name { get; set; }
+        public string? description { get; set; }
+        public decimal price { get; set; }
     }
 }

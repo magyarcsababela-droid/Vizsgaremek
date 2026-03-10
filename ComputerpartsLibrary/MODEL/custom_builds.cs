@@ -10,11 +10,11 @@ namespace ComputerpartsLibrary.MODEL
     public class Custom_builds
     {
         [Key]
-        public int BuildId { get; set; } 
-        public int UserId { get; set; } 
-        public string? Name { get; set; }
-        public string? Status { get; set; } 
-        public decimal TotalPrice { get; set; }
-        public DateTimeOffset CreatedAt { get; set; }
+        public int build_id { get; set; } 
+        public int User_id { get; set; } 
+        public string? name { get; set; }
+        public string? status { get; set; } 
+        public decimal total_price { get; set; }
+        public DateTimeOffset created_at { get; set; }
     }
 }

@@ -10,9 +10,9 @@ namespace ComputerpartsLibrary.MODEL
     public class Build_components
     {
         [Key]
-        public int BuildId { get; set; } 
-        public int ComponentId { get; set; } 
-        public int Quantity { get; set; }
-        public decimal UnitPrice { get; set; }
+        public int build_id { get; set; } 
+        public int component_id { get; set; } 
+        public int quantity { get; set; }
+        public decimal unit_price { get; set; }
     }
 }

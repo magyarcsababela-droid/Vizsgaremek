@@ -10,11 +10,11 @@ namespace ComputerpartsLibrary.MODEL
     public class Order_items_b
     {
         [Key]
-        public int ItemId { get; set; } 
-        public int OrderId { get; set; } 
-        public int BuildId { get; set; } 
-        public int Quantity { get; set; }
-        public decimal UnitPrice { get; set; }
-        public decimal TotalPrice => Quantity * UnitPrice; 
+        public int item_id { get; set; } 
+        public int order_id { get; set; } 
+        public int build_id { get; set; } 
+        public int quantity { get; set; }
+        public decimal unit_price { get; set; }
+        public decimal total_price => quantity * unit_price; 
     }
 }

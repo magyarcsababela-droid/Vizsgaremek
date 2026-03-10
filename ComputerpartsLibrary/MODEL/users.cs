@@ -10,8 +10,10 @@ namespace ComputerpartsLibrary.MODEL
     public class Users
     {
         [Key]
-        public int Id { get; set; }
-        public string UserName { get; set; } = null!;
-        public string Email { get; set; } = null!;
+        public int id { get; set; }
+        public string username { get; set; } = null!;
+        public string email { get; set; } = null!;
+        public string password_hash { get; set; } = null!;
+        public DateTimeOffset created_at { get; set; }
     }
 }

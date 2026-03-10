@@ -10,12 +10,12 @@ namespace ComputerpartsLibrary.MODEL
     public class Orders
     {
         [Key]
-        public int OrderId { get; set; } 
-        public int UserId { get; set; } 
-        public int ShippingAddressId { get; set; } 
-        public string? Status { get; set; } 
-        public string? PaymentMethod { get; set; }
-        public decimal TotalAmount { get; set; }
-        public DateTimeOffset PlacedAt { get; set; }
+        public int order_id { get; set; } 
+        public int user_id { get; set; } 
+        public int shipping_address_id { get; set; } 
+        public string? status { get; set; } 
+        public string? payment_method { get; set; }
+        public decimal total_amount { get; set; }
+        public DateTimeOffset placed_at { get; set; }
     }
 }

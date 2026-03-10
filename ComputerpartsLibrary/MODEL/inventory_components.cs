@@ -10,7 +10,7 @@ namespace ComputerpartsLibrary.MODEL
     public class Inventory_components
     {
         [Key]
-        public int ComponentId { get; set; }
-        public int QuantityAvailable { get; set; }
+        public int component_id { get; set; }
+        public int quantity_available { get; set; }
     }
 }
