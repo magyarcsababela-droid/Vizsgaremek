@@ -37,13 +37,13 @@ namespace ComputerpartsAPI.Controllers
         public async Task<ActionResult> AddComponent(Components component)
         {
             await _componentService.AddComponentAsync(component);
-            return CreatedAtAction(nameof(GetComponentById), new { id = component.Id }, component);
+            return CreatedAtAction(nameof(GetComponentById), new { id = component.id }, component);
         }
 
         [HttpPut("{id}")]
         public async Task<ActionResult> UpdateComponent(int id, Components component)
         {
-            if (id != component.Id)
+            if (id != component.id)
                 return BadRequest("ID mismatch");
 
             await _componentService.UpdateComponentAsync(component);

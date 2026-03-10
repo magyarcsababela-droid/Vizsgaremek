@@ -12,7 +12,7 @@ namespace ComputerpartsLibrary.MODEL
         [Key]
         public int item_id { get; set; }
         public int order_id { get; set; }
-        public int build_id { get; set; }
+        public int product_id { get; set; }
         public int quantity { get; set; }
         public decimal unit_price { get; set; }
         public decimal total_price => quantity * unit_price;

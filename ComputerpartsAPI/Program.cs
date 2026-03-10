@@ -20,6 +20,20 @@ namespace ComputerpartsAPI
             builder.Services.AddDbContext<ComputerpatsDbContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("Default")));
 
             builder.Services.AddScoped<IAddressService, AddressService>();
+            builder.Services.AddScoped<IBuildComponentService, BuildComponentService>();
+            builder.Services.AddScoped<ICategoryService, CategoryService>();
+            builder.Services.AddScoped<IComponentService, ComponentService>();
+            builder.Services.AddScoped<IComponentTypeService, ComponentTypeService>();
+            builder.Services.AddScoped<ICustomBuildService, CustomBuildService>();
+            builder.Services.AddScoped<IInventoryComponentService, InventoryComponentService>();
+            builder.Services.AddScoped<IInventoryProductService, InventoryProductService>();
+            builder.Services.AddScoped<IOrderItemBService, OrderItemBService>();
+            builder.Services.AddScoped<IOrderItemPService, OrderItemPService>();
+            builder.Services.AddScoped<IOrderService, OrderService>();
+            builder.Services.AddScoped<IProductService, ProductService>();
+            builder.Services.AddScoped<IUserService, UserService>();
+            builder.Services.AddScoped<IPrebuiltPcCompService, PrebuiltPcCompService>();
+            builder.Services.AddScoped<IPrebuiltPcService, PrebuiltPcService>();
 
             var app = builder.Build();
 

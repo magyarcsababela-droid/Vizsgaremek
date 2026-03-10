@@ -38,13 +38,13 @@ namespace ComputerpartsAPI.Controllers
         public async Task<ActionResult> AddPrebuiltPC(Prebuilt_pcs prebuiltPC)
         {
             await _prebuiltPCService.AddPrebuiltPCAsync(prebuiltPC);
-            return CreatedAtAction(nameof(GetPrebuiltPCById), new { id = prebuiltPC.PcId }, prebuiltPC);
+            return CreatedAtAction(nameof(GetPrebuiltPCById), new { id = prebuiltPC.pc_id }, prebuiltPC);
         }
 
         [HttpPut("{id}")]
         public async Task<ActionResult> UpdatePrebuiltPC(int id, Prebuilt_pcs prebuiltPC)
         {
-            if (id != prebuiltPC.PcId)
+            if (id != prebuiltPC.pc_id)
                 return BadRequest("ID mismatch");
 
             await _prebuiltPCService.UpdatePrebuiltPCAsync(prebuiltPC);

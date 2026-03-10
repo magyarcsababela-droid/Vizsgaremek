@@ -37,13 +37,13 @@ namespace ComputerpartsAPI.Controllers
         public async Task<ActionResult> AddCustomBuild(Custom_builds customBuild)
         {
             await _customBuildService.AddCustomBuildAsync(customBuild);
-            return CreatedAtAction(nameof(GetCustomBuildById), new { id = customBuild.BuildId }, customBuild);
+            return CreatedAtAction(nameof(GetCustomBuildById), new { id = customBuild.build_id }, customBuild);
         }
 
         [HttpPut("{id}")]
         public async Task<ActionResult> UpdateCustomBuild(int id, Custom_builds customBuild)
         {
-            if (id != customBuild.BuildId)
+            if (id != customBuild.build_id)
                 return BadRequest("ID mismatch");
 
             await _customBuildService.UpdateCustomBuildAsync(customBuild);

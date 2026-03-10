@@ -37,13 +37,13 @@ namespace ComputerpartsAPI.Controllers
         public async Task<ActionResult> AddOrderItemB(Order_items_b orderItemB)
         {
             await _orderItemBService.AddOrderItemBAsync(orderItemB);
-            return CreatedAtAction(nameof(GetOrderItemBById), new { itemId = orderItemB.ItemId }, orderItemB);
+            return CreatedAtAction(nameof(GetOrderItemBById), new { itemId = orderItemB.item_id }, orderItemB);
         }
 
         [HttpPut("{itemId}")]
         public async Task<ActionResult> UpdateOrderItemB(int itemId, Order_items_b orderItemB)
         {
-            if (itemId != orderItemB.ItemId)
+            if (itemId != orderItemB.item_id)
                 return BadRequest("ID mismatch");
 
             await _orderItemBService.UpdateOrderItemBAsync(orderItemB);

@@ -37,13 +37,13 @@ namespace ComputerpartsAPI.Controllers
         public async Task<ActionResult> AddInventoryProduct(Inventory_products inventoryProduct)
         {
             await _inventoryProductService.AddInventoryProductAsync(inventoryProduct);
-            return CreatedAtAction(nameof(GetInventoryProductById), new { productId = inventoryProduct.ProductId }, inventoryProduct);
+            return CreatedAtAction(nameof(GetInventoryProductById), new { productId = inventoryProduct.product_id }, inventoryProduct);
         }
 
         [HttpPut("{productId}")]
         public async Task<ActionResult> UpdateInventoryProduct(int productId, Inventory_products inventoryProduct)
         {
-            if (productId != inventoryProduct.ProductId)
+            if (productId != inventoryProduct.product_id)
                 return BadRequest("ID mismatch");
 
             await _inventoryProductService.UpdateInventoryProductAsync(inventoryProduct);

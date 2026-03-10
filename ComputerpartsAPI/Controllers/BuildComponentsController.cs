@@ -37,13 +37,13 @@ namespace ComputerpartsAPI.Controllers
         public async Task<ActionResult> AddBuildComponent(Build_components buildComponent)
         {
             await _buildComponentService.AddBuildComponentAsync(buildComponent);
-            return CreatedAtAction(nameof(GetBuildComponentById), new { buildId = buildComponent.BuildId, componentId = buildComponent.ComponentId }, buildComponent);
+            return CreatedAtAction(nameof(GetBuildComponentById), new { buildId = buildComponent.build_id, componentId = buildComponent.component_id }, buildComponent);
         }
 
         [HttpPut("{buildId}/{componentId}")]
         public async Task<ActionResult> UpdateBuildComponent(int buildId, int componentId, Build_components buildComponent)
         {
-            if (buildId != buildComponent.BuildId || componentId != buildComponent.ComponentId)
+            if (buildId != buildComponent.build_id || componentId != buildComponent.component_id)
                 return BadRequest("ID mismatch");
 
             await _buildComponentService.UpdateBuildComponentAsync(buildComponent);

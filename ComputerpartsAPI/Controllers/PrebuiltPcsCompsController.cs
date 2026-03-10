@@ -37,13 +37,13 @@ namespace ComputerpartsAPI.Controllers
         public async Task<ActionResult> AddPrebuiltPcComp(Prebuilt_pc_comp prebuiltPcComp)
         {
             await _prebuiltPcCompService.AddPrebuiltPcCompAsync(prebuiltPcComp);
-            return CreatedAtAction(nameof(GetPrebuiltPcCompById), new { pcId = prebuiltPcComp.PcId, componentId = prebuiltPcComp.ComponentId }, prebuiltPcComp);
+            return CreatedAtAction(nameof(GetPrebuiltPcCompById), new { pcId = prebuiltPcComp.pc_id, componentId = prebuiltPcComp.component_id }, prebuiltPcComp);
         }
 
         [HttpPut("{pcId}/{componentId}")]
         public async Task<ActionResult> UpdatePrebuiltPcComp(int pcId, int componentId, Prebuilt_pc_comp prebuiltPcComp)
         {
-            if (pcId != prebuiltPcComp.PcId || componentId != prebuiltPcComp.ComponentId)
+            if (pcId != prebuiltPcComp.pc_id || componentId != prebuiltPcComp.component_id)
                 return BadRequest("ID mismatch");
 
             await _prebuiltPcCompService.UpdatePrebuiltPcCompAsync(prebuiltPcComp);

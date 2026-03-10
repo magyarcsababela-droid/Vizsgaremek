@@ -37,13 +37,13 @@ namespace ComputerpartsAPI.Controllers
         public async Task<ActionResult> AddCategory(Categories categories)
         {
             await _categoryService.AddCategoryAsync(categories);
-            return CreatedAtAction(nameof(GetCategoryById), new { id = categories.Id }, categories);
+            return CreatedAtAction(nameof(GetCategoryById), new { id = categories.id }, categories);
         }
 
         [HttpPut("{id}")]
         public async Task<ActionResult> UpdateCategory(int id, Categories categories)
         {
-            if (id != categories.Id)
+            if (id != categories.id)
                 return BadRequest("ID mismatch");
 
             await _categoryService.UpdateCategoryAsync(categories);

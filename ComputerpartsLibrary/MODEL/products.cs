@@ -11,9 +11,11 @@ namespace ComputerpartsLibrary.MODEL
     {
         [Key]
         public int id { get; set; }
-        public string name { get; set; } = null!;
-        public int price { get; set; }
         public int category_id { get; set; }
-        public Categories category { get; set; } = null!;
+        public string name { get; set; } = null!;
+        public string sku { get; set; } = null!;
+        public decimal base_price { get; set; }
+        public string image_url { get; set; } = null!;
+        public string description { get; set; } = null!;
     }
 }
