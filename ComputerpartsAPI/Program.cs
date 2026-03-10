@@ -19,8 +19,6 @@ namespace ComputerpartsAPI
             builder.Services.AddSwaggerGen();
             builder.Services.AddDbContext<ComputerpatsDbContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("Default")));
 
-            builder.Services.AddScoped<IProductService, ProductService>();
-            builder.Services.AddScoped<ICategoryService, CategoryService>();
             builder.Services.AddScoped<IUserService, UserService>();
 
             var app = builder.Build();

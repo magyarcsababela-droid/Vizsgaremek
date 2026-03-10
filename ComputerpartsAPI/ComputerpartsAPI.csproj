@@ -25,8 +25,4 @@
     <ProjectReference Include="..\ComputerpartsLibrary\ComputerpartsLibrary.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Controllers\" />
-  </ItemGroup>
-
 </Project>
