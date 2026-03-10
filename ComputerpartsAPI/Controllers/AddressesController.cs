@@ -37,13 +37,13 @@ namespace ComputerpartsAPI.Controllers
         public async Task<ActionResult> AddAddress(Addresses address)
         {
             await _addressService.AddAddressAsync(address);
-            return CreatedAtAction(nameof(GetAddressById), new { id = address.Id }, address);
+            return CreatedAtAction(nameof(GetAddressById), new { id = address.id }, address);
         }
 
         [HttpPut("{id}")]
         public async Task<ActionResult> UpdateAddress(int id, Addresses address)
         {
-            if (id != address.Id)
+            if (id != address.id)
                 return BadRequest("ID mismatch");
 
             await _addressService.UpdateAddressAsync(address);

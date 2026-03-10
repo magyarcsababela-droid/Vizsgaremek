@@ -10,13 +10,13 @@ namespace ComputerpartsLibrary.MODEL
     public class Addresses
     {
         [Key]
-        public int Id { get; set; }
-        public int UserId { get; set; }
-        public string? Street { get; set; }
-        public string? City { get; set; }
-        public string? State { get; set; }
-        public string? Zip { get; set; }
-        public string? Country { get; set; }
-        public bool IsDefault { get; set; }
+        public int id { get; set; }
+        public int user_id { get; set; }
+        public string? street { get; set; }
+        public string? city { get; set; }
+        public string? state { get; set; }
+        public string? zip { get; set; }
+        public string? country { get; set; }
+        public bool is_default { get; set; }
     }
 }
