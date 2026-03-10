@@ -22,13 +22,16 @@ namespace ComputerpartsLibrary.SERVICE
         public async Task AddBuildComponentAsync(Build_components build_Components)
         {
             await _service.AddAsync(build_Components);
-            _service.SaveChangesAsync();
+            _service.SaveChanges();
         }
         public async Task DeleteBuildComponentAsync(int pcId, int compId)
         {
             var entity = await _service.Build_components.FindAsync(pcId, compId);
-            _service.Build_components.Remove(entity);
-            _service.SaveChangesAsync();
+            if (entity != null) 
+            {
+                _service.Build_components.Remove(entity);
+                _service.SaveChanges();
+            }
         }
         public async Task<Build_components> GetBuildComponentByIdAsync(int pcId, int compId)
         {
@@ -43,7 +46,7 @@ namespace ComputerpartsLibrary.SERVICE
         public async Task UpdateBuildComponentAsync(Build_components build_Components)
         {
             _service.Build_components.Update(build_Components);
-            _service.SaveChangesAsync();
+            await _service.SaveChangesAsync();
         }
     }
 }

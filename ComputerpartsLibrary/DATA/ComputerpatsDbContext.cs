@@ -20,7 +20,7 @@ namespace ComputerpartsLibrary.DATA
         public DbSet<Build_components> Build_components { get; set; }
         public DbSet<Custom_builds> Custom_builds { get; set; }
         public DbSet<Components> Components { get; set; }
-        public DbSet<Component_type> Component_types { get; set; }
+        public DbSet<Component_type> Component_type { get; set; }
         public DbSet<Order_items_p> Order_items_p { get; set; }
         public DbSet<Order_items_b> Order_items_b { get; set; }
         public DbSet<Prebuilt_pcs> Prebuilt_pcs { get; set; }

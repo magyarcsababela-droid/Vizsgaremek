@@ -1,5 +1,7 @@
-﻿using ComputerpartsLibrary.INTERFACE;
+﻿using ComputerpartsLibrary.DATA;
+using ComputerpartsLibrary.INTERFACE;
 using ComputerpartsLibrary.MODEL;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,32 +12,38 @@ namespace ComputerpartsLibrary.SERVICE
 {
     public class PrebuiltPcCompService : IPrebuiltPcCompService
     {
-        private readonly IPrebuiltPcCompService _service;
-        public PrebuiltPcCompService(IPrebuiltPcCompService service)
+        private readonly ComputerpatsDbContext _service;
+        public PrebuiltPcCompService(ComputerpatsDbContext service)
         {
             _service = service;
         }
         public async Task AddPrebuiltPcCompAsync(Prebuilt_pc_comp preb_pcs_comp)
         {
-            await _service.AddPrebuiltPcCompAsync(preb_pcs_comp);
+            await _service.Prebuilt_pc_comp.AddAsync(preb_pcs_comp);
         }
         public async Task DeletePrebuiltPcCompAsync(int pcId, int compId)
         {
-            await _service.DeletePrebuiltPcCompAsync(pcId, compId);
+            var entity = await _service.Prebuilt_pc_comp.FindAsync(pcId, compId);
+            if (entity != null)
+            {
+                _service.Prebuilt_pc_comp.Remove(entity);
+                _service.SaveChanges();
+            }
         }
         public async Task<Prebuilt_pc_comp> GetPrebuiltPcCompByIdAsync(int pcId, int compId)
         {
-            var preb_pcs_comp = await _service.GetPrebuiltPcCompByIdAsync(pcId, compId);
+            var preb_pcs_comp = await _service.Prebuilt_pc_comp.FindAsync(pcId, compId);
             return preb_pcs_comp;
         }
         public async Task<IEnumerable<Prebuilt_pc_comp>> GetAllPrebuiltPcCompsAsync()
         {
-            var preb_pcs_comp = await _service.GetAllPrebuiltPcCompsAsync();
+            var preb_pcs_comp = await _service.Prebuilt_pc_comp.ToListAsync();
             return preb_pcs_comp;
         }
         public async Task UpdatePrebuiltPcCompAsync(Prebuilt_pc_comp preb_pcs_comp)
         {
-            await _service.UpdatePrebuiltPcCompAsync(preb_pcs_comp);
+            _service.Prebuilt_pc_comp.Update(preb_pcs_comp);
+            await _service.SaveChangesAsync();
         }
     }
 }

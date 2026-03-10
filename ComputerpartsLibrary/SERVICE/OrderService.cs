@@ -1,5 +1,7 @@
-﻿using ComputerpartsLibrary.INTERFACE;
+﻿using ComputerpartsLibrary.DATA;
+using ComputerpartsLibrary.INTERFACE;
 using ComputerpartsLibrary.MODEL;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,32 +12,38 @@ namespace ComputerpartsLibrary.SERVICE
 {
     public class OrderService : IOrderService
     {
-        private readonly IOrderService _service;
-        public OrderService(IOrderService service)
+        private readonly ComputerpatsDbContext _service;
+        public OrderService(ComputerpatsDbContext service)
         {
             _service = service;
         }
         public async Task AddOrderAsync(Orders order)
         {
-            await _service.AddOrderAsync(order);
+            await _service.Orders.AddAsync(order);
         }
         public async Task DeleteOrderAsync(int id)
         {
-            await _service.DeleteOrderAsync(id);
+            var entity = await _service.Orders.FindAsync(id);
+            if (entity != null)
+            {
+                _service.Orders.Remove(entity);
+                _service.SaveChanges();
+            }
         }
         public async Task<Orders> GetOrderByIdAsync(int id)
         {
-            var order = await _service.GetOrderByIdAsync(id);
+            var order = await _service.Orders.FindAsync(id);
             return order;
         }
         public async Task<IEnumerable<Orders>> GetAllOrdersAsync()
         {
-            var order = await _service.GetAllOrdersAsync();
+            var order = await _service.Orders.ToListAsync();
             return order;
         }
         public async Task UpdateOrderAsync(Orders order)
         {
-            await _service.UpdateOrderAsync(order);
+            _service.Orders.Update(order);
+            await _service.SaveChangesAsync();
         }
     }
 }

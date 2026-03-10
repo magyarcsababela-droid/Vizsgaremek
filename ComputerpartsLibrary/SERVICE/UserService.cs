@@ -1,5 +1,7 @@
-﻿using ComputerpartsLibrary.INTERFACE;
+﻿using ComputerpartsLibrary.DATA;
+using ComputerpartsLibrary.INTERFACE;
 using ComputerpartsLibrary.MODEL;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,32 +12,38 @@ namespace ComputerpartsLibrary.SERVICE
 {
     public class UserService : IUserService
     {
-        private readonly IUserService _service;
-        public UserService(IUserService service)
+        private readonly ComputerpatsDbContext _service;
+        public UserService(ComputerpatsDbContext service)
         {
             _service = service;
         }
         public async Task AddUserAsync(Users user)
         {
-            await _service.AddUserAsync(user);
+            await _service.Users.AddAsync(user);
         }
         public async Task DeleteUserAsync(int id)
         {
-            await _service.DeleteUserAsync(id);
-        }
-        public async Task<IEnumerable<Users>> GetAllUsersAsync()
-        {
-            var users = await _service.GetAllUsersAsync();
-            return users;
+            var entity = await _service.Users.FindAsync(id);
+            if (entity != null)
+            {
+                _service.Users.Remove(entity);
+                _service.SaveChanges();
+            }
         }
         public async Task<Users> GetUserByIdAsync(int id)
         {
-            var user = await _service.GetUserByIdAsync(id);
+            var user = await _service.Users.FindAsync(id);
             return user;
+        }
+        public async Task<IEnumerable<Users>> GetAllUsersAsync()
+        {
+            var users = await _service.Users.ToListAsync();
+            return users;
         }
         public async Task UpdateUserAsync(Users user)
         {
-            await _service.UpdateUserAsync(user);
+            _service.Users.Update(user);
+            await _service.SaveChangesAsync();
         }
     }
 }

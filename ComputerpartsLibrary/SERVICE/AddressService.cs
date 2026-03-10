@@ -20,13 +20,16 @@ namespace ComputerpartsLibrary.SERVICE
         public async Task AddAddressAsync(Addresses address)
         {
             await _service.AddAsync(address);
-            _service.SaveChangesAsync();
+            _service.SaveChanges();
         }
         public async Task DeleteAddressAsync(int id)
         {
             var entity = await _service.Addresses.FindAsync(id);
-            _service.Addresses.Remove(entity);
-            _service.SaveChangesAsync();
+            if (entity != null) 
+            {
+                _service.Addresses.Remove(entity);
+                _service.SaveChanges();
+            }
         }
         public async Task<Addresses> GetAddressByIdAsync(int id)
         {
@@ -41,7 +44,7 @@ namespace ComputerpartsLibrary.SERVICE
         public async Task UpdateAddressAsync(Addresses address)
         {
             _service.Addresses.Update(address);
-            _service.SaveChangesAsync();
+            await _service.SaveChangesAsync();
         }
     }
 }
