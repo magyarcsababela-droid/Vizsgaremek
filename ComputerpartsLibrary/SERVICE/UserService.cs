@@ -20,6 +20,7 @@ namespace ComputerpartsLibrary.SERVICE
         public async Task AddUserAsync(Users user)
         {
             await _service.Users.AddAsync(user);
+            _service.SaveChanges();
         }
         public async Task DeleteUserAsync(int id)
         {

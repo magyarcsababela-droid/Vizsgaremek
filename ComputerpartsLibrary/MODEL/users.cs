@@ -15,5 +15,6 @@ namespace ComputerpartsLibrary.MODEL
         public string email { get; set; } = null!;
         public string password_hash { get; set; } = null!;
         public DateTimeOffset created_at { get; set; }
+        public string? role { get; set; } // Optional: "Admin", "User", etc.
     }
 }

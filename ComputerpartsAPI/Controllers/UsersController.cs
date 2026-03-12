@@ -37,7 +37,7 @@ namespace ComputerpartsAPI.Controllers
         public async Task<ActionResult> AddUser(Users user)
         {
             await _userService.AddUserAsync(user);
-            return CreatedAtAction(nameof(GetUserById), new { id = user.id }, user);
+            return Ok(user);
         }
 
         [HttpPut("{id}")]
