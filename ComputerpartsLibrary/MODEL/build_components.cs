@@ -12,9 +12,7 @@ namespace ComputerpartsLibrary.MODEL
     {
         [Key]
         public int id { get; set; }
-        [ForeignKey("Custom_builds")]
         public int build_id { get; set; }
-        [ForeignKey("Components")]
         public int component_id { get; set; } 
         public int quantity { get; set; }
         public decimal unit_price { get; set; }
