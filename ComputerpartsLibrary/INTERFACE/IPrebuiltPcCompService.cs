@@ -9,7 +9,7 @@ namespace ComputerpartsLibrary.INTERFACE
 {
     public interface IPrebuiltPcCompService
     {
-        Task<Prebuilt_pc_comp> GetPrebuiltPcCompByIdAsync(int pcId, int componentId);
+        Task<IEnumerable<Prebuilt_pc_comp>> GetPrebuiltPcCompByIdAsync(int pcId, int componentId);
         Task<IEnumerable<Prebuilt_pc_comp>> GetAllPrebuiltPcCompsAsync();
         Task AddPrebuiltPcCompAsync(Prebuilt_pc_comp prebuiltPcComp);
         Task UpdatePrebuiltPcCompAsync(Prebuilt_pc_comp prebuiltPcComp);

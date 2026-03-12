@@ -26,16 +26,16 @@ namespace ComputerpartsLibrary.SERVICE
         }
         public async Task DeleteBuildComponentAsync(int pcId, int compId)
         {
-            var entity = await _service.Build_components.FindAsync(pcId, compId);
+            var entity = await _service.Build_components.Where(bc => bc.build_id == pcId && bc.component_id == compId).FirstOrDefaultAsync();
             if (entity != null) 
             {
                 _service.Build_components.Remove(entity);
                 _service.SaveChanges();
             }
         }
-        public async Task<Build_components> GetBuildComponentByIdAsync(int pcId, int compId)
+        public async Task<IEnumerable<Build_components>> GetBuildComponentByIdAsync(int pcId, int compId)
         {
-            var buildcomponent = await _service.Build_components.FindAsync(pcId, compId);
+            var buildcomponent = await _service.Build_components.Where(bc => bc.build_id == pcId && bc.component_id == compId).ToListAsync();
             return buildcomponent;
         }
         public async Task<IEnumerable<Build_components>> GetAllBuildComponentsAsync()

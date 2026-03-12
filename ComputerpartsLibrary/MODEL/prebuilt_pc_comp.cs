@@ -10,6 +10,7 @@ namespace ComputerpartsLibrary.MODEL
     public class Prebuilt_pc_comp
     {
         [Key]
+        public int Id { get; set; }
         public int pc_id { get; set; } 
         public int component_id { get; set; } 
         public int quantity { get; set; }

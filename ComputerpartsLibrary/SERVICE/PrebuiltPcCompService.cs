@@ -23,16 +23,16 @@ namespace ComputerpartsLibrary.SERVICE
         }
         public async Task DeletePrebuiltPcCompAsync(int pcId, int compId)
         {
-            var entity = await _service.Prebuilt_pc_comp.FindAsync(pcId, compId);
+            var entity = await _service.Prebuilt_pc_comp.Where(bc => bc.pc_id == pcId && bc.component_id == compId).FirstOrDefaultAsync();
             if (entity != null)
             {
                 _service.Prebuilt_pc_comp.Remove(entity);
                 _service.SaveChanges();
             }
         }
-        public async Task<Prebuilt_pc_comp> GetPrebuiltPcCompByIdAsync(int pcId, int compId)
+        public async Task<IEnumerable<Prebuilt_pc_comp>> GetPrebuiltPcCompByIdAsync(int pcId, int compId)
         {
-            var preb_pcs_comp = await _service.Prebuilt_pc_comp.FindAsync(pcId, compId);
+            var preb_pcs_comp = await _service.Prebuilt_pc_comp.Where(bc => bc.pc_id == pcId && bc.component_id == compId).ToListAsync();
             return preb_pcs_comp;
         }
         public async Task<IEnumerable<Prebuilt_pc_comp>> GetAllPrebuiltPcCompsAsync()

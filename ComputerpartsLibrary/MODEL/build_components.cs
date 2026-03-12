@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -10,7 +11,10 @@ namespace ComputerpartsLibrary.MODEL
     public class Build_components
     {
         [Key]
-        public int build_id { get; set; } 
+        public int id { get; set; }
+        [ForeignKey("Custom_builds")]
+        public int build_id { get; set; }
+        [ForeignKey("Components")]
         public int component_id { get; set; } 
         public int quantity { get; set; }
         public decimal unit_price { get; set; }
