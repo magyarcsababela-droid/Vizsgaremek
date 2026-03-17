@@ -1,30 +1,48 @@
-﻿<div class="top-row ps-3 navbar navbar-dark">
+﻿<nav class="navbar navbar-expand-lg navbar-dark bg-white fixed-top shadow-sm" style="border-radius: 10px; border: 1px solid; margin: 1%;">
     <div class="container-fluid">
-        <a class="navbar-brand" href="">ComputerpartsFrontendBlazor</a>
+        <NavLink href="" class="logo nav-link">ComputerParts.com</NavLink>
+        
+        @* <a href="" class="logo">ComputerParts.com</a> *@
+        @* <div class="nav-links">
+            <NavLink class="nav-link" href="">
+                Home
+            </NavLink>
+            <NavLink class="nav-link" href="parts">
+                Parts
+            </NavLink>
+            <NavLink class="nav-link" href="configurator">
+                Configurator
+            </NavLink>
+            <NavLink class="nav-link" href="deals">
+                Deals
+            </NavLink>
+            <NavLink class="nav-link" href="support">
+                Support
+            </NavLink>
+            <NavLink class="nav-link" href="contact">
+                Contact
+            </NavLink>
+        </div> *@
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar" aria-controls="mainNavbar" aria-expanded="false">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse d-lg-flex flex-grow-0 ms-auto" id="mainNavbar">
+            <div class="d-none d-lg-flex gap-2">
+                <NavLink class="nav-link btn btn-outline-primary" href="">Főoldal</NavLink>
+                <NavLink class="nav-link btn btn-outline-primary" href="">Listázás</NavLink>
+                <NavLink class="nav-link btn btn-outline-primary" href="">Statisztika</NavLink>
+                <NavLink class="nav-link btn btn-outline-primary" href="">Új Processzor hozzáadása</NavLink>
+                <a class="cart-icon" style="background-color: blue;">
+                    🛒
+                </a>
+            </div>
+            <div class="d-lg-none pt-3 d-grid gap-2">
+                <NavLink class="nav-link btn" href="#home">Főoldal</NavLink>
+                <NavLink class="nav-link btn" href="">Listázás</NavLink>
+                <NavLink class="nav-link btn" href="">Statisztika</NavLink>
+                <NavLink class="nav-link btn" href="">Új Processzor hozzáadása</NavLink>
+                <button class="" style="background-color: blue; border-radius: 10px; padding: 10px;"href="">Kosár tartalma</button>
+            </div>
+        </div>
     </div>
-</div>
-
-<input type="checkbox" title="Navigation menu" class="navbar-toggler" />
-
-<div class="nav-scrollable" onclick="document.querySelector('.navbar-toggler').click()">
-    <nav class="flex-column">
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
-                <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Home
-            </NavLink>
-        </div>
-
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="counter">
-                <span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span> Counter
-            </NavLink>
-        </div>
-
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="weather">
-                <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Weather
-            </NavLink>
-        </div>
-    </nav>
-</div>
-
+</nav>
