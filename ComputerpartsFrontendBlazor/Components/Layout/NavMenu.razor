@@ -3,36 +3,26 @@
         <NavLink href="" class="logo nav-link">ComputerParts.com</NavLink>
         
         @* <a href="" class="logo">ComputerParts.com</a> *@
-        @* <div class="nav-links">
-            <NavLink class="nav-link" href="">
-                Home
-            </NavLink>
-            <NavLink class="nav-link" href="parts">
-                Parts
-            </NavLink>
-            <NavLink class="nav-link" href="configurator">
-                Configurator
-            </NavLink>
-            <NavLink class="nav-link" href="deals">
-                Deals
-            </NavLink>
-            <NavLink class="nav-link" href="support">
-                Support
-            </NavLink>
-            <NavLink class="nav-link" href="contact">
-                Contact
-            </NavLink>
-        </div> *@
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar" aria-controls="mainNavbar" aria-expanded="false">
             <span class="navbar-toggler-icon"></span>
         </button>
-        <div class="collapse navbar-collapse d-lg-flex flex-grow-0 ms-auto" id="mainNavbar">
+        <div class="collapse navbar-collapse d-lg-flex flex-grow-0 ms-auto gap-3" id="mainNavbar">
+            <div class="d-none d-lg-flex gap-1">
+                <NavLink class="nav-link">
+                    <a href="/" class="navbutton">Keződlap</a>
+                </NavLink>
+                <NavLink class="nav-link">
+                    <a href="parts" class="navbutton">Alkatrészek</a>
+                </NavLink>
+                <NavLink class="nav-link">
+                    <a href="configurator" class="navbutton">Számítógép összerakó</a>
+                </NavLink>
+                <NavLink class="nav-link">
+                    <a href="deals" class="navbutton">Ajánlatok</a>
+                </NavLink>
+            </div>
             <div class="d-none d-lg-flex gap-2">
-                <NavLink class="nav-link btn btn-outline-primary" href="">Főoldal</NavLink>
-                <NavLink class="nav-link btn btn-outline-primary" href="">Listázás</NavLink>
-                <NavLink class="nav-link btn btn-outline-primary" href="">Statisztika</NavLink>
-                <NavLink class="nav-link btn btn-outline-primary" href="">Új Processzor hozzáadása</NavLink>
-                <a class="cart-icon" style="background-color: blue;">
+                <a class="cart-icon" style="background: radial-gradient()">
                     🛒
                 </a>
             </div>

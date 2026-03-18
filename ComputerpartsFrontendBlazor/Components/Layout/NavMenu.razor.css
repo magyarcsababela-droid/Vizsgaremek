@@ -1,4 +1,26 @@
 .navbar {
-    --primary: #3498db;
-    --secondary: #3498db;
+    
+}
+.cart-icon {
+    width: 50px;
+    height: 50px;
+    transition: transform var(--transition),box-shadow var(--transition);
+}
+    .cart-icon:hover {
+        transform: scale(1.2);
+        box-shadow: 12px 12px 6px rgba(0,0,0,.3);
+        border: 2px solid black;
+    }
+.navbutton {
+    padding: .75rem 1rem;
+    border-radius: 5px;
+    font-weight: 500;
+    cursor: pointer;
+    background: radial-gradient(#e67e22,#3498db);
+    color: white;
+    transition: transform var(--transition),box-shadow var(--transition);
+}
+.navbutton:hover {
+    transform: scale(1.2);
+    box-shadow: 12px 12px 6px rgba(0,0,0,.3);
 }
