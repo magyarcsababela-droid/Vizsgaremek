@@ -1,0 +1,32 @@
+﻿@page "/register"
+@rendermode InteractiveServer
+<main class="auth-wrap">
+    <section class="login-card">
+        <h2>Register</h2>
+        <p class="muted" style="margin-bottom:1rem;">Create a new customer account for orders, saved configurations and support tracking.</p>
+        <div class="form-grid">
+            <div><label for="regFirst">First name</label><input id="regFirst" type="text" placeholder="First name"></div>
+            <div><label for="regLast">Last name</label><input id="regLast" type="text" placeholder="Last name"></div>
+            <div class="full"><label for="regEmail">Email</label><input id="regEmail" type="email" placeholder="you@example.com"></div>
+            <div><label for="regPassword">Password</label><input id="regPassword" type="password" placeholder="Create password"></div>
+            <div><label for="regPassword2">Confirm password</label><input id="regPassword2" type="password" placeholder="Confirm password"></div>
+        </div>
+        <div class="form-actions"><button class="btn" data-demo="Demo mode: registration submitted.">Create Account</button></div>
+        <p class="switch-link">Already registered? <a href="login">Back to login</a>.</p>
+    </section>
+</main>
+
+<footer class="footer">
+    <div class="footer-links">
+        <a href="parts.html">Parts</a>
+        <a href="support.html">Support</a>
+        <a href="deals.html">Deals</a>
+        <a href="contact.html">Contact</a>
+        <a href="login.html">Login</a>
+    </div>
+    <p>© 2026 ComputerParts.com. All rights reserved.</p>
+</footer>
+
+@code {
+
+}

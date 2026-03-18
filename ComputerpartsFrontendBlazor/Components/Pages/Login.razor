@@ -1,0 +1,29 @@
+﻿@page "/login"
+@rendermode InteractiveServer
+
+<main class="auth-wrap">
+    <section class="login-card">
+        <h2>Login</h2>
+        <p class="muted" style="margin-bottom:1rem;">Access your account to manage orders, saved builds and support requests.</p>
+        <div class="form-grid">
+            <div class="full"><label for="loginEmail">Email</label><input id="loginEmail" type="email" placeholder="you@example.com"></div>
+            <div class="full"><label for="loginPassword">Password</label><input id="loginPassword" type="password" placeholder="••••••••"></div>
+        </div>
+        <div class="form-actions"><button class="btn" data-demo="Demo mode: login submitted.">Login</button></div>
+        <p class="switch-link">No account yet? <a href="register">Create one here</a>.</p>
+    </section>
+</main>
+
+<footer class="footer">
+    <div class="footer-links">
+        <a href="parts.html">Parts</a>
+        <a href="support.html">Support</a>
+        <a href="deals.html">Deals</a>
+        <a href="contact.html">Contact</a>
+        <a href="login.html">Login</a>
+    </div>
+    <p>© 2026 ComputerParts.com. All rights reserved.</p>
+</footer>
+@code {
+
+}
