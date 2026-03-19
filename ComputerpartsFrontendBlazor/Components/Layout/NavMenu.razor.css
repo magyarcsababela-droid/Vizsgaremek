@@ -9,7 +9,7 @@
     .cart-icon:hover {
         transform: scale(1.2);
         box-shadow: 12px 12px 6px rgba(0,0,0,.3);
-        border: 2px solid black;
+        border: 2px solid white;
     }
 .navbutton {
     padding: .75rem 1rem;
