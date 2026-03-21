@@ -1,7 +1,9 @@
 using ComputerpartsLibrary.DATA;
 using ComputerpartsLibrary.INTERFACE;
+using ComputerpartsLibrary.MODEL;
 using Microsoft.EntityFrameworkCore;
 using ComputerpartsLibrary.SERVICE;
+using ComputerpartsAPI.Controllers;
 
 namespace ComputerpartsAPI
 {
@@ -35,7 +37,25 @@ namespace ComputerpartsAPI
             builder.Services.AddScoped<IPrebuiltPcCompService, PrebuiltPcCompService>();
             builder.Services.AddScoped<IPrebuiltPcService, PrebuiltPcService>();
 
+            // Register authentication services and controller
+            builder.Services.AddScoped<UserAuthService>();
+
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy("AllowAll", policy =>
+                    policy.AllowAnyOrigin()
+                          .AllowAnyMethod()
+                          .AllowAnyHeader());
+            });
+
             var app = builder.Build();
+
+            // Use JWT Secret Key from environment variable
+            var jwtSecret = builder.Configuration["Jwt:SecretKey"];
+            if (string.IsNullOrEmpty(jwtSecret))
+            {
+                throw new InvalidOperationException("JWT:SecretKey must be set in appsettings.json");
+            }
 
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
@@ -48,7 +68,7 @@ namespace ComputerpartsAPI
 
             app.UseAuthorization();
 
-
+            // Map attribute-routed controllers
             app.MapControllers();
 
             app.Run();

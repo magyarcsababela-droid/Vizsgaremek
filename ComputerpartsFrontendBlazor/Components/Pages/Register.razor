@@ -1,17 +1,48 @@
 ﻿@page "/register"
 @rendermode InteractiveServer
+@using System.Net.Http.Json
+@inject HttpClient Http
+@inject NavigationManager Navigation
+
 <main class="auth-wrap">
-    <section class="login-card">
+    <section class="login-card page-anim">
         <h2>Register</h2>
         <p class="muted" style="margin-bottom:1rem;">Create a new customer account for orders, saved configurations and support tracking.</p>
+
         <div class="form-grid">
-            <div><label for="regFirst">First name</label><input id="regFirst" type="text" placeholder="First name"></div>
-            <div><label for="regLast">Last name</label><input id="regLast" type="text" placeholder="Last name"></div>
-            <div class="full"><label for="regEmail">Email</label><input id="regEmail" type="email" placeholder="you@example.com"></div>
-            <div><label for="regPassword">Password</label><input id="regPassword" type="password" placeholder="Create password"></div>
-            <div><label for="regPassword2">Confirm password</label><input id="regPassword2" type="password" placeholder="Confirm password"></div>
+            <div>
+                <label for="regFirst">First name</label>
+                <input id="regFirst" @bind="Model.FirstName" type="text" placeholder="First name" />
+            </div>
+            <div>
+                <label for="regLast">Last name</label>
+                <input id="regLast" @bind="Model.LastName" type="text" placeholder="Last name" />
+            </div>
+            <div class="full">
+                <label for="regEmail">Email</label>
+                <input id="regEmail" @bind="Model.Email" type="email" placeholder="you@example.com" />
+            </div>
+            <div>
+                <label for="regPassword">Password</label>
+                <input id="regPassword" @bind="Model.Password" type="password" placeholder="Create password" />
+            </div>
+            <div>
+                <label for="regPassword2">Confirm password</label>
+                <input id="regPassword2" @bind="Model.ConfirmPassword" type="password" placeholder="Confirm password" />
+            </div>
         </div>
-        <div class="form-actions"><button class="btn" data-demo="Demo mode: registration submitted.">Create Account</button></div>
+
+        <div class="form-actions">
+            <button class="btn" @onclick="RegisterAsync" disabled="@(IsSubmitting)">
+                @(IsSubmitting ? "Creating..." : "Create Account")
+            </button>
+        </div>
+
+        @if (!string.IsNullOrEmpty(StatusMessage))
+        {
+            <p class="muted">@StatusMessage</p>
+        }
+
         <p class="switch-link">Already registered? <a href="login">Back to login</a>.</p>
     </section>
 </main>
@@ -28,5 +59,103 @@
 </footer>
 
 @code {
+    private RegisterFormModel Model { get; set; } = new();
+    private bool IsSubmitting { get; set; }
+    private string? StatusMessage { get; set; }
 
+    private class RegisterFormModel
+    {
+        public string FirstName { get; set; } = string.Empty;
+        public string LastName { get; set; } = string.Empty;
+        public string Email { get; set; } = string.Empty;
+        public string Password { get; set; } = string.Empty;
+        public string ConfirmPassword { get; set; } = string.Empty;
+    }
+
+    private async Task RegisterAsync()
+    {
+        StatusMessage = null;
+
+        // Basic client-side validation
+        if (string.IsNullOrWhiteSpace(Model.FirstName) || string.IsNullOrWhiteSpace(Model.LastName))
+        {
+            StatusMessage = "Please enter your first and last name.";
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(Model.Email))
+        {
+            StatusMessage = "Please enter an email address.";
+            return;
+        }
+
+        if (string.IsNullOrEmpty(Model.Password) || Model.Password.Length < 8)
+        {
+            StatusMessage = "Password must be at least 8 characters long.";
+            return;
+        }
+
+        if (Model.Password != Model.ConfirmPassword)
+        {
+            StatusMessage = "Passwords do not match.";
+            return;
+        }
+
+        IsSubmitting = true;
+
+        try
+        {
+            // Derive a username from first and last name (fallback to email local-part)
+            var username = (Model.FirstName + Model.LastName).Replace(" ", "").ToLowerInvariant();
+            if (string.IsNullOrWhiteSpace(username))
+            {
+                var at = Model.Email.IndexOf('@');
+                username = at > 0 ? Model.Email.Substring(0, at) : Model.Email;
+            }
+
+            var payload = new
+            {
+                Username = username,
+                Email = Model.Email,
+                Password = Model.Password
+            };
+
+            var response = await Http.PostAsJsonAsync("api/auth/register", payload);
+
+            if (response.IsSuccessStatusCode)
+            {
+                // Registration successful - navigate to login
+                StatusMessage = "Registration successful. Redirecting to login...";
+                // small delay to let user read message
+                await Task.Delay(800);
+                Navigation.NavigateTo("/login");
+            }
+            else
+            {
+                // Try to extract error message from API
+                try
+                {
+                    var errorObj = await response.Content.ReadFromJsonAsync<ServerError?>();
+                    StatusMessage = errorObj?.message ?? "Registration failed. Please try again.";
+                }
+                catch
+                {
+                    StatusMessage = "Registration failed. Please try again.";
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            StatusMessage = "An error occurred: " + ex.Message;
+        }
+        finally
+        {
+            IsSubmitting = false;
+        }
+    }
+
+    private class ServerError
+    {
+        public string? message { get; set; }
+    }
 }

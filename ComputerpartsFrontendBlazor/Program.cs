@@ -1,3 +1,5 @@
+using System;
+using System.Net.Http;
 using ComputerpartsFrontendBlazor.Components;
 
 namespace ComputerpartsFrontendBlazor
@@ -11,6 +13,13 @@ namespace ComputerpartsFrontendBlazor
             // Add services to the container.
             builder.Services.AddRazorComponents()
                 .AddInteractiveServerComponents();
+
+            // Register HttpClient for server-side components (base address can be overridden via configuration "ApiBaseUrl")
+            var apiBase = builder.Configuration["ApiBaseUrl"] ?? "https://localhost:44369/";
+            builder.Services.AddScoped(sp => new HttpClient
+            {
+                BaseAddress = new Uri(apiBase)
+            });
 
             var app = builder.Build();
 

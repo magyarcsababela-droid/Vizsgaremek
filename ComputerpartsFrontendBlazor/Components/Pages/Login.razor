@@ -1,15 +1,34 @@
 ﻿@page "/login"
 @rendermode InteractiveServer
+@using System.Net.Http.Json
+@inject HttpClient Http
+@inject NavigationManager Navigation
 
 <main class="auth-wrap">
-    <section class="login-card">
+    <section class="login-card page-anim">
         <h2>Login</h2>
         <p class="muted" style="margin-bottom:1rem;">Access your account to manage orders, saved builds and support requests.</p>
         <div class="form-grid">
-            <div class="full"><label for="loginEmail">Email</label><input id="loginEmail" type="email" placeholder="you@example.com"></div>
-            <div class="full"><label for="loginPassword">Password</label><input id="loginPassword" type="password" placeholder="••••••••"></div>
+            <div class="full">
+                <label for="loginEmail">Email or username</label>
+                <input id="loginEmail" @bind="Model.UsernameOrEmail" type="text" placeholder="you@example.com or username" />
+            </div>
+            <div class="full">
+                <label for="loginPassword">Password</label>
+                <input id="loginPassword" @bind="Model.Password" type="password" placeholder="••••••••" />
+            </div>
         </div>
-        <div class="form-actions"><button class="btn" data-demo="Demo mode: login submitted.">Login</button></div>
+        <div class="form-actions">
+            <button class="btn" @onclick="LoginAsync" disabled="@(IsSubmitting)">
+                @(IsSubmitting ? "Signing in..." : "Login")
+            </button>
+        </div>
+
+        @if (!string.IsNullOrEmpty(StatusMessage))
+        {
+            <p class="muted">@StatusMessage</p>
+        }
+
         <p class="switch-link">No account yet? <a href="register">Create one here</a>.</p>
     </section>
 </main>
@@ -24,6 +43,77 @@
     </div>
     <p>© 2026 ComputerParts.com. All rights reserved.</p>
 </footer>
-@code {
 
+@code {
+    private LoginFormModel Model { get; set; } = new();
+    private bool IsSubmitting { get; set; }
+    private string? StatusMessage { get; set; }
+
+    private class LoginFormModel
+    {
+        public string UsernameOrEmail { get; set; } = string.Empty;
+        public string Password { get; set; } = string.Empty;
+    }
+
+    private async Task LoginAsync()
+    {
+        StatusMessage = null;
+
+        if (string.IsNullOrWhiteSpace(Model.UsernameOrEmail))
+        {
+            StatusMessage = "Please enter your username or email.";
+            return;
+        }
+
+        if (string.IsNullOrEmpty(Model.Password))
+        {
+            StatusMessage = "Please enter your password.";
+            return;
+        }
+
+        IsSubmitting = true;
+        try
+        {
+            var payload = new
+            {
+                Username = Model.UsernameOrEmail,
+                Password = Model.Password
+            };
+
+            var response = await Http.PostAsJsonAsync("api/auth/login", payload);
+
+            if (response.IsSuccessStatusCode)
+            {
+                // Optionally read returned user info
+                StatusMessage = "Login successful. Redirecting...";
+                await Task.Delay(500);
+                Navigation.NavigateTo("/");
+            }
+            else
+            {
+                try
+                {
+                    var err = await response.Content.ReadFromJsonAsync<ServerError?>();
+                    StatusMessage = err?.message ?? "Login failed. Check credentials.";
+                }
+                catch
+                {
+                    StatusMessage = "Login failed. Check credentials.";
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            StatusMessage = "An error occurred: " + ex.Message;
+        }
+        finally
+        {
+            IsSubmitting = false;
+        }
+    }
+
+    private class ServerError
+    {
+        public string? message { get; set; }
+    }
 }
