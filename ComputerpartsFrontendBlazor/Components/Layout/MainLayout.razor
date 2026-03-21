@@ -1,9 +1,43 @@
 ﻿@inherits LayoutComponentBase
-<NavMenu />
+@inject NavigationManager Navigation
+@implements IDisposable
+
+@if (ShouldShowNav())
+{
+    <NavMenu />
+}
 
 <main>
     @Body
 </main>
+
+@code {
+    protected override void OnInitialized()
+    {
+        Navigation.LocationChanged += OnLocationChanged;
+    }
+
+    private void OnLocationChanged(object? sender, Microsoft.AspNetCore.Components.Routing.LocationChangedEventArgs e)
+    {
+        // Re-render layout when the URL changes so nav visibility updates
+        InvokeAsync(StateHasChanged);
+    }
+
+    private bool ShouldShowNav()
+    {
+        var relative = Navigation.ToBaseRelativePath(Navigation.Uri);
+        if (string.IsNullOrEmpty(relative))
+            return true; // home
+        var path = relative.Split('?')[0].Trim('/');
+        return !string.Equals(path, "login", StringComparison.OrdinalIgnoreCase)
+            && !string.Equals(path, "register", StringComparison.OrdinalIgnoreCase);
+    }
+
+    public void Dispose()
+    {
+        Navigation.LocationChanged -= OnLocationChanged;
+    }
+}
 
 @* <div id="blazor-error-ui">
     An unhandled error has occurred.

@@ -33,7 +33,7 @@
         </div>
 
         <div class="form-actions">
-            <button class="btn" @onclick="RegisterAsync" disabled="@(IsSubmitting)">
+            <button class="btn" style="width: 100%" @onclick="RegisterAsync" disabled="@(IsSubmitting)">
                 @(IsSubmitting ? "Creating..." : "Create Account")
             </button>
         </div>
