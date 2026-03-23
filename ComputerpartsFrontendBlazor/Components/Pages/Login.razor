@@ -6,15 +6,15 @@
 
 <main class="auth-wrap">
     <section class="login-card page-anim">
-        <h2>Login</h2>
-        <p class="muted" style="margin-bottom:1rem;">Access your account to manage orders, saved builds and support requests.</p>
+        <h2>Bejelentkezés</h2>
+        <p class="muted" style="margin-bottom:1rem;">Hozzáférés a fiókodhoz a rendeléseket, mentett épített gépeket, és segítség kéréseket.</p>
         <div class="form-grid">
             <div class="full">
-                <label for="loginEmail">Email or username</label>
-                <input id="loginEmail" @bind="Model.UsernameOrEmail" type="text" placeholder="you@example.com or username" />
+                <label for="loginEmail">Email vagy Felhasználónév</label>
+                <input id="loginEmail" @bind="Model.UsernameOrEmail" type="text" placeholder="you@example.com vagy Felhasználónév" />
             </div>
             <div class="full">
-                <label for="loginPassword">Password</label>
+                <label for="loginPassword">Jelszó</label>
                 <input id="loginPassword" @bind="Model.Password" type="password" placeholder="••••••••" />
             </div>
         </div>
@@ -29,19 +29,19 @@
             <p class="muted">@StatusMessage</p>
         }
 
-        <p class="switch-link">No account yet? <a href="register">Create one here</a>.</p>
+        <p class="switch-link">Nincs még fiókod? <a href="register">Készíts egyet itt...</a>.</p>
     </section>
 </main>
 
 <footer class="footer">
     <div class="footer-links">
-        <a href="parts.html">Parts</a>
-        <a href="support.html">Support</a>
-        <a href="deals.html">Deals</a>
-        <a href="contact.html">Contact</a>
-        <a href="login.html">Login</a>
+        <a href="Parts.razor">Alkatrészek</a>
+        <a href="Support.razor">Támogatás</a>
+        <a href="Deals.razor">Ajánlatok</a>
+        <a href="Contact.razor">Kapcsolat</a>
+        <a href="Login.razor">Bejelentkezés</a>
     </div>
-    <p>© 2026 ComputerParts.com. All rights reserved.</p>
+    <p>© 2026 ComputerParts.com. All rights reserved//Minden jog fenntartva.</p>
 </footer>
 
 @code {
