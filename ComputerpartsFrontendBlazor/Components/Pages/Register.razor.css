@@ -10,13 +10,13 @@
     min-height: calc(100vh - 140px);
 }
 
-.login-card {
-    background: #fff;
+/*.login-card {
+    background-color: forestgreen;
     padding: 2rem;
     border-radius: 8px;
     width: 420px;
     box-shadow: 0 8px 20px rgba(0,0,0,0.08);
-}
+}*/
 
 /* Shared page animation used by pages */
 .page-anim {
