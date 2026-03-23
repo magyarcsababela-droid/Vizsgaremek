@@ -6,29 +6,29 @@
 
 <main class="auth-wrap">
     <section class="login-card page-anim">
-        <h2>Register</h2>
-        <p class="muted" style="margin-bottom:1rem;">Create a new customer account for orders, saved configurations and support tracking.</p>
+        <h2>Regisztráció</h2>
+        <p class="muted" style="margin-bottom:1rem;">Készíts új vevői fiókot a rendelésekhez, mentett konfigurációkhoz és segítségkérések követéséhez.</p>
 
         <div class="form-grid">
             <div>
-                <label for="regFirst">First name</label>
-                <input id="regFirst" @bind="Model.FirstName" type="text" placeholder="First name" />
+                <label for="regFirst">Keresztnév</label>
+                <input id="regFirst" @bind="Model.FirstName" type="text" placeholder="Keresztnév" />
             </div>
             <div>
-                <label for="regLast">Last name</label>
-                <input id="regLast" @bind="Model.LastName" type="text" placeholder="Last name" />
+                <label for="regLast">Családnév</label>
+                <input id="regLast" @bind="Model.LastName" type="text" placeholder="Családnév" />
             </div>
             <div class="full">
                 <label for="regEmail">Email</label>
                 <input id="regEmail" @bind="Model.Email" type="email" placeholder="you@example.com" />
             </div>
             <div>
-                <label for="regPassword">Password</label>
-                <input id="regPassword" @bind="Model.Password" type="password" placeholder="Create password" />
+                <label for="regPassword">Jelszó</label>
+                <input id="regPassword" @bind="Model.Password" type="password" placeholder="Jelszó" />
             </div>
             <div>
-                <label for="regPassword2">Confirm password</label>
-                <input id="regPassword2" @bind="Model.ConfirmPassword" type="password" placeholder="Confirm password" />
+                <label for="regPassword2">Jelszó megerősítése</label>
+                <input id="regPassword2" @bind="Model.ConfirmPassword" type="password" placeholder="Leszó megerősítése" />
             </div>
         </div>
 
@@ -43,7 +43,7 @@
             <p class="muted">@StatusMessage</p>
         }
 
-        <p class="switch-link">Already registered? <a href="login">Back to login</a>.</p>
+        <p class="switch-link">Van már fiókod? <a href="login">Térj vissza a bejelentkezéshez.</a>.</p>
         <p class="switch-link">Vissza a kezőlapra <a href="/">Kezdőlap</a></p>
     </section>
 </main>
