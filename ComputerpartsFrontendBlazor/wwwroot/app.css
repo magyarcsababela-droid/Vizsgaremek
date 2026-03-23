@@ -46,6 +46,9 @@ img {
     background: rgba(24,24,24,.9);
     backdrop-filter: blur(8px);
     padding: .75rem 2rem;
+    width: auto; /* Vagy max-width: 100% */
+    min-width: fit-content;
+
 }
 
 .navbar-container {
@@ -54,6 +57,8 @@ img {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    box-sizing: border-box; /* Fontos! Ne engedi hogy a padding növelje a szélességet */
+    overflow-x: auto;
 }
 
 .logo {
@@ -66,6 +71,13 @@ img {
 .nav-links {
     display: flex;
     gap: 1.2rem;
+}
+
+.nav-link .navbutton {
+    max-width: fit-content; /* Vagy 100px fix */
+    white-space: nowrap; /* Ne törölje el a szöveget */
+    overflow: hidden; /* Ha túl hosszú, elvágja */
+
 }
 
     .nav-links a {

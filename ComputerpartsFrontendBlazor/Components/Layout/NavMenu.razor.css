@@ -25,3 +25,30 @@
     transform: scale(1.2);
     box-shadow: 12px 12px 6px rgba(0,0,0,.3);
 }
+.mobile-icon-row {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 12px;                 
+    margin-top: 10px;
+}
+
+.icon-button {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 60px;
+    height: 60px;
+    background-color: #3498db;
+    border-radius: 50%;
+    text-decoration: none;
+    font-size: 24px;
+    color: white;
+    transition: transform var(--transition), box-shadow var(--transition);
+}
+
+    .icon-button:hover {
+        transform: scale(1.2);
+        box-shadow: 12px 12px 6px rgba(0,0,0,.3);
+        border: 2px solid white;
+    }
