@@ -7,7 +7,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    min-height: calc(100vh - 140px);
+    min-height: 100vh;
 }
 
 /* Shared page animation used by pages */

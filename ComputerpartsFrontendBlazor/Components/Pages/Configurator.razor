@@ -9,7 +9,7 @@
     </section>
     <section class="page-section configurator-layout">
         <div class="detail-card">
-            <h3>Select your components</h3>
+            <h3>Válaszd ki a megfelelő alkatrészeket</h3>
             <div class="form-grid">
                 <div><label for="cpu">CPU</label><select id="cpu"><option>--Válassz alkatrészt--</option><option>Intel Core i7-13700K</option><option>AMD Ryzen 7 7800X3D</option><option>Intel Core i5-14600K</option></select></div>
                 <div><label for="gpu">GPU</label><select id="gpu"><option>--Válassz alkatrészt--</option><option>NVIDIA RTX 4080</option><option>AMD Radeon RX 7900 XT</option><option>NVIDIA RTX 4070 Super</option></select></div>
@@ -22,28 +22,19 @@
             <div class="form-actions"><button class="btn" data-demo="Demo mode: configuration saved.">Konfiguráció mentése</button>@* <button class="btn-secondary" data-demo="Demo mode: compatibility check finished.">Check Compatibility</button> *@</div>
         </div>
         <div class="detail-card summary-box">
-            <h3>Estimated build summary</h3>
+            <h3>Várható végösszeg</h3>
             <div class="summary-line"><span>CPU</span><strong>Intel Core i7-13700K</strong></div>
             <div class="summary-line"><span>GPU</span><strong>NVIDIA RTX 4080</strong></div>
             <div class="summary-line"><span>Memória</span><strong>32 GB DDR5</strong></div>
             <div class="summary-line"><span>Tárkapacitás</span><strong>2 TB NVMe SSD</strong></div>
             <div class="summary-line"><span>Tápegység</span><strong>850W Gold</strong></div>
             <div class="summary-line"><span>Végösszeg</span><strong class="price">$2,798.99</strong></div>
-            <p class="muted" style="margin-top:1rem;">A végösszeg változhat a jelenlegi piaci áraknak megfelelően...</p>
+            <p class="muted" style="margin-top:1rem;">A végösszeg változhat a jelenlegi piaci árakhoz igazítva...</p>
         </div>
     </section>
 </main>
 
-<footer class="footer">
-    <div class="footer-links">
-        <a href="Parts.razor">Alkatrészek</a>
-        <a href="Support.razor">Támogatás</a>
-        <a href="Deals.razor">Ajánlatok</a>
-        <a href="Contact.razor">Kapcsolat</a>
-        <a href="Login.razor">Bejelentkezés</a>
-    </div>
-    <p>© 2026 ComputerParts.com. All rights reserved//Minden jog fenntartva.</p>
-</footer>
+@* Footer moved to shared component (MainLayout) *@
 @* <script>
             document.querySelectorAll('.faq-question').forEach(btn=>{
               btn.addEventListener('click',()=>btn.parentElement.classList.toggle('open'));

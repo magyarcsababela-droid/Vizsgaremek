@@ -11,6 +11,11 @@
     @Body
 </main>
 
+@if (ShouldShowNav())
+{
+    <Footer />
+}
+
 @code {
     protected override void OnInitialized()
     {

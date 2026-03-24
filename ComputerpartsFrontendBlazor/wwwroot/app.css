@@ -608,8 +608,10 @@ textarea {
 }
 
 .auth-wrap {
-    min-height: calc(100vh - 160px);
-    display: flex;
+    /* On auth pages we don't render the global footer, make the auth area fill the viewport260
+       so no darker footer band appears under the card. */
+    min-height: 100vh;
+    display: none;
     align-items: center;
     justify-content: center;
     padding: 2rem;
