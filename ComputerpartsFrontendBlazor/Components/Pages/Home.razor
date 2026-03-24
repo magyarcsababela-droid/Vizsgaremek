@@ -40,19 +40,24 @@
             <button type="button" class="btn" @onclick="() => DebugAndLoad(3)">Opciók megtekintése</button>
         </div>
         <div class="config-card">
-            <h3>Storage</h3>
+            <h3>Tárhely</h3>
             <p>Gyors NVMe SSD-k és nagy kapacitású HDD-k minden adatod szükségletéhez.</p>
             <button type="button" class="btn" @onclick="() => DebugAndLoad(4)">Opciók megtekintése</button>
         </div>
         <div class="config-card">
-            <h3>Case</h3>
-            <p>Menő dizájnok jó légáramlattal, edzett üveggel vagy minimalista stílusok.</p>
+            <h3>Hűtés</h3>
+            <p>A processzor hűtésének megoldásai - léghűtő vagy vízhűtő</p>
             <button type="button" class="btn" @onclick="() => DebugAndLoad(5)">Opciók megtekintése</button>
         </div>
         <div class="config-card">
-            <h3>PSU</h3>
-            <p>Megbízható tápegységek - 80+ Gold és Platinum hatásfokkal, 300W-tól akár 2000W-ig.</p>
+            <h3>Gépház</h3>
+            <p>Menő dizájnok jó légáramlattal, edzett üveggel vagy minimalista stílusok.</p>
             <button type="button" class="btn" @onclick="() => DebugAndLoad(6)">Opciók megtekintése</button>
+        </div>
+        <div class="config-card">
+            <h3>Tápegység</h3>
+            <p>Megbízható tápegységek - 80+ Gold és Platinum hatásfokkal, 300W-tól akár 2000W-ig.</p>
+            <button type="button" class="btn" @onclick="() => DebugAndLoad(7)">Opciók megtekintése</button>
         </div>
     </div>
 </section>
@@ -76,7 +81,7 @@
     <div class="modal-dialog modal-lg modal-dialog-scrollable modal-dialog-centered">
         <div class="modal-content" style="color: white; background-color: #181818; box-shadow: 1px 1px 20px black;">
             <div class="modal-header">
-                <h5 class="modal-title" id="componentsModalLabel">Kiválasztott kategória elemei</h5>
+                <h5 class="modal-title" id="componentsModalLabel">Elérhető alkatrészek</h5>
                 @* <button type="button" class="btn-close" style="border: 1px solid white;" data-bs-dismiss="modal" aria-label="Close" @onclick="CloseModal"></button> *@
             </div>
             <div class="modal-body">

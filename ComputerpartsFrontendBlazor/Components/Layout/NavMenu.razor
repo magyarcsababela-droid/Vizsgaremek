@@ -32,7 +32,7 @@
                 @if (AuthService?.IsAuthenticated == true)
                 {
                     <div class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" role="button" @onclick="ToggleProfileDropdown">
+                        <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" role="button" @onclick="ToggleProfileDropdown" @onclick:preventDefault="true">
                             <img src="Images/profile_user_avatar_people_icon_219228.png" alt="User" style="border-radius: 50%; width: 30px; height: 30px; margin-right:8px;" />
                             <span>@(string.IsNullOrEmpty(AuthService.Username) ? "Profil" : AuthService.Username)</span>
                         </a>
@@ -49,7 +49,7 @@
                 }
                 else
                 {
-                    <a class="icon-button d-flex align-items-center" @onclick="ToggleProfileDropdown">
+                    <a class="icon-button d-flex align-items-center" @onclick="ToggleProfileDropdown" @onclick:preventDefault="true">
                         <img src="Images/profile_user_avatar_people_icon_219228.png" alt="User" style="border-radius: 50%; width: 30px; height: 30px;" />
                     </a>
                     @if (showProfileDropdown)
@@ -81,7 +81,7 @@
                     <a href="cart" class="icon-button">🛒</a>
                     @if (AuthService?.IsAuthenticated == true)
                     {
-                        <a class="icon-button d-flex align-items-center" @onclick="ToggleProfileDropdown">
+                        <a class="icon-button d-flex align-items-center" @onclick="ToggleProfileDropdown" @onclick:preventDefault="true">
                             <img src="Images/profile_user_avatar_people_icon_219228.png" alt="User" style="border-radius: 50%; width: 30px; height: 30px;" />
                             <span style="margin-left:6px;">@AuthService.Username</span>
                         </a>
@@ -97,7 +97,7 @@
                     else
                     {
                         @* <a href="profile" class="icon-button"><img src="Images/profile_user_avatar_people_icon_219228.png" alt="User" style="border-radius: 50%; width: 30px; height: 30px;"></a> *@
-                        <a class="icon-button d-flex align-items-center" @onclick="ToggleProfileDropdown">
+                        <a class="icon-button d-flex align-items-center" @onclick="ToggleProfileDropdown" @onclick:preventDefault="true">
                             <img src="Images/profile_user_avatar_people_icon_219228.png" alt="User" style="border-radius: 50%; width: 30px; height: 30px;" />
                         </a>
                         @if (showProfileDropdown)
