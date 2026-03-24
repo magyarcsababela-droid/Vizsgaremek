@@ -43,6 +43,13 @@
         Navigation.LocationChanged -= OnLocationChanged;
     }
 }
+@inject ComputerpartsFrontendBlazor.Services.AuthService Auth
+protected override async Task OnInitializedAsync()
+{
+    // initialize auth (loads token from localStorage if present)
+    try { await Auth.InitializeAsync(); } catch { }
+    Navigation.LocationChanged += OnLocationChanged;
+}
 
 @* <div id="blazor-error-ui">
     An unhandled error has occurred.

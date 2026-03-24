@@ -49,14 +49,39 @@ namespace ComputerpartsAPI
                           .AllowAnyHeader());
             });
 
-            var app = builder.Build();
+            
 
-            // Use JWT Secret Key from environment variable
+            // Use JWT Secret Key from configuration
             var jwtSecret = builder.Configuration["Jwt:SecretKey"];
             if (string.IsNullOrEmpty(jwtSecret))
             {
                 throw new InvalidOperationException("JWT:SecretKey must be set in appsettings.json");
             }
+
+            // Configure JWT authentication
+            builder.Services.AddAuthentication(options =>
+            {
+                options.DefaultAuthenticateScheme = Microsoft.AspNetCore.Authentication.JwtBearer.JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = Microsoft.AspNetCore.Authentication.JwtBearer.JwtBearerDefaults.AuthenticationScheme;
+            })
+            .AddJwtBearer(options =>
+            {
+                options.RequireHttpsMetadata = true;
+                options.SaveToken = true;
+                // Use SHA256 of the secret to derive a stable 256-bit key (same as JwtTokenService)
+                using var sha = System.Security.Cryptography.SHA256.Create();
+                var keyHash = sha.ComputeHash(System.Text.Encoding.UTF8.GetBytes(jwtSecret));
+                options.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters
+                {
+                    ValidateIssuerSigningKey = true,
+                    IssuerSigningKey = new Microsoft.IdentityModel.Tokens.SymmetricSecurityKey(keyHash),
+                    ValidateIssuer = false,
+                    ValidateAudience = false,
+                    ClockSkew = TimeSpan.Zero
+                };
+            });
+
+            var app = builder.Build();
 
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
@@ -66,7 +91,9 @@ namespace ComputerpartsAPI
             }
 
             app.UseHttpsRedirection();
+            app.UseCors("AllowAll");
 
+            app.UseAuthentication();
             app.UseAuthorization();
 
             // Map attribute-routed controllers

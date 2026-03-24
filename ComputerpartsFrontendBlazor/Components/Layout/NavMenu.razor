@@ -24,13 +24,42 @@
                     <a href="register" class="navbutton">Regisztráció</a>
                 </NavLink>
             </div>
-            <div class="d-none d-xl-flex gap-2">
-                <a class="cart-icon" style="background: radial-gradient()">
-                    🛒
-                </a>
-                <a class="cart-icon" style="background: radial-gradient()">
-                    <img src="Images/profile_user_avatar_people_icon_219228.png" alt="User" style="border-radius: 50%; width: 30px; height: 30px;">
-                </a>
+            <div class="d-none d-xl-flex gap-2 align-items-center">
+                <a class="cart-icon" style="background: radial-gradient()">🛒</a>
+
+                @* Profile dropdown using AuthService state *@
+
+                @if (AuthService?.IsAuthenticated == true)
+                {
+                    <div class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" role="button" @onclick="ToggleProfileDropdown">
+                            <img src="Images/profile_user_avatar_people_icon_219228.png" alt="User" style="border-radius: 50%; width: 30px; height: 30px; margin-right:8px;" />
+                            <span>@(string.IsNullOrEmpty(AuthService.Username) ? "Profil" : AuthService.Username)</span>
+                        </a>
+
+                        @if (showProfileDropdown)
+                        {
+                            <div class="dropdown-menu dropdown-menu-end show" style="position: absolute;">
+                                <div class="dropdown-item-text">@AuthService.Username</div>
+                                <div class="dropdown-divider"></div>
+                                <button class="dropdown-item" @onclick="OnLogoutClicked">Kijelentkezés</button>
+                            </div>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <a class="icon-button d-flex align-items-center" @onclick="ToggleProfileDropdown">
+                        <img src="Images/profile_user_avatar_people_icon_219228.png" alt="User" style="border-radius: 50%; width: 30px; height: 30px;" />
+                    </a>
+                    @if (showProfileDropdown)
+                    {
+                        <div class="dropdown-menu show" style="position: absolute; z-index: 2000;">
+                            <div class="dropdown-divider"></div>
+                            <button class="dropdown-item" @onclick="OnLogoutClicked">Kijelentkezés</button>
+                        </div>
+                    }
+                }
             </div>
             <div class="d-xl-none pt-3 d-grid gap-2">
                 <NavLink class="nav-link">
@@ -48,11 +77,73 @@
                 <NavLink class="nav-link">
                     <a href="register" class="navbutton">Regisztráció</a>
                 </NavLink>
-                <div class="mobile-icon-row">
+                <div class="mobile-icon-row d-flex gap-2 align-items-center">
                     <a href="cart" class="icon-button">🛒</a>
-                    <a href="profile" class="icon-button"><img src="Images/profile_user_avatar_people_icon_219228.png" alt="User" style="border-radius: 50%; width: 30px; height: 30px;"></a>
+                    @if (AuthService?.IsAuthenticated == true)
+                    {
+                        <a class="icon-button d-flex align-items-center" @onclick="ToggleProfileDropdown">
+                            <img src="Images/profile_user_avatar_people_icon_219228.png" alt="User" style="border-radius: 50%; width: 30px; height: 30px;" />
+                            <span style="margin-left:6px;">@AuthService.Username</span>
+                        </a>
+                        @if (showProfileDropdown)
+                        {
+                            <div class="dropdown-menu show" style="position: absolute; z-index: 2000;">
+                                <div class="dropdown-item-text">@AuthService.Username</div>
+                                <div class="dropdown-divider"></div>
+                                <button class="dropdown-item" @onclick="OnLogoutClicked">Kijelentkezés</button>
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        @* <a href="profile" class="icon-button"><img src="Images/profile_user_avatar_people_icon_219228.png" alt="User" style="border-radius: 50%; width: 30px; height: 30px;"></a> *@
+                        <a class="icon-button d-flex align-items-center" @onclick="ToggleProfileDropdown">
+                            <img src="Images/profile_user_avatar_people_icon_219228.png" alt="User" style="border-radius: 50%; width: 30px; height: 30px;" />
+                        </a>
+                        @if (showProfileDropdown)
+                        {
+                            <div class="dropdown-menu show" style="position: absolute; z-index: 2000;">
+                                <div class="dropdown-divider"></div>
+                                <button class="dropdown-item" @onclick="OnLogoutClicked">Kijelentkezés</button>
+                            </div>
+                        }
+                    }
                 </div>
             </div>
         </div>
     </div>
 </nav>
+
+@code {
+    [Microsoft.AspNetCore.Components.Inject]
+    private ComputerpartsFrontendBlazor.Services.AuthService AuthService { get; set; } = default!;
+
+    [Microsoft.AspNetCore.Components.Inject]
+    private Microsoft.AspNetCore.Components.NavigationManager Navigation { get; set; } = default!;
+
+    private bool showProfileDropdown;
+
+    private void ToggleProfileDropdown()
+    {
+        showProfileDropdown = !showProfileDropdown;
+    }
+
+    private async System.Threading.Tasks.Task OnLogoutClicked()
+    {
+        if (AuthService != null)
+        {
+            await AuthService.LogoutAsync();
+        }
+
+        Navigation.NavigateTo("/", true);
+    }
+
+    protected override async System.Threading.Tasks.Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender && AuthService != null)
+        {
+            await AuthService.InitializeAsync();
+            StateHasChanged();
+        }
+    }
+}

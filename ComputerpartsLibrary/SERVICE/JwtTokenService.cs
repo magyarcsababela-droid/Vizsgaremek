@@ -14,28 +14,45 @@ namespace ComputerpartsLibrary.SERVICE
     /// </summary>
     public class JwtTokenService
     {
-        private readonly string _secretKey = "ComputerPartsApp_SecretKey_2024!";
+        private readonly string _secretKey;
         private const int ExpirationHours = 24; // Token érvényességi idő (24 óra)
         
         /// <summary>
         /// Generates a JWT token for the given user
         /// </summary>
+        public JwtTokenService()
+        {
+            _secretKey = Environment.GetEnvironmentVariable("JWT_SECRET") ?? "ComputerPartsApp_SecretKey_2024!";
+        }
+
         public JwtToken GenerateToken(int userId, string role)
         {
             var claims = new[]
             {
                 new Claim(ClaimTypes.NameIdentifier, userId.ToString()),
-                new Claim("role", role),
-                new Claim("username", "user") // Username is optional
+                new Claim(ClaimTypes.Role, role),
             };
-            
-            var tokenString = CreateJwtTokenString(claims);
-            var expiration = DateTimeOffset.UtcNow.AddHours(ExpirationHours);
-            
+
+            var expires = DateTime.UtcNow.AddHours(ExpirationHours);
+
+            var securityKey = CreateSymmetricKey();
+            var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
+
+            var jwt = new JwtSecurityToken(
+                issuer: null,
+                audience: null,
+                claims: claims,
+                expires: expires,
+                signingCredentials: credentials
+            );
+
+            var handler = new JwtSecurityTokenHandler();
+            var tokenString = handler.WriteToken(jwt);
+
             return new JwtToken
             {
                 Token = tokenString,
-                Expiration = expiration,
+                Expiration = new DateTimeOffset(expires),
                 UserId = userId,
                 Role = role
             };
@@ -52,8 +69,8 @@ namespace ComputerpartsLibrary.SERVICE
                 var tokenValidationParameters = new TokenValidationParameters
                 {
                     ValidateIssuerSigningKey = true,
-                    ValidIssuer = _secretKey,
                     IssuerSigningKey = CreateSymmetricKey(),
+                    ValidateIssuer = false,
                     ValidateAudience = false, // Audience validation can be added later
                     ClockSkew = TimeSpan.Zero
                 };
@@ -136,10 +153,10 @@ namespace ComputerpartsLibrary.SERVICE
         /// </summary>
         private SymmetricSecurityKey CreateSymmetricKey()
         {
-            var keyBytes = new byte[32]; // 256 bits
-            using var rng = RandomNumberGenerator.Create();
-            rng.GetBytes(keyBytes);
-            return new SymmetricSecurityKey(keyBytes);
+            // Derive a 256-bit key from the secret using SHA256 so it is stable across restarts
+            using var sha = System.Security.Cryptography.SHA256.Create();
+            var hash = sha.ComputeHash(Encoding.UTF8.GetBytes(_secretKey));
+            return new SymmetricSecurityKey(hash);
         }
     }
 }

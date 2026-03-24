@@ -29,6 +29,9 @@
             const modal = bootstrap.Modal.getOrCreateInstance(el);
             modal.hide();
         };
+        window.getLocalToken = () => localStorage.getItem('authToken');
+        window.setLocalToken = (t) => localStorage.setItem('authToken', t);
+        window.removeLocalToken = () => localStorage.removeItem('authToken');
     </script>
 </body>
 
