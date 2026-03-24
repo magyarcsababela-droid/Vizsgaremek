@@ -1,6 +1,10 @@
 ﻿@page "/"
 @using ComputerpartsFrontendBlazor.Components.Layout
+@using ComputerpartsLibrary.MODEL
+@using System.Net.Http.Json
+@inject HttpClient Http
 @inherits LayoutComponentBase
+@rendermode InteractiveServer
 <PageTitle>ComputerParts.com</PageTitle>
 <!-- Hero -->
 <section class="hero">
@@ -8,6 +12,11 @@
         <h1>Építsd meg az álom PC-d</h1>
         <p>Válassz több ezer alkatrész közül és hozd létre a legbrutálabb gépet játékra, munkára vagy kreativitásra!</p>
         <button class="btn"><a href="/configurator">Konfigurálás megkezdése</a></button>
+       @*  <button type="button" class="btn" @onclick="ToggleTest">Teszt: kattintás működik-e</button>
+        @if (testClicked)
+        {
+            <div class="badge">Teszt gomb megnyomva</div>
+        } *@
     </div>
 </section>
 
@@ -18,35 +27,93 @@
         <div class="config-card">
             <h3>CPU</h3>
             <p>Intel vagy AMD processzorok – válaszd a Számodra megfelelő magot a munkádhoz!</p>
-            <button class="btn">Opciók megtekintése</button>
+            <button type="button" class="btn" @onclick="() => DebugAndLoad(1)">Opciók megtekintése</button>
         </div>
         <div class="config-card">
             <h3>GPU</h3>
             <p>Nagy teljesítményű grafikus kártyák egyaránt gaming-re és munkára szánva.</p>
-            <button class="btn">Opciók megtekintése</button>
+            <button type="button" class="btn" @onclick="() => DebugAndLoad(2)">Opciók megtekintése</button>
         </div>
         <div class="config-card">
             <h3>RAM</h3>
             <p>8 -128 GB DDR4/DDR5 – válaszd ki igényeidnek megfelelő típust.</p>
-            <button class="btn">Opciók megtekintése</button>
+            <button type="button" class="btn" @onclick="() => DebugAndLoad(3)">Opciók megtekintése</button>
         </div>
         <div class="config-card">
             <h3>Storage</h3>
             <p>Gyors NVMe SSD-k és nagy kapacitású HDD-k minden adatod szükségletéhez.</p>
-            <button class="btn">Opciók megtekintése</button>
+            <button type="button" class="btn" @onclick="() => DebugAndLoad(4)">Opciók megtekintése</button>
         </div>
         <div class="config-card">
             <h3>Case</h3>
             <p>Menő dizájnok jó légáramlattal, edzett üveggel vagy minimalista stílusok.</p>
-            <button class="btn">Opciók megtekintése</button>
+            <button type="button" class="btn" @onclick="() => DebugAndLoad(5)">Opciók megtekintése</button>
         </div>
         <div class="config-card">
             <h3>PSU</h3>
             <p>Megbízható tápegységek - 80+ Gold és Platinum hatásfokkal, 300W-tól akár 2000W-ig.</p>
-            <button class="btn">Opciók megtekintése</button>
+            <button type="button" class="btn" @onclick="() => DebugAndLoad(6)">Opciók megtekintése</button>
         </div>
     </div>
 </section>
+
+@* @if (isLoading)
+{
+    <div>Betöltés...</div>
+}
+@if (!string.IsNullOrEmpty(errorMessage))
+{
+    <div class="alert alert-danger">@errorMessage</div>
+} *@
+@* custom glassy backdrop (rendered by Blazor to ensure backdrop-filter works) *@
+@if (showBackdrop)
+{
+    <div class="glassy-backdrop" @onclick="CloseModal"></div>
+}
+
+@* Modal for showing filtered components (Bootstrap backdrop disabled because we render a custom one) *@
+<div class="modal fade" id="componentsModal" data-bs-backdrop="false" tabindex="-1" aria-labelledby="componentsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable modal-dialog-centered">
+        <div class="modal-content" style="color: white; background-color: #181818; box-shadow: 1px 1px 20px black;">
+            <div class="modal-header">
+                <h5 class="modal-title" id="componentsModalLabel">Kiválasztott kategória elemei</h5>
+                @* <button type="button" class="btn-close" style="border: 1px solid white;" data-bs-dismiss="modal" aria-label="Close" @onclick="CloseModal"></button> *@
+            </div>
+            <div class="modal-body">
+                @if (isLoading)
+                {
+                    <div>Betöltés...</div>
+                }
+                else if (!string.IsNullOrEmpty(errorMessage))
+                {
+                    <div class="alert alert-danger">@errorMessage</div>
+                }
+                else if (filteredComponents == null || filteredComponents.Count == 0)
+                {
+                    <p>Nincs találat ebben a kategóriában.</p>
+                }
+                else
+                {
+                    <ul class="list-group">
+                        @foreach (var comp in filteredComponents)
+                        {
+                            <li class="list-group-item d-flex justify-content-between align-items-start" style="background-color: rgba(0, 0, 0, 0.1); color: white;">
+                                <div class="ms-2 me-auto">
+                                    <div class="fw-bold">@comp.name</div>
+                                    @comp.description
+                                </div>
+                                <span class="badge bg-primary rounded-pill">@comp.price.ToString("C")</span>
+                            </li>
+                        }
+                    </ul>
+                }
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" @onclick="CloseModal">Bezár</button>
+            </div>
+        </div>
+    </div>
+</div>
 
 <!-- Featured products -->
 <section class="section-title">Kiemelt Termékek</section>
@@ -95,4 +162,68 @@
         </div>
     </div>
 </div>
-@* Footer moved to shared component (MainLayout) *@
+@code {
+    private List<Components>? filteredComponents;
+    private bool isLoading = false;
+    private string? errorMessage;
+    private bool testClicked = false;
+    private bool showBackdrop = false;
+
+    private async Task DebugAndLoad(int typeId)
+    {
+        // immediate visible feedback for debugging
+        errorMessage = $"Gomb megnyomva: {typeId}";
+        isLoading = true;
+        StateHasChanged();
+        // also log to browser console
+        try { await JS.InvokeVoidAsync("console.log", $"Button clicked for type {typeId}"); } catch { }
+        await LoadComponentsByType(typeId);
+        // show modal after loading
+        showBackdrop = true;
+        StateHasChanged();
+        try { await JS.InvokeVoidAsync("showModal", "componentsModal"); } catch { }
+    }
+
+    private async Task LoadComponentsByType(int typeId)
+    {
+        isLoading = true;
+        errorMessage = null;
+        filteredComponents = null;
+        StateHasChanged();
+        try
+        {
+            var all = await Http.GetFromJsonAsync<List<Components>>("api/components");
+            if (all == null)
+            {
+                errorMessage = "Nem sikerült lekérni az adatokat.";
+                filteredComponents = new List<Components>();
+            }
+            else
+            {
+                filteredComponents = all.Where(c => c.type_id == typeId).ToList();
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Hiba történt: {ex.Message}";
+            filteredComponents = new List<Components>();
+        }
+        isLoading = false;
+        StateHasChanged();
+    }
+
+    [Inject]
+    private IJSRuntime JS { get; set; } = default!;
+
+    private void ToggleTest()
+    {
+        testClicked = !testClicked;
+    }
+
+    private async Task CloseModal()
+    {
+        try { await JS.InvokeVoidAsync("hideModal", "componentsModal"); } catch { }
+        showBackdrop = false;
+        StateHasChanged();
+    }
+}

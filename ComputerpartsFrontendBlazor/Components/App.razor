@@ -14,8 +14,22 @@
 
 <body>
     <Routes />
-    <script src="_framework/blazor.web.js"></script>
+    <script src="_framework/blazor.server.js"></script>
     <script src="bootstrap/bootstrap-5.3.8-dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        window.showModal = (id) => {
+            const el = document.getElementById(id);
+            if (!el) return;
+            const modal = bootstrap.Modal.getOrCreateInstance(el);
+            modal.show();
+        };
+        window.hideModal = (id) => {
+            const el = document.getElementById(id);
+            if (!el) return;
+            const modal = bootstrap.Modal.getOrCreateInstance(el);
+            modal.hide();
+        };
+    </script>
 </body>
 
 </html>

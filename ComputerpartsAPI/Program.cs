@@ -34,6 +34,7 @@ namespace ComputerpartsAPI
             builder.Services.AddScoped<IOrderService, OrderService>();
             builder.Services.AddScoped<IProductService, ProductService>();
             builder.Services.AddScoped<IUserService, UserService>();
+            builder.Services.AddScoped<JwtTokenService>(); // Register JWT token service
             builder.Services.AddScoped<IPrebuiltPcCompService, PrebuiltPcCompService>();
             builder.Services.AddScoped<IPrebuiltPcService, PrebuiltPcService>();
 
