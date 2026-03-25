@@ -1,7 +1,7 @@
 ﻿@page "/login"
 @rendermode InteractiveServer
 @using System.Net.Http.Json
-@inject HttpClient Http
+@inject ComputerpartsFrontendBlazor.Services.AuthService AuthService
 @inject NavigationManager Navigation
 
 <main class="auth-wrap">
@@ -34,16 +34,6 @@
     </section>
 </main>
 
-<footer class="footer">
-    <div class="footer-links">
-        <a href="Parts.razor">Alkatrészek</a>
-        <a href="Support.razor">Támogatás</a>
-        <a href="Deals.razor">Ajánlatok</a>
-        <a href="Contact.razor">Kapcsolat</a>
-        <a href="Login.razor">Bejelentkezés</a>
-    </div>
-    <p>© 2026 ComputerParts.com. All rights reserved//Minden jog fenntartva.</p>
-</footer>
 
 @code {
     private LoginFormModel Model { get; set; } = new();
@@ -75,32 +65,18 @@
         IsSubmitting = true;
         try
         {
-            var payload = new
-            {
-                Username = Model.UsernameOrEmail,
-                Password = Model.Password
-            };
+            var success = await AuthService.LoginAsync(Model.UsernameOrEmail, Model.Password);
 
-            var response = await Http.PostAsJsonAsync("api/auth/login", payload);
-
-            if (response.IsSuccessStatusCode)
+            if (success)
             {
-                // Optionally read returned user info
-                StatusMessage = "Login successful. Redirecting...";
-                await Task.Delay(500);
-                Navigation.NavigateTo("/");
+                StatusMessage = "Sikeres bejelentkezés. Átirányítás...";
+                await Task.Delay(400);
+                // force reload so other components pick up persisted token
+                Navigation.NavigateTo("/", true);
             }
             else
             {
-                try
-                {
-                    var err = await response.Content.ReadFromJsonAsync<ServerError?>();
-                    StatusMessage = err?.message ?? "Login failed. Check credentials.";
-                }
-                catch
-                {
-                    StatusMessage = "Login failed. Check credentials.";
-                }
+                StatusMessage = "Bejelentkezés sikertelen. Ellenőrizd a hitelesítő adatokat.";
             }
         }
         catch (Exception ex)

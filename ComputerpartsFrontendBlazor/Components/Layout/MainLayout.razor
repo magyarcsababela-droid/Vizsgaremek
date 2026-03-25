@@ -1,5 +1,6 @@
 ﻿@inherits LayoutComponentBase
 @inject NavigationManager Navigation
+@inject ComputerpartsFrontendBlazor.Services.AuthService Auth
 @implements IDisposable
 
 @if (ShouldShowNav())
@@ -11,12 +12,22 @@
     @Body
 </main>
 
+@if (ShouldShowNav())
+{
+    <Footer />
+}
+
 @code {
     protected override void OnInitialized()
     {
         Navigation.LocationChanged += OnLocationChanged;
     }
-
+    protected override async Task OnInitializedAsync()
+    {
+        // initialize auth (loads token from localStorage if present)
+        try { await Auth.InitializeAsync(); } catch { }
+        Navigation.LocationChanged += OnLocationChanged;
+    }
     private void OnLocationChanged(object? sender, Microsoft.AspNetCore.Components.Routing.LocationChangedEventArgs e)
     {
         // Re-render layout when the URL changes so nav visibility updates
@@ -38,6 +49,7 @@
         Navigation.LocationChanged -= OnLocationChanged;
     }
 }
+
 
 @* <div id="blazor-error-ui">
     An unhandled error has occurred.

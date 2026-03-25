@@ -20,22 +20,13 @@
         </div>
     </section>
     <section class="info-grid">
-        <div class="info-card"><h3>Építés-kész szűrők</h3><p class="muted"> Találd meg a megelelő alkatrészeket foglalat, memória típus, teljesítmény igény és méret szerint, a kompatibilitása problémák csökkentéséhez.</p><a class="small-link" href="Configurator.razor">Konfigurátor megnyitása</a></div>
-        @* <div class="info-card"><h3>Fast comparisons</h3><p class="muted">Compare specs, pricing and use-case notes before adding a part to your shortlist.</p><a class="small-link" href="product.html">Példa termék megnyitása</a></div> *@
-        <div class="info-card"><h3>Segítségre van szükséged?</h3><p class="muted">Ha nem vagy benne biztos, mi hogy működik együtt, a "segítség" oldal gyors megoldást biztosít a gyakori kérdésekre.</p><a class="small-link" href="support.html">Segítségkérés</a></div>
+        <div class="info-card"><h3>Építés-kész szűrők</h3><p class="muted"> Találd meg a megelelő alkatrészeket foglalat, memória típus, teljesítmény igény és méret szerint, a kompatibilitása problémák csökkentéséhez.</p><a class="small-link" href="/configurator">Konfigurátor megnyitása</a></div>
+        @* <div class="info-card"><h3>Fast comparisons</h3><p class="muted">Compare specs, pricing and use-case notes  before adding a part to your shortlist.</p><a class="small-link" href="product.html">Példa termék megnyitása</a></div> *@
+        <div class="info-card"><h3>Segítségre van szükséged?</h3><p class="muted">Ha nem vagy benne biztos, mi hogy működik együtt, a "segítség" oldal gyors megoldást biztosít a gyakori kérdésekre.</p><a class="small-link" href="/support">Segítségkérés</a></div>
     </section>
 </main>
 
-<footer class="footer">
-    <div class="footer-links">
-        <a href="Parts.razor">Alkatrészek</a>
-        <a href="Support.razor">Támogatás</a>
-        <a href="Deals.razor">Ajánlatok</a>
-        <a href="Contact.razor">Kapcsolat</a>
-        <a href="Login.razor">Bejelentkezés</a>
-    </div>
-    <p>© 2026 ComputerParts.com. All rights reserved//Minden jog fenntartva.</p>
-</footer>
+@* Footer moved to shared component (MainLayout) *@
 
 @code {
 

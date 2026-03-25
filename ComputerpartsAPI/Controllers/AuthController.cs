@@ -14,11 +14,13 @@ namespace ComputerpartsAPI.Controllers
     {
         private readonly IUserService _userService;
         private readonly UserAuthService _authService;
+        private readonly ComputerpartsLibrary.SERVICE.JwtTokenService _jwtService;
 
-        public AuthController(IUserService userService, UserAuthService authService)
+        public AuthController(IUserService userService, UserAuthService authService, ComputerpartsLibrary.SERVICE.JwtTokenService jwtService)
         {
             _userService = userService;
             _authService = authService;
+            _jwtService = jwtService;
         }
 
         /// <summary>
@@ -53,6 +55,9 @@ namespace ComputerpartsAPI.Controllers
             if (user == null)
                 return Unauthorized(new { message = "Invalid username or password" });
 
+            // Generate JWT token
+            var jwt = _jwtService.GenerateToken(user.id, user.role);
+
             // Remove sensitive data from response
             var responseUser = new Users
             {
@@ -63,7 +68,7 @@ namespace ComputerpartsAPI.Controllers
                 created_at = user.created_at
             };
 
-            return Ok(responseUser);
+            return Ok(new { user = responseUser, token = jwt.Token, expires = jwt.Expiration });
         }
 
         /// <summary>

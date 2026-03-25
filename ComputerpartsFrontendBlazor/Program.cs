@@ -21,6 +21,9 @@ namespace ComputerpartsFrontendBlazor
                 BaseAddress = new Uri(apiBase)
             });
 
+            // Add auth service for token storage
+            builder.Services.AddScoped<ComputerpartsFrontendBlazor.Services.AuthService>();
+
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.

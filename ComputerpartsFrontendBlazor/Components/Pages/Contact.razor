@@ -1,0 +1,75 @@
+@page "/contact"
+@using System.ComponentModel.DataAnnotations
+@rendermode InteractiveServer
+@inherits LayoutComponentBase
+
+<main>
+    <section class="page-header_custom page-header hero-mini">
+        <h1>Kapcsolat</h1>
+        <p>Írj nekünk az alábbi űrlapon — válaszunkat a megadott email címen kapod meg.</p>
+    </section>
+
+    <section class="page-section">
+        <h2>Üzenet küldése</h2>
+
+        <EditForm Model="ContactModel" OnValidSubmit="SubmitContact">
+            <DataAnnotationsValidator />
+            <ValidationSummary />
+
+            <div class="form-grid">
+                <div>
+                    <label for="name">Név</label>
+                    <InputText id="name" @bind-Value="ContactModel.Name" />
+                </div>
+                <div>
+                    <label for="email">Email</label>
+                    <InputText id="email" @bind-Value="ContactModel.Email" />
+                </div>
+                <div class="full">
+                    <label for="subject">Tárgy</label>
+                    <InputText id="subject" @bind-Value="ContactModel.Subject" />
+                </div>
+                <div class="full">
+                    <label for="message">Üzenet</label>
+                    <InputTextArea id="message" @bind-Value="ContactModel.Message" />
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <button class="btn" type="submit">Küldés</button>
+            </div>
+        </EditForm>
+
+        @if (!string.IsNullOrEmpty(ResponseMessage))
+        {
+            <p class="muted">@ResponseMessage</p>
+        }
+    </section>
+</main>
+
+@code {
+    private ContactFormModel ContactModel { get; set; } = new();
+    private string? ResponseMessage { get; set; }
+
+    private async Task SubmitContact()
+    {
+        await Task.Delay(400); // simulate API
+        ResponseMessage = "Köszönjük üzenetedet — hamarosan válaszolunk a megadott e-mail címen.";
+        ContactModel = new ContactFormModel();
+    }
+
+    private class ContactFormModel
+    {
+        [Required]
+        public string Name { get; set; } = string.Empty;
+
+        [Required]
+        [EmailAddress]
+        public string Email { get; set; } = string.Empty;
+
+        public string Subject { get; set; } = string.Empty;
+
+        [Required]
+        public string Message { get; set; } = string.Empty;
+    }
+}
