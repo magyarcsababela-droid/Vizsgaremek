@@ -12,11 +12,6 @@
         <h1>Építsd meg az álom PC-d</h1>
         <p>Válassz több ezer alkatrész közül és hozd létre a legbrutálabb gépet játékra, munkára vagy kreativitásra!</p>
         <button class="btn"><a href="/configurator">Konfigurálás megkezdése</a></button>
-       @*  <button type="button" class="btn" @onclick="ToggleTest">Teszt: kattintás működik-e</button>
-        @if (testClicked)
-        {
-            <div class="badge">Teszt gomb megnyomva</div>
-        } *@
     </div>
 </section>
 
@@ -62,15 +57,6 @@
     </div>
 </section>
 
-@* @if (isLoading)
-{
-    <div>Betöltés...</div>
-}
-@if (!string.IsNullOrEmpty(errorMessage))
-{
-    <div class="alert alert-danger">@errorMessage</div>
-} *@
-@* custom glassy backdrop (rendered by Blazor to ensure backdrop-filter works) *@
 @if (showBackdrop)
 {
     <div class="glassy-backdrop" @onclick="CloseModal"></div>
@@ -123,7 +109,27 @@
 <!-- Featured products -->
 <section class="section-title">Kiemelt Termékek</section>
 <div class="product-grid">
-    <div class="product-card">
+    @if (filteredproducts == null || filteredproducts.Count == 0)
+    {
+        <p>No products yet.</p>
+    }
+    else
+    {
+        @foreach (var product in filteredproducts)
+        {
+            <div class="product-card">
+                @* <img src="https://via.placeholder.com/300x200?text=Intel+Core+i7" alt="Intel Core i7"> *@
+                <h3 class="product-name">@product.name</h3>
+                <p class="product-price">@product.base_price</p>
+                <div class="product-rating">★★★★★</div>
+                <p class="product-description">@product.description</p>
+                <div class="product-actions">
+                    <button class="btn-primary">Hozzáadás Kosárhoz</button>
+                </div>
+            </div>
+        }
+    }
+    @* <div class="product-card">
         <img src="https://via.placeholder.com/300x200?text=Intel+Core+i7" alt="Intel Core i7">
         <h3 class="product-name">Intel Core i7‑13700K</h3>
         <p class="product-price">$499.99</p>
@@ -165,14 +171,42 @@
         <div class="product-actions">
             <button class="btn-primary">Hozzáadás Kosárhoz</button>
         </div>
-    </div>
+    </div> *@
 </div>
 @code {
     private List<Components>? filteredComponents;
+    private List<Products>? filteredproducts;
     private bool isLoading = false;
     private string? errorMessage;
     private bool testClicked = false;
     private bool showBackdrop = false;
+
+    protected override async System.Threading.Tasks.Task OnInitializedAsync()
+    {
+        isLoading = true;
+        errorMessage = null;
+        StateHasChanged();
+        try
+        {
+            var all = await Http.GetFromJsonAsync<List<Products>>("api/products");
+            if (all == null)
+            {
+                errorMessage = "Nem sikerült lekérni az adatokat.";
+                filteredproducts = new List<Products>();
+            }
+            else
+            {
+                filteredproducts = all;
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Hiba történt: {ex.Message}";
+            filteredproducts = new List<Products>();
+        }
+        isLoading = false;
+        StateHasChanged();
+    }
 
     private async Task DebugAndLoad(int typeId)
     {
@@ -205,7 +239,7 @@
             }
             else
             {
-                filteredComponents = all.Where(c => c.type_id == typeId).ToList();
+                filteredComponents = all.Where(x => x.type_id == typeId).ToList();
             }
         }
         catch (Exception ex)

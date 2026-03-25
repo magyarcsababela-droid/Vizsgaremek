@@ -3,6 +3,9 @@
 }
 .navbar {
 }
+body {
+    background: radial-gradient(#e67e22,#3498db);
+}
 
 .cart-icon {
     width: 50px;
