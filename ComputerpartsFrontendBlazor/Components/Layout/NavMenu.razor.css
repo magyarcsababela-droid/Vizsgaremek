@@ -25,3 +25,37 @@
     transform: scale(1.2);
     box-shadow: 12px 12px 6px rgba(0,0,0,.3);
 }
+
+.mobile-icon-row {
+    display: flex;
+    justify-content: center; /* középre rakja a két ikont */
+    align-items: center;
+    gap: 12px; /* távolság a két ikon között */
+}
+
+.icon-button {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 50%;
+    width: 60px;
+    height: 60px;
+    text-decoration: none;
+    font-size: 24px;
+    color: white;
+    overflow: hidden;
+    transition: transform var(--transition), box-shadow var(--transition);
+}
+
+    .icon-button:hover {
+        transform: scale(1.05);
+    }
+
+.profile-icon-img {
+    width: 24px;
+    height: 24px;
+    object-fit: contain;
+    display: block;
+    max-width: 100%;
+    max-height: 100%;
+}
