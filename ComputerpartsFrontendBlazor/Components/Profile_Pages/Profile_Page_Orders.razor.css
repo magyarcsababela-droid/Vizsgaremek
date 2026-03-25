@@ -1,0 +1,10 @@
+.order-details{background:linear-gradient(135deg, rgba(255,255,255,0.03), rgba(255,255,255,0.02)); padding:1rem; border-radius:10px;} .pill{display:inline-block;padding:.35rem .8rem;background:linear-gradient(45deg,var(--primary),var(--secondary));border-radius:999px;color:#fff;}
+.profile-nav .btn {
+    background: transparent;
+    border: 1px solid rgba(255,255,255,.06);
+    color: var(--text-secondary);
+}
+
+    .profile-nav .btn:hover {
+        background: rgba(255,255,255,.04);
+    }

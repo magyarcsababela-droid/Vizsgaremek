@@ -1,5 +1,9 @@
 ﻿@page "/configurator"
 @using ComputerpartsFrontendBlazor.Components.Layout
+@using ComputerpartsLibrary.MODEL
+@using System.Net.Http.Json
+@inject HttpClient Http
+@inject IJSRuntime JS
 @inherits LayoutComponentBase
 @rendermode InteractiveServer
 <main style="min-height: 75vh;">
@@ -11,29 +15,148 @@
         <div class="detail-card">
             <h3>Válaszd ki a megfelelő alkatrészeket</h3>
             <div class="form-grid">
-                <div><label for="cpu">CPU</label><select id="cpu"><option>--Válassz alkatrészt--</option><option>Intel Core i7-13700K</option><option>AMD Ryzen 7 7800X3D</option><option>Intel Core i5-14600K</option></select></div>
-                <div><label for="gpu">GPU</label><select id="gpu"><option>--Válassz alkatrészt--</option><option>NVIDIA RTX 4080</option><option>AMD Radeon RX 7900 XT</option><option>NVIDIA RTX 4070 Super</option></select></div>
-                <div><label for="ram">Memória</label><select id="ram"><option>--Válassz alkatrészt--</option><option>32 GB DDR5 6000</option><option>64 GB DDR5 5600</option><option>16 GB DDR5 5200</option></select></div>
-                <div><label for="storage">Tárkapacitás</label><select id="storage"><option>--Válassz alkatrészt--</option><option>Samsung 980 Pro 2TB</option><option>WD Black SN850X 1TB</option><option>Kingston NV2 2TB</option></select></div>
-                <div><label for="cooler">CPU hűtő</label><select id="cooler"><option>--Válassz alkatrészt--</option><option>360 mm AIO</option><option>Dual-tower air cooler</option><option>240 mm AIO</option></select></div>
-                <div><label for="psu">Tápegység</label><select id="psu"><option>--Válassz alkatrészt--</option><option>850W 80+ Gold</option><option>1000W 80+ Gold</option><option>750W 80+ Bronze</option></select></div>
+                <div>
+                    <label for="cpu">CPU</label>
+                    <select id="cpu" @bind="SelectedCpuId">
+                        <option value="">--Válassz alkatrészt--</option>
+                        @foreach (var component in componentsByType.GetValueOrDefault(1, new List<Components>()))
+                        {
+                            <option value="@component.id">@component.name (@component.price.ToString("C", currencyformat))</option>
+                        }
+                    </select>
+                </div>
+                <div>
+                    <label for="gpu">GPU</label>
+                    <select id="gpu" @bind="SelectedGpuId">
+                        <option value="">--Válassz alkatrészt--</option>
+                        @foreach (var component in componentsByType.GetValueOrDefault(2, new List<Components>()))
+                        {
+                            <option value="@component.id">@component.name (@component.price.ToString("C", currencyformat))</option>
+                        }
+                    </select>
+                </div>
+                <div>
+                    <label for="ram">Memória</label>
+                    <select id="ram" @bind="SelectedRamId">
+                        <option value="">--Válassz alkatrészt--</option>
+                        @foreach (var component in componentsByType.GetValueOrDefault(3, new List<Components>()))
+                        {
+                            <option value="@component.id">@component.name (@component.price.ToString("C", currencyformat))</option>
+                        }
+                    </select>
+                </div>
+                <div>
+                    <label for="storage">Tárkapacitás</label>
+                    <select id="storage" @bind="SelectedStorageId">
+                        <option value="">--Válassz alkatrészt--</option>
+                        @foreach (var component in componentsByType.GetValueOrDefault(4, new List<Components>()))
+                        {
+                            <option value="@component.id">@component.name (@component.price.ToString("C",currencyformat))</option>
+                        }
+                    </select>
+                </div>
+                <div>
+                    <label for="cooler">CPU hűtő</label>
+                    <select id="cooler" @bind="SelectedCoolerId">
+                        <option value="">--Válassz alkatrészt--</option>
+                        @foreach (var component in componentsByType.GetValueOrDefault(5, new List<Components>()))
+                        {
+                            <option value="@component.id">@component.name (@component.price.ToString("C",currencyformat))</option>
+                        }
+                    </select>
+                </div>
+                <div>
+                    <label for="case">Gépház</label>
+                    <select id="case" @bind="SelectedCaseId">
+                        <option value="">--Válassz alkatrészt--</option>
+                        @foreach (var component in componentsByType.GetValueOrDefault(6, new List<Components>()))
+                        {
+                            <option value="@component.id">@component.name (@component.price.ToString("C",currencyformat))</option>
+                        }
+                    </select>
+                </div>
+                <div>
+                    <label for="psu">Tápegység</label>
+                    <select id="psu" @bind="SelectedPsuId">
+                        <option value="">--Válassz alkatrészt--</option>
+                        @foreach (var component in componentsByType.GetValueOrDefault(7, new List<Components>()))
+                        {
+                            <option value="@component.id">@component.name (@component.price.ToString("C",currencyformat))</option>
+                        }
+                    </select>
+                </div>
                 <div class="full"><label for="notes">Megjegyzés</label><textarea id="notes" placeholder="Adja hozzá egyéb kérését vagy preferenciáját itt..."></textarea></div>
             </div>
-            <div class="form-actions"><button class="btn" data-demo="Demo mode: configuration saved.">Konfiguráció mentése</button>@* <button class="btn-secondary" data-demo="Demo mode: compatibility check finished.">Check Compatibility</button> *@</div>
+            <div class="form-actions"><button class="btn" data-demo="Demo mode: configuration saved.">Konfiguráció mentése</button></div>
         </div>
         <div class="detail-card summary-box">
             <h3>Várható végösszeg</h3>
-            <div class="summary-line"><span>CPU</span><strong>Intel Core i7-13700K</strong></div>
-            <div class="summary-line"><span>GPU</span><strong>NVIDIA RTX 4080</strong></div>
-            <div class="summary-line"><span>Memória</span><strong>32 GB DDR5</strong></div>
-            <div class="summary-line"><span>Tárkapacitás</span><strong>2 TB NVMe SSD</strong></div>
-            <div class="summary-line"><span>Tápegység</span><strong>850W Gold</strong></div>
-            <div class="summary-line"><span>Végösszeg</span><strong class="price">$2,798.99</strong></div>
+            <div class="summary-line"><span>CPU</span><strong>@(GetName(SelectedCpu)) <span class="price">@(SelectedCpu != null ? SelectedCpu.price.ToString("C", currencyformat) : "")</span></strong></div>
+            <div class="summary-line"><span>GPU</span><strong>@(GetName(SelectedGpu)) <span class="price">@(SelectedGpu != null ? SelectedGpu.price.ToString("C", currencyformat) : "")</span></strong></div>
+            <div class="summary-line"><span>Memória</span><strong>@(GetName(SelectedRam)) <span class="price">@(SelectedRam != null ? SelectedRam.price.ToString("C", currencyformat) : "")</span></strong></div>
+            <div class="summary-line"><span>Tárkapacitás</span><strong>@(GetName(SelectedStorage)) <span class="price">@(SelectedStorage != null ? SelectedStorage.price.ToString("C", currencyformat) : "")</span></strong></div>
+            <div class="summary-line"><span>CPU hűtő</span><strong>@(GetName(SelectedCooler)) <span class="price">@(SelectedCooler != null ? SelectedCooler.price.ToString("C", currencyformat) : "")</span></strong></div>
+            <div class="summary-line"><span>Gépház</span><strong>@(GetName(SelectedCase)) <span class="price">@(SelectedCase != null ? SelectedCase.price.ToString("C", currencyformat) : "")</span></strong></div>
+            <div class="summary-line"><span>Tápegység</span><strong>@(GetName(SelectedPsu)) <span class="price">@(SelectedPsu != null ? SelectedPsu.price.ToString("C", currencyformat) : "")</span></strong></div>
+            <div class="summary-line"><span>Végösszeg</span><strong class="price">@TotalPrice.ToString("C", currencyformat)</strong></div>
             <p class="muted" style="margin-top:1rem;">A végösszeg változhat a jelenlegi piaci árakhoz igazítva...</p>
         </div>
     </section>
 </main>
 
 @code {
+    private List<Components>? filteredComponents;
+    private Dictionary<int, List<Components>> componentsByType = new();
+    private System.Globalization.CultureInfo currencyformat = System.Globalization.CultureInfo.GetCultureInfo("en-US");
 
+    private int? SelectedCpuId;
+    private int? SelectedGpuId;
+    private int? SelectedRamId;
+    private int? SelectedStorageId;
+    private int? SelectedCoolerId;
+    private int? SelectedCaseId;
+    private int? SelectedPsuId;
+
+    private Components? SelectedCpu => FindSelected(SelectedCpuId);
+    private Components? SelectedGpu => FindSelected(SelectedGpuId);
+    private Components? SelectedRam => FindSelected(SelectedRamId);
+    private Components? SelectedStorage => FindSelected(SelectedStorageId);
+    private Components? SelectedCooler => FindSelected(SelectedCoolerId);
+    private Components? SelectedCase => FindSelected(SelectedCaseId);
+    private Components? SelectedPsu => FindSelected(SelectedPsuId);
+
+    private decimal TotalPrice =>
+        (SelectedCpu?.price ?? 0) + (SelectedGpu?.price ?? 0) + (SelectedRam?.price ?? 0) +
+        (SelectedStorage?.price ?? 0) + (SelectedCooler?.price ?? 0) + (SelectedCase?.price ?? 0) +
+        (SelectedPsu?.price ?? 0);
+
+    private bool isLoading = false;
+    private string? errorMessage;
+    private bool showBackdrop = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            var all = await Http.GetFromJsonAsync<List<Components>>("api/components");
+            if (all != null)
+            {
+                componentsByType = all.GroupBy(x => x.type_id).ToDictionary(g => g.Key, g => g.ToList());
+            }
+        }
+        catch { }
+    }
+
+    private Components? FindSelected(int? id)
+    {
+        if (id == null) return null;
+        foreach (var kv in componentsByType)
+        {
+            var found = kv.Value.FirstOrDefault(x => x.id == id.Value);
+            if (found != null) return found;
+        }
+        return null;
+    }
+
+    private string GetName(Components? c) => c?.name ?? "-";
 }

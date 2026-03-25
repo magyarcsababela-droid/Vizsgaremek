@@ -1,0 +1,120 @@
+@page "/profile/orders"
+@using ComputerpartsFrontendBlazor.Components.Layout
+@using System.Net.Http.Json
+@inject HttpClient Http
+@inherits LayoutComponentBase
+@rendermode InteractiveServer
+
+<PageTitle>Rendeléseim - ComputerParts.com</PageTitle>
+
+<section class="page-header hero-mini">
+    <h1>Rendeléseim</h1>
+    <p>Itt követheted a korábbi és folyamatban lévõ rendelések állapotát.</p>
+</section>
+
+@* Profile navigation *@
+<nav class="profile-nav d-flex gap-2" style="margin-bottom:1rem;">
+    <a class="btn btn-secondary" href="/profile">Fiók áttekintés</a>
+    <a class="btn btn-secondary" href="/profile/orders">Rendeléseim</a>
+    <a class="btn btn-secondary" href="/profile/data">Személyes adatok</a>
+    <a class="btn btn-secondary" href="/profile/settings">Beállítások</a>
+</nav>
+
+<section class="page-section configurator-layout">
+    <div class="detail-card">
+        <h3>Rendelések</h3>
+        <div class="form-grid">
+            <div class="full">
+                <label for="orderSelect">Válassz rendelést</label>
+                <select id="orderSelect" @onchange="OnOrderChanged">
+                    <option value="">--Válassz rendelést--</option>
+                    @if (orders != null)
+                    {
+                        @foreach (var o in orders)
+                        {
+                            <option value="@o.orderId">#@o.orderId - @o.date.ToShortDateString() - @o.status</option>
+                        }
+                    }
+                </select>
+            </div>
+        </div>
+
+        @if (selectedOrder != null)
+        {
+            <div class="order-details" style="margin-top:1rem;">
+                <h4>Rendelés #@selectedOrder.orderId</h4>
+                <div><strong>Dátum:</strong> @selectedOrder.date.ToString("g")</div>
+                <div><strong>Állapot:</strong> @selectedOrder.status</div>
+                <div style="margin-top:.6rem;"><strong>Összeg:</strong> @selectedOrder.total.ToString("C")</div>
+                <div style="margin-top:.6rem;"><strong>Termékek:</strong>
+                    <ul>
+                        @foreach (var p in selectedOrder.items)
+                        {
+                            <li>@p</li>
+                        }
+                    </ul>
+                </div>
+            </div>
+        }
+        else
+        {
+            <div class="muted" style="margin-top:1rem;">Válassz egy rendelést a részletek megtekintéséhez.</div>
+        }
+    </div>
+
+    <div class="detail-card summary-box">
+        <h3>Kuponok és kedvezmények</h3>
+        @if (coupons != null && coupons.Count > 0)
+        {
+            <ul class="list-clean">
+                @foreach (var c in coupons)
+                {
+                    <li class="pill">@c.code - @c.description</li>
+                }
+            </ul>
+        }
+        else
+        {
+            <div class="muted">Nincsenek aktív kuponok a fiókodban.</div>
+        }
+    </div>
+</section>
+
+@code {
+    private List<OrderModel>? orders;
+    private OrderModel? selectedOrder;
+    private List<CouponModel>? coupons;
+
+    protected override async Task OnInitializedAsync()
+    {
+        // sample data – in a real app you'd call an API
+        orders = new List<OrderModel>
+        {
+            new OrderModel{ orderId=1001, date=DateTime.Now.AddDays(-12), status="Szállítás alatt", total=2798.99m, items=new List<string>{"Intel Core i7-13700K","NVIDIA RTX 4080"} },
+            new OrderModel{ orderId=1002, date=DateTime.Now.AddDays(-45), status="Kiszállítva", total=499.99m, items=new List<string>{"Kingston DDR5 64 GB"} }
+        };
+
+        coupons = new List<CouponModel>
+        {
+            new CouponModel{ code="WELCOME10", description="10% off first order" }
+        };
+
+        await Task.CompletedTask;
+    }
+
+    private void OnOrderChanged(ChangeEventArgs e)
+    {
+        var val = e.Value?.ToString();
+        if (string.IsNullOrEmpty(val)) { selectedOrder = null; }
+        else
+        {
+            if (int.TryParse(val, out var id))
+            {
+                selectedOrder = orders?.FirstOrDefault(o => o.orderId == id);
+            }
+        }
+    }
+
+    private class OrderModel { public int orderId { get; set; } public DateTime date { get; set; } public string status { get; set; } = ""; public decimal total { get; set; } public List<string> items { get; set; } = new(); }
+    private class CouponModel { public string code { get; set; } = ""; public string description { get; set; } = ""; }
+}

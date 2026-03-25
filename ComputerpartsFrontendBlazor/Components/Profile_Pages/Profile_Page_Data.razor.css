@@ -1,0 +1,25 @@
+.detail-card input, .detail-card textarea, .detail-card select{background:#1d1d1d;color:#fff;border:1px solid #444;padding:.6rem;border-radius:8px;} .summary-box .muted{font-size:.9rem;} .payment-list{display:grid;gap:.5rem;margin-top:.6rem;}
+.profile-nav .btn {
+    background: transparent;
+    border: 1px solid rgba(255,255,255,.06);
+    color: var(--text-secondary);
+}
+
+    .profile-nav .btn:hover {
+        background: rgba(255,255,255,.04);
+    }
+
+/* Fix: remove unexpected dark bar below content by disabling sticky behavior on this page and trimming bottom padding */
+.page-section {
+    padding-bottom: 0;
+}
+
+.configurator-layout {
+    align-items: start;
+}
+
+/* On profile data page the right column should not be sticky to avoid layout gaps */
+.summary-box {
+    position: static !important;
+    top: auto !important;
+}

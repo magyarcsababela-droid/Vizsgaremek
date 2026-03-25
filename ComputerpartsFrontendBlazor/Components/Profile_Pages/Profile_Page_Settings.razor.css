@@ -1,0 +1,10 @@
+.detail-card label{margin-left:.5rem;color:var(--text-primary);} .detail-card input[type=checkbox]{width:18px;height:18px;} .detail-card .btn{margin-top:.8rem;}
+.profile-nav .btn {
+    background: transparent;
+    border: 1px solid rgba(255,255,255,.06);
+    color: var(--text-secondary);
+}
+
+    .profile-nav .btn:hover {
+        background: rgba(255,255,255,.04);
+    }

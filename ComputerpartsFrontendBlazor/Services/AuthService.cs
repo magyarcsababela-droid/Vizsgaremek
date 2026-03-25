@@ -27,7 +27,8 @@ namespace ComputerpartsFrontendBlazor.Services
         {
             try
             {
-                var token = await _js.InvokeAsync<string>("localStorage.getItem", "authToken");
+                // Use the window wrapper functions defined in App.razor to access browser localStorage
+                var token = await _js.InvokeAsync<string>("getLocalToken");
                 if (!string.IsNullOrEmpty(token))
                 {
                     Token = token;
@@ -61,7 +62,7 @@ namespace ComputerpartsFrontendBlazor.Services
                 IsAuthenticated = true;
 
                 _http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", Token);
-                await _js.InvokeVoidAsync("localStorage.setItem", "authToken", Token);
+                await _js.InvokeVoidAsync("setLocalToken", Token);
                 return true;
             }
             catch
@@ -76,7 +77,7 @@ namespace ComputerpartsFrontendBlazor.Services
             Username = null;
             IsAuthenticated = false;
             _http.DefaultRequestHeaders.Authorization = null;
-            try { await _js.InvokeVoidAsync("localStorage.removeItem", "authToken"); } catch { }
+            try { await _js.InvokeVoidAsync("removeLocalToken"); } catch { }
         }
 
         private class LoginResponse

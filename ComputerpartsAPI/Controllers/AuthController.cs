@@ -27,7 +27,7 @@ namespace ComputerpartsAPI.Controllers
         /// User registration endpoint - POST /api/auth/register
         /// </summary>
         [HttpPost("register")]
-        public async Task<ActionResult<Users>> RegisterUser([FromBody] RegisterRequest request)
+        public async Task<ActionResult> RegisterUser([FromBody] RegisterRequest request)
         {
             try
             {
@@ -36,7 +36,20 @@ namespace ComputerpartsAPI.Controllers
                     request.Email,
                     request.Password
                 );
-                return CreatedAtAction(nameof(RegisterUser), new { id = user.id }, user);
+                // Generate JWT token for the newly created user
+                var jwt = _jwtService.GenerateToken(user.id, user.role);
+
+                // Build response object without sensitive fields
+                var responseUser = new Users
+                {
+                    id = user.id,
+                    username = user.username,
+                    email = user.email,
+                    role = user.role,
+                    created_at = user.created_at
+                };
+
+                return CreatedAtAction(nameof(RegisterUser), new { id = user.id }, new { user = responseUser, token = jwt.Token, expires = jwt.Expiration });
             }
             catch (ArgumentException ex)
             {

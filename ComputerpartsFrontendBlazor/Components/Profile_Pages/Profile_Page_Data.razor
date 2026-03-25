@@ -1,0 +1,98 @@
+@page "/profile/data"
+@using ComputerpartsFrontendBlazor.Components.Layout
+@inject ComputerpartsFrontendBlazor.Services.AuthService AuthService
+@inherits LayoutComponentBase
+@rendermode InteractiveServer
+
+<PageTitle>Adatok - ComputerParts.com</PageTitle>
+
+<section class="page-header hero-mini">
+    <h1>Személyes adataim</h1>
+    <p>Módosítsd a neved, szállítási címed, e-mail címed, fizetési módjaid és jelszavad.</p>
+</section>
+
+@* Profile navigation *@
+<nav class="profile-nav d-flex gap-2" style="margin-bottom:1rem;">
+    <a class="btn btn-secondary" href="/profile">Fiók áttekintés</a>
+    <a class="btn btn-secondary" href="/profile/orders">Rendeléseim</a>
+    <a class="btn btn-secondary" href="/profile/data">Személyes adatok</a>
+    <a class="btn btn-secondary" href="/profile/settings">Beállítások</a>
+</nav>
+
+<section class="page-section configurator-layout">
+    <div class="detail-card">
+        <h3>Elérhetõségek</h3>
+        <div class="form-grid">
+            <div><label for="name">Név</label><input id="name" @bind="name" /></div>
+            <div><label for="email">Email</label><input id="email" @bind="email" type="email" /></div>
+            <div class="full"><label for="address">Szállítási cím</label><textarea id="address" @bind="address"></textarea></div>
+            <div><label for="payment">Fizetési módok</label>
+                <select id="payment" @bind="selectedPayment">
+                    <option value="">--Válassz fizetési módot--</option>
+                    @foreach(var p in paymentMethods)
+                    {
+                        <option value="@p">@p</option>
+                    }
+                </select>
+            </div>
+            <div><label for="newPayment">Új fizetési mód hozzáadása</label><input id="newPayment" @bind="newPayment" placeholder="Pl.: Visa **** 4242" /></div>
+            <div class="full"><button class="btn" @onclick="AddPayment">Fizetési mód hozzáadása</button></div>
+        </div>
+    </div>
+
+    <div class="detail-card summary-box">
+        <h3>Jelszó</h3>
+        <div class="form-grid">
+            <div><label for="current">Jelenlegi jelszó</label><input id="current" type="password" @bind="currentPassword" /></div>
+            <div><label for="new">Új jelszó</label><input id="new" type="password" @bind="newPassword" /></div>
+            <div class="full"><button class="btn" @onclick="ChangePassword">Jelszó módosítása</button></div>
+        </div>
+        <div style="margin-top:1rem;" class="muted">A változtatások mentése jelen demo módban helyi állapotban történik.</div>
+    </div>
+</section>
+
+@code {
+    private string name = "";
+    private string email = "";
+    private string address = "";
+    private List<string> paymentMethods = new();
+    private string selectedPayment = "";
+    private string newPayment = "";
+
+    private string currentPassword = "";
+    private string newPassword = "";
+
+    protected override async Task OnInitializedAsync()
+    {
+        // populate from AuthService if available
+        if (AuthService != null)
+        {
+            name = AuthService.Username ?? "";
+        }
+
+        // demo payments
+        paymentMethods = new List<string>{ "Visa **** 4242" };
+        await Task.CompletedTask;
+    }
+
+    private void AddPayment()
+    {
+        if (!string.IsNullOrWhiteSpace(newPayment))
+        {
+            paymentMethods.Add(newPayment);
+            newPayment = "";
+        }
+    }
+
+    private void ChangePassword()
+    {
+        // demo only
+        if (string.IsNullOrWhiteSpace(currentPassword) || string.IsNullOrWhiteSpace(newPassword))
+        {
+            // no-op
+            return;
+        }
+
+        currentPassword = string.Empty; newPassword = string.Empty;
+    }
+}
