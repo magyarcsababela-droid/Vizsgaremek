@@ -1,4 +1,5 @@
 using System;
+using Microsoft.Extensions.Configuration;
 using System.Security.Claims;
 using System.Text;
 using System.Security.Cryptography;
@@ -14,15 +15,27 @@ namespace ComputerpartsLibrary.SERVICE
     /// </summary>
     public class JwtTokenService
     {
-        private readonly string _secretKey;
-        private const int ExpirationHours = 24; // Token érvényességi idő (24 óra)
+        private readonly string? _secretKey;
+        private readonly string? _issuer;
+        private readonly string? _audience;
+        private readonly int _expireMinutes;
         
         /// <summary>
         /// Generates a JWT token for the given user
         /// </summary>
-        public JwtTokenService()
+        public JwtTokenService(IConfiguration config)
         {
-            _secretKey = Environment.GetEnvironmentVariable("JWT_SECRET") ?? "ComputerPartsApp_SecretKey_2024!";
+            // Read settings from configuration (appsettings.json)
+            var section = config.GetSection("Jwt");
+            _secretKey = section["Key"];
+            _issuer = section["Issuer"];
+            _audience = section["Audience"];
+
+            if (!int.TryParse(section["ExpireMinutes"], out _expireMinutes))
+            {
+                // fallback to 60 minutes
+                _expireMinutes = 60;
+            }
         }
 
         public JwtToken GenerateToken(int userId, string role)
@@ -33,14 +46,14 @@ namespace ComputerpartsLibrary.SERVICE
                 new Claim(ClaimTypes.Role, role),
             };
 
-            var expires = DateTime.UtcNow.AddHours(ExpirationHours);
+            var expires = DateTime.UtcNow.AddMinutes(_expireMinutes);
 
             var securityKey = CreateSymmetricKey();
             var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
 
             var jwt = new JwtSecurityToken(
-                issuer: null,
-                audience: null,
+                issuer: _issuer,
+                audience: _audience,
                 claims: claims,
                 expires: expires,
                 signingCredentials: credentials
@@ -70,8 +83,10 @@ namespace ComputerpartsLibrary.SERVICE
                 {
                     ValidateIssuerSigningKey = true,
                     IssuerSigningKey = CreateSymmetricKey(),
-                    ValidateIssuer = false,
-                    ValidateAudience = false, // Audience validation can be added later
+                    ValidateIssuer = !string.IsNullOrEmpty(_issuer),
+                    ValidIssuer = _issuer,
+                    ValidateAudience = !string.IsNullOrEmpty(_audience),
+                    ValidAudience = _audience,
                     ClockSkew = TimeSpan.Zero
                 };
                 

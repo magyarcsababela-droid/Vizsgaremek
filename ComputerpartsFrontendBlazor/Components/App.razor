@@ -14,9 +14,8 @@
 
 <body>
     <Routes />
-    <script src="_framework/blazor.server.js"></script>
-    <script src="bootstrap/bootstrap-5.3.8-dist/js/bootstrap.bundle.min.js"></script>
     <script>
+        // Make small localStorage and modal helpers available before Blazor starts
         window.showModal = (id) => {
             const el = document.getElementById(id);
             if (!el) return;
@@ -32,7 +31,15 @@
         window.getLocalToken = () => localStorage.getItem('authToken');
         window.setLocalToken = (t) => localStorage.setItem('authToken', t);
         window.removeLocalToken = () => localStorage.removeItem('authToken');
+        window.getLocalUsername = () => localStorage.getItem('authUsername');
+        window.setLocalUsername = (u) => localStorage.setItem('authUsername', u);
+        window.removeLocalUsername = () => localStorage.removeItem('authUsername');
+        window.getLocalEmail = () => localStorage.getItem('authEmail');
+        window.setLocalEmail = (e) => localStorage.setItem('authEmail', e);
+        window.removeLocalEmail = () => localStorage.removeItem('authEmail');
     </script>
+    <script src="_framework/blazor.server.js"></script>
+    <script src="bootstrap/bootstrap-5.3.8-dist/js/bootstrap.bundle.min.js"></script>
 </body>
 
 </html>

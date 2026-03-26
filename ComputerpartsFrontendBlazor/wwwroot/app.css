@@ -1,5 +1,5 @@
-/* -------------------------------------------------- */
-/* 1. Root variables – change these to theme your site */
+ /*-------------------------------------------------- */
+ /*1. Root variables – change these to theme your site */
 :root {
     --primary: #3498db;
     --secondary: #e67e22;
@@ -12,7 +12,7 @@
     --transition: .4s ease;
 }
 
-/* 2. Global styles */
+ /*2. Global styles */
 *, *::before, *::after {
     box-sizing: border-box;
     margin: 0;
@@ -38,7 +38,8 @@ img {
     height: auto;
 }
 
-/* 3. Navbar */
+ /*3. Navbar */
+
 .navbar {
     position: sticky;
     top: 0;
@@ -46,7 +47,7 @@ img {
     background: rgba(24,24,24,.9);
     backdrop-filter: blur(8px);
     padding: .75rem 2rem;
-    width: auto; /* Vagy max-width: 100% */
+    width: auto; 
     min-width: fit-content;
 
 }
@@ -57,7 +58,7 @@ img {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    box-sizing: border-box; /* Fontos! Ne engedi hogy a padding növelje a szélességet */
+    box-sizing: border-box;  
     overflow-x: auto;
 }
 
@@ -74,9 +75,9 @@ img {
 }
 
 .nav-link .navbutton {
-    max-width: fit-content; /* Vagy 100px fix */
-    white-space: nowrap; /* Ne törölje el a szöveget */
-    overflow: hidden; /* Ha túl hosszú, elvágja */
+    max-width: fit-content;  
+    white-space: nowrap;  
+    overflow: hidden;  
 
 }
 
@@ -124,7 +125,7 @@ img {
     justify-content: center;
 }
 
-/* 4. Hero */
+ /*4. Hero */
 .hero {
     position: relative;
     text-align: center;
@@ -188,7 +189,7 @@ img {
         box-shadow: 0 4px 12px rgba(0,0,0,.3);
     }
 
-/* 5. Configurator section */
+ /*5. Configurator section */
 .configurator-section {
     max-width: 1200px;
     margin: auto;
@@ -320,7 +321,7 @@ img {
     gap: .7rem;
 }
 
-/* Glassy modal styles */
+ Glassy modal styles 
 .modal-backdrop,
 .modal-backdrop.show {
     position: fixed !important;
@@ -387,7 +388,7 @@ img {
         opacity: .85;
     }
 
-/* 7. Footer */
+ /*7. Footer */
 .footer {
     background: rgba(24,24,24,.9);
     color: var(--text-secondary);
@@ -412,7 +413,7 @@ img {
             color: var(--primary);
         }
 
-/* 8. Mobile tweaks */
+ /*8. Mobile tweaks */
 @media(max-width:768px) {
     .hero h1 {
         font-size: 2.4rem;
@@ -792,4 +793,120 @@ textarea {
         flex-wrap: wrap;
         justify-content: center;
     }
+}
+
+
+
+
+
+
+
+
+
+
+
+.navbar {
+}
+
+.cart-icon {
+    width: 50px;
+    height: 50px;
+    transition: transform var(--transition),box-shadow var(--transition);
+}
+
+    .cart-icon:hover {
+        transform: scale(1.2);
+        box-shadow: 12px 12px 6px rgba(0,0,0,.3);
+        border: 2px solid white;
+    }
+
+.navbutton {
+    padding: .75rem 1rem;
+    text-align: center;
+    border-radius: 5px;
+    font-weight: 500;
+    cursor: pointer;
+    background: radial-gradient(#e67e22,#3498db);
+    color: white;
+    transition: transform var(--transition),box-shadow var(--transition);
+}
+
+    .navbutton:hover {
+        transform: scale(1.2);
+        box-shadow: 12px 12px 6px rgba(0,0,0,.3);
+    }
+
+.mobile-icon-row {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 12px;
+    margin-top: 10px;
+}
+
+.icon-button {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 60px;
+    height: 60px;
+    background-color: #3498db;
+    border-radius: 50%;
+    text-decoration: none;
+    font-size: 24px;
+    color: white;
+    transition: transform var(--transition), box-shadow var(--transition);
+}
+
+    .icon-button:hover {
+        transform: scale(1.2);
+        box-shadow: 12px 12px 6px rgba(0,0,0,.3);
+        border: 2px solid white;
+    }
+
+.dropdown-menu {
+    padding: 10px;
+    left: auto;
+    right: 0;
+    transition: opacity var(--transition);
+    background-color: #181818;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.dropdown-menu {
+    transition: opacity 0.2s ease, transform 0.2s ease, visibility 0.2s;
+}
+
+.dropdown-item {
+    color: white;
+}
+
+.dropdown-menu {
+    position: absolute;
+    left: auto;
+    right: 0;
+    min-width: 200px;
+    border-radius: 8px;
+    box-shadow: 0 .5rem 1rem rgba(0,0,0,.15);
+    /* Indiciális állapot */
+    opacity: 0;
+    transform: translateY(-20px);
+}
+
+/* Animáció keyframes */
+@keyframes dropdownOpen {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Show class - animáció fut */
+.dropdown-menu.show {
+    animation: dropdownOpen 0.3s ease-out forwards;
 }

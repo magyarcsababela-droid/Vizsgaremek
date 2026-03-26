@@ -51,11 +51,14 @@ namespace ComputerpartsAPI
 
             
 
-            // Use JWT Secret Key from configuration
-            var jwtSecret = builder.Configuration["Jwt:SecretKey"];
-            if (string.IsNullOrEmpty(jwtSecret))
+            // Read JWT settings from configuration (appsettings.json)
+            var jwtKey = builder.Configuration["Jwt:Key"];
+            var jwtIssuer = builder.Configuration["Jwt:Issuer"];
+            var jwtAudience = builder.Configuration["Jwt:Audience"];
+
+            if (string.IsNullOrEmpty(jwtKey))
             {
-                throw new InvalidOperationException("JWT:SecretKey must be set in appsettings.json");
+                throw new InvalidOperationException("Jwt:Key must be set in appsettings.json");
             }
 
             // Configure JWT authentication
@@ -70,13 +73,15 @@ namespace ComputerpartsAPI
                 options.SaveToken = true;
                 // Use SHA256 of the secret to derive a stable 256-bit key (same as JwtTokenService)
                 using var sha = System.Security.Cryptography.SHA256.Create();
-                var keyHash = sha.ComputeHash(System.Text.Encoding.UTF8.GetBytes(jwtSecret));
+                var keyHash = sha.ComputeHash(System.Text.Encoding.UTF8.GetBytes(jwtKey));
                 options.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters
                 {
                     ValidateIssuerSigningKey = true,
                     IssuerSigningKey = new Microsoft.IdentityModel.Tokens.SymmetricSecurityKey(keyHash),
-                    ValidateIssuer = false,
-                    ValidateAudience = false,
+                    ValidateIssuer = !string.IsNullOrEmpty(jwtIssuer),
+                    ValidIssuer = jwtIssuer,
+                    ValidateAudience = !string.IsNullOrEmpty(jwtAudience),
+                    ValidAudience = jwtAudience,
                     ClockSkew = TimeSpan.Zero
                 };
             });

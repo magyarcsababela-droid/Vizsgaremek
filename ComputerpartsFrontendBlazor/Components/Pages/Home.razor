@@ -3,8 +3,9 @@
 @using ComputerpartsLibrary.MODEL
 @using System.Net.Http.Json
 @inject HttpClient Http
-@inherits LayoutComponentBase
+@inject ComputerpartsFrontendBlazor.Services.AuthService AuthService
 @rendermode InteractiveServer
+@inherits LayoutComponentBase
 <PageTitle>ComputerParts.com</PageTitle>
 <!-- Hero -->
 <section class="hero">
@@ -14,7 +15,28 @@
         <button class="btn"><a href="/configurator">Konfigurálás megkezdése</a></button>
     </div>
 </section>
-
+<!-- Auth test panel -->
+@* <section style="margin:1rem 0;">
+    <h4>Auth teszt</h4>
+    <div>
+        @if (AuthService?.IsAuthenticated == true)
+        {
+            <div style="color:lightgreen;">Bejelentkezve: @(string.IsNullOrEmpty(AuthService.Username) ? "(nincs felhasználónév)" : AuthService.Username)</div>
+            <div style="font-size:0.9rem; color:#ccc">Token: @ShortToken(AuthService.Token)</div>
+        }
+        else
+        {
+            <div style="color:salmon;">Nem vagy bejelentkezve</div>
+        }
+        <div style="margin-top:.5rem; display:flex; gap:.5rem; align-items:center;">
+            <button class="btn btn-sm btn-primary" @onclick="CheckAuthAsync">Frissíts állapot</button>
+            @if (AuthService?.IsAuthenticated == true)
+            {
+                <button class="btn btn-sm btn-danger" @onclick="LogoutAsync">Kijelentkezés</button>
+            }
+        </div>
+    </div>
+</section> *@
 <!-- Popular categories -->
 <section class="configurator-section">
     <h2>Népszerű alkatrész kategóriák</h2>
@@ -266,4 +288,30 @@
         showBackdrop = false;
         StateHasChanged();
     }
+
+    // private string ShortToken(string? token)
+    // {
+    //     if (string.IsNullOrEmpty(token)) return "(nincs token)";
+    //     return token.Length > 40 ? token.Substring(0, 20) + "..." + token.Substring(token.Length - 16) : token;
+    // }
+
+    // private async Task CheckAuthAsync()
+    // {
+    //     if (AuthService != null)
+    //     {
+    //         await AuthService.InitializeAsync();
+    //     }
+    //     StateHasChanged();
+    // }
+
+    // private async Task LogoutAsync()
+    // {
+    //     if (AuthService != null)
+    //     {
+    //         await AuthService.LogoutAsync();
+    //     }
+    //     // refresh local state/UI
+    //     await CheckAuthAsync();
+    //     StateHasChanged();
+    // }
 }

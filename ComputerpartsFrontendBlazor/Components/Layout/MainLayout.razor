@@ -1,7 +1,7 @@
 ﻿@inherits LayoutComponentBase
 @inject NavigationManager Navigation
-@inject ComputerpartsFrontendBlazor.Services.AuthService Auth
-@implements IDisposable
+@inject ComputerpartsFrontendBlazor.Services.AuthService AuthService
+
 
 @if (ShouldShowNav())
 {
@@ -24,9 +24,22 @@
     }
     protected override async Task OnInitializedAsync()
     {
-        // initialize auth (loads token from localStorage if present)
-        try { await Auth.InitializeAsync(); } catch { }
+        // defer JS-dependent auth initialization to after first render
         Navigation.LocationChanged += OnLocationChanged;
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            try
+            {
+                // call InitializeAsync after first render so browser JS helpers are available
+                await AuthService.InitializeAsync();
+            }
+            catch { }
+            StateHasChanged();
+        }
     }
     private void OnLocationChanged(object? sender, Microsoft.AspNetCore.Components.Routing.LocationChangedEventArgs e)
     {
@@ -47,5 +60,30 @@
     public void Dispose()
     {
         Navigation.LocationChanged -= OnLocationChanged;
+    }
+    private string ShortToken(string? token)
+    {
+        if (string.IsNullOrEmpty(token)) return "(nincs token)";
+        return token.Length > 40 ? token.Substring(0, 20) + "..." + token.Substring(token.Length - 16) : token;
+    }
+
+    private async Task CheckAuthAsync()
+    {
+        if (AuthService != null)
+        {
+            await AuthService.InitializeAsync();
+        }
+        StateHasChanged();
+    }
+
+    private async Task LogoutAsync()
+    {
+        if (AuthService != null)
+        {
+            await AuthService.LogoutAsync();
+        }
+        // refresh local state/UI
+        await CheckAuthAsync();
+        StateHasChanged();
     }
 }

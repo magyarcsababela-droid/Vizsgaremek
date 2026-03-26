@@ -16,11 +16,32 @@ namespace ComputerpartsFrontendBlazor.Services
         public bool IsAuthenticated { get; private set; }
         public string? Token { get; private set; }
         public string? Username { get; private set; }
+        public string? Email { get; private set; }
+        public event Action? AuthStateChanged;
 
         public AuthService(HttpClient http, IJSRuntime js)
         {
             _http = http;
             _js = js;
+        }
+
+        private async Task FetchCurrentUserAsync()
+        {
+            try
+            {
+                var resp = await _http.GetAsync("api/auth/me");
+                if (!resp.IsSuccessStatusCode) return;
+                var user = await resp.Content.ReadFromJsonAsync<ComputerpartsLibrary.MODEL.Users>();
+                if (user != null)
+                {
+                    if (!string.IsNullOrEmpty(user.username)) Username = user.username;
+                    if (!string.IsNullOrEmpty(user.email)) Email = user.email;
+                    // persist to localStorage
+                    try { if (!string.IsNullOrEmpty(Username)) await _js.InvokeVoidAsync("setLocalUsername", Username); } catch { }
+                    try { if (!string.IsNullOrEmpty(Email)) await _js.InvokeVoidAsync("setLocalEmail", Email); } catch { }
+                }
+            }
+            catch { }
         }
 
         public async Task InitializeAsync()
@@ -29,11 +50,26 @@ namespace ComputerpartsFrontendBlazor.Services
             {
                 // Use the window wrapper functions defined in App.razor to access browser localStorage
                 var token = await _js.InvokeAsync<string>("getLocalToken");
+                var username = await _js.InvokeAsync<string>("getLocalUsername");
                 if (!string.IsNullOrEmpty(token))
                 {
                     Token = token;
                     _http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", Token);
                     IsAuthenticated = true;
+                    if (!string.IsNullOrEmpty(username))
+                    {
+                        Username = username;
+                    }
+                    try
+                    {
+                        var email = await _js.InvokeAsync<string>("getLocalEmail");
+                        if (!string.IsNullOrEmpty(email)) Email = email;
+                    }
+                    catch { }
+                    // try to refresh user info from server for authoritative username/email
+                    try { await FetchCurrentUserAsync(); } catch { }
+                    // notify subscribers that auth state may have changed
+                    AuthStateChanged?.Invoke();
                 }
             }
             catch
@@ -54,15 +90,57 @@ namespace ComputerpartsFrontendBlazor.Services
                 if (result?.token == null) return false;
 
                 Token = result.token;
-                // user is returned as arbitrary object; try to parse username if present
-                if (result.user is JsonElement je && je.ValueKind == JsonValueKind.Object && je.TryGetProperty("username", out var uname))
+
+                // Try to extract username from the returned user object in a robust way
+                try
                 {
-                    Username = uname.GetString();
+                    if (result.user is JsonElement je && je.ValueKind == JsonValueKind.Object)
+                    {
+                        if (je.TryGetProperty("username", out var unameProp) || je.TryGetProperty("Username", out unameProp) || je.TryGetProperty("userName", out unameProp))
+                        {
+                            Username = unameProp.GetString();
+                        }
+                        else
+                        {
+                            // fallback: try deserializing to Users model
+                            try
+                            {
+                                var u = JsonSerializer.Deserialize<ComputerpartsLibrary.MODEL.Users>(je.GetRawText());
+                                if (u != null && !string.IsNullOrEmpty(u.username))
+                                    Username = u.username;
+                            }
+                            catch { }
+                        }
+                    }
                 }
+                catch { }
+
+                // if server did not return a username, fall back to the login identifier
+                if (string.IsNullOrEmpty(Username))
+                {
+                    Username = username; // fallback to what user entered (email or username)
+                }
+
                 IsAuthenticated = true;
 
                 _http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", Token);
                 await _js.InvokeVoidAsync("setLocalToken", Token);
+                try { var toSave = !string.IsNullOrEmpty(Username) ? Username : username; if (!string.IsNullOrEmpty(toSave)) await _js.InvokeVoidAsync("setLocalUsername", toSave); } catch { }
+                try
+                {
+                    // try to extract email from returned user object
+                    if (result.user is JsonElement je && je.ValueKind == JsonValueKind.Object)
+                    {
+                        if (je.TryGetProperty("email", out var emailProp) || je.TryGetProperty("Email", out emailProp))
+                        {
+                            Email = emailProp.GetString();
+                            if (!string.IsNullOrEmpty(Email)) await _js.InvokeVoidAsync("setLocalEmail", Email);
+                        }
+                    }
+                }
+                catch { }
+                try { await _js.InvokeVoidAsync("console.log", $"AuthService.LoginAsync: username={Username} token={(Token?.Length>10?Token.Substring(0,10)+"...":Token)}"); } catch { }
+                AuthStateChanged?.Invoke();
                 return true;
             }
             catch
@@ -75,9 +153,13 @@ namespace ComputerpartsFrontendBlazor.Services
         {
             Token = null;
             Username = null;
+            Email = null;
             IsAuthenticated = false;
             _http.DefaultRequestHeaders.Authorization = null;
             try { await _js.InvokeVoidAsync("removeLocalToken"); } catch { }
+            try { await _js.InvokeVoidAsync("removeLocalUsername"); } catch { }
+            try { await _js.InvokeVoidAsync("removeLocalEmail"); } catch { }
+            AuthStateChanged?.Invoke();
         }
 
         private class LoginResponse

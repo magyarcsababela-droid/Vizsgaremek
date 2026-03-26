@@ -2,6 +2,7 @@ using ComputerpartsLibrary.INTERFACE;
 using ComputerpartsLibrary.MODEL;
 using ComputerpartsLibrary.SERVICE;
 using Microsoft.AspNetCore.Authorization;
+using System.Security.Claims;
 using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -21,6 +22,34 @@ namespace ComputerpartsAPI.Controllers
             _userService = userService;
             _authService = authService;
             _jwtService = jwtService;
+        }
+
+        /// <summary>
+        /// Returns the current authenticated user's public info - GET /api/auth/me
+        /// </summary>
+        [HttpGet("me")]
+        [Authorize]
+        public async Task<ActionResult<Users>> GetCurrentUser()
+        {
+            // read user id from claims
+            var idClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(idClaim) || !int.TryParse(idClaim, out var id))
+                return Unauthorized();
+
+            var user = await _userService.GetUserByIdAsync(id);
+            if (user == null)
+                return NotFound();
+
+            var responseUser = new Users
+            {
+                id = user.id,
+                username = user.username,
+                email = user.email,
+                role = user.role,
+                created_at = user.created_at
+            };
+
+            return Ok(responseUser);
         }
 
         /// <summary>

@@ -1,4 +1,8 @@
-﻿<nav class="navbar navbar-expand-xl navbar-dark fixed-top shadow-sm" style="border-radius: 10px; border: 1px solid #3498db; margin: 1%;">
+﻿@inject ComputerpartsFrontendBlazor.Services.AuthService AuthService
+@inject Microsoft.AspNetCore.Components.NavigationManager Navigation
+@rendermode InteractiveServer
+@inherits LayoutComponentBase
+<nav class="navbar navbar-expand-xl navbar-dark fixed-top shadow-sm" style="border-radius: 10px; border: 1px solid #3498db; margin: 1%;">
     <div class="container-fluid">
         <NavLink href="" class="logo nav-link">ComputerParts.com</NavLink>
 
@@ -8,54 +12,58 @@
         </button>
         <div class="collapse navbar-collapse d-xl-flex flex-grow-0 gap-3" id="mainNavbar">
             <div class="d-none d-xl-flex gap-2">
-                <NavLink class="nav-link">
-                    <a href="/" class="navbutton">Keződlap</a>
-                </NavLink>
-                <NavLink class="nav-link">
-                    <a href="parts" class="navbutton">Alkatrészek</a>
-                </NavLink>
-                <NavLink class="nav-link">
-                    <a href="configurator" class="navbutton">PC összerakó</a>
-                </NavLink>
-                <NavLink class="nav-link">
-                    <a href="deals" class="navbutton">Ajánlatok</a>
-                </NavLink>
-                <NavLink class="nav-link">
-                    <a href="register" class="navbutton">Regisztráció</a>
-                </NavLink>
+                <a href="/" class="navbutton">Keződlap</a>
+                <a href="parts" class="navbutton">Alkatrészek</a>
+                <a href="configurator" class="navbutton">PC összerakó</a>
+                <a href="deals" class="navbutton">Ajánlatok</a>
             </div>
+            <!-- Auth test panel -->
+            @* <section style="margin:1rem 0;">
+                <h4>Auth teszt</h4>
+                <div>
+                    @if (AuthService?.IsAuthenticated == true)
+                    {
+                        <div style="color:lightgreen;">Bejelentkezve: @(string.IsNullOrEmpty(AuthService.Username) ? "(nincs felhasználónév)" : AuthService.Username)</div>
+                        <div style="font-size:0.9rem; color:#ccc">Token: @ShortToken(AuthService.Token)</div>
+                    }
+                    else
+                    {
+                        <div style="color:salmon;">Nem vagy bejelentkezve</div>
+                    }
+                    <div style="margin-top:.5rem; display:flex; gap:.5rem; align-items:center;">
+                        <button class="btn btn-sm btn-primary" @onclick="CheckAuthAsync">Frissíts állapot</button>
+                        @if (AuthService?.IsAuthenticated == true)
+                        {
+                            <button class="btn btn-sm btn-danger" @onclick="LogoutAsync">Kijelentkezés</button>
+                        }
+                    </div>
+                </div>
+            </section> *@
             <div class="d-none d-xl-flex gap-2 align-items-center">
                 <a class="cart-icon" style="background: radial-gradient()">🛒</a>
 
-                @* Profile dropdown using AuthService state *@
-
                 @if (AuthService?.IsAuthenticated == true)
                 {
-                    @* <div class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" role="button" @onclick="ToggleProfileDropdown" @onclick:preventDefault="true">
-                            <img src="Images/profile_user_avatar_people_icon_219228.png" alt="User" style="border-radius: 50%; width: 30px; height: 30px; margin-right:8px;" />
-                            <span>@(string.IsNullOrEmpty(AuthService.Username) ? "Profil" : AuthService.Username)</span>
-                        </a>
-
-                        @if (showProfileDropdown)
-                        {
-                            <div class="dropdown-menu dropdown-menu-end show" style="position: absolute;">
-                                <div class="dropdown-item-text">@AuthService.Username</div>
-                                <div class="dropdown-divider"></div>
-                                <button class="dropdown-item" @onclick="OnLogoutClicked">Kijelentkezés</button>
-                            </div>
-                        }
-                    </div> *@
                     <div class="dropdown">
                         <a class="icon-button d-flex align-items-center" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
                             <img src="Images/profile_user_avatar_people_icon_219228.png" alt="User" style="border-radius: 50%; width: 30px; height: 30px;" />
                         </a>
-                        <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
-                            <li><a class="dropdown-item" href="#"></a></li>
-                            <li><a class="dropdown-item" href="#">Another action</a></li>
-                            <li><a class="dropdown-item" href="#">Something else here</a></li>
-                            <button class="dropdown-item" @onclick="OnLogoutClicked">Kijelentkezés</button>
-                        </ul>
+                        <div class="dropdown-menu">
+                            <div style="color:lightgreen; font-weight: 10; padding: 10px 10px 0px 10px;">@(string.IsNullOrEmpty(AuthService.Username) ? "(nincs felhasználónév)" : AuthService.Username)</div>
+                            @if (!string.IsNullOrEmpty(AuthService.Email))
+                            {
+                                <div style="color:#ccc; font-size:0.85rem; padding: 0 10px 10px 10px;">@AuthService.Email</div>
+                            }
+                            <div></div>
+                            @* <ul class="" style="list-style-type: none;" aria-labelledby="dropdownMenuButton1">
+                                <li><a class="dropdown-item" href="#">@AuthService.Username</a></li>
+                                <li><a class="dropdown-item" href="#">@AuthService.</a></li>
+                            </ul> *@
+                            @if (AuthService?.IsAuthenticated == true)
+                            {
+                                <button class="dropdown-item btn btn-sm btn-danger" @onclick="LogoutAsync">Kijelentkezés</button>
+                            }
+                        </div>
                     </div>
                 }
                 else
@@ -65,87 +73,57 @@
                         <a class="icon-button d-flex align-items-center" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
                             <img src="Images/profile_user_avatar_people_icon_219228.png" alt="User" style="border-radius: 50%; width: 30px; height: 30px;" />
                         </a>
-                        <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
-                            <li><a class="dropdown-item" href="#"></a></li>
-                            <li><a class="dropdown-item" href="#">Another action</a></li>
-                            <li><a class="dropdown-item" href="#">Something else here</a></li>
-                            <button class="dropdown-item" @onclick="OnLogoutClicked">Kijelentkezés</button>
-                        </ul>
-                    </div>
-                    @* @if (showProfileDropdown)
-                    {
-                        <div class="dropdown-menu show" style="position: absolute; z-index: 2000;">
-                            <div class="dropdown-divider"></div>
-                            <button class="dropdown-item" @onclick="OnLogoutClicked">Kijelentkezés</button>
+                        <div class="dropdown-menu" style="padding: 10px; margin: 1%; width: 100px">
+                            <p style="color: white; margin: 1%">Jelentkezz be, vagy regisztrálj.</p>
+                            <a href="register" class="btn dropdown-item" style="margin: 1%; text-align: center">Regisztráció</a>
+                            <a href="login" class="btn dropdown-item" style="margin: 1%; text-align: center">Bejelentkezés</a>
                         </div>
-                    } *@
+                    </div>
                 }
             </div>
             <div class="d-xl-none pt-3 d-grid gap-2">
-                <NavLink class="nav-link">
-                    <a href="/" class="navbutton">Keződlap</a>
-                </NavLink>
-                <NavLink class="nav-link">
-                    <a href="parts" class="navbutton">Alkatrészek</a>
-                </NavLink>
-                <NavLink class="nav-link">
-                    <a href="configurator" class="navbutton">PC összerakó</a>
-                </NavLink>
-                <NavLink class="nav-link">
-                    <a href="deals" class="navbutton">Ajánlatok</a>
-                </NavLink>
-                <NavLink class="nav-link">
-                    <a href="register" class="navbutton">Regisztráció</a>
-                </NavLink>
+                <a href="/" class="navbutton">Keződlap</a>
+                <a href="parts" class="navbutton">Alkatrészek</a>
+                <a href="configurator" class="navbutton">PC összerakó</a>
+                <a href="deals" class="navbutton">Ajánlatok</a>
                 <div class="mobile-icon-row d-flex gap-2 align-items-center">
                     <a href="cart" class="icon-button">🛒</a>
                     @if (AuthService?.IsAuthenticated == true)
                     {
-                        @* <a class="icon-button d-flex align-items-center" @onclick="ToggleProfileDropdown" @onclick:preventDefault="true">
-                            <img src="Images/profile_user_avatar_people_icon_219228.png" alt="User" style="border-radius: 50%; width: 30px; height: 30px;" />
-                            <span style="margin-left:6px;">@AuthService.Username</span>
-                        </a>
-                        @if (showProfileDropdown)
-                        {
-                            <div class="dropdown-menu show" style="position: absolute; z-index: 2000;">
-                                <div class="dropdown-item-text">@AuthService.Username</div>
-                                <div class="dropdown-divider"></div>
-                                <button class="dropdown-item" @onclick="OnLogoutClicked">Kijelentkezés</button>
-                            </div>
-                        } *@
                         <div class="dropdown">
                             <a class="icon-button d-flex align-items-center" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
                                 <img src="Images/profile_user_avatar_people_icon_219228.png" alt="User" style="border-radius: 50%; width: 30px; height: 30px;" />
                             </a>
-                            <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
-                                <li><a class="dropdown-item" href="#">Another action</a></li>
-                                <li><a class="dropdown-item" href="#">Something else here</a></li>
-                                <button class="dropdown-item" @onclick="OnLogoutClicked">Kijelentkezés</button>
-                            </ul>
+                            <div class="dropdown-menu">
+                                <div style="color:lightgreen; font-weight: 10; padding: 10px 10px 0px 10px;">@(string.IsNullOrEmpty(AuthService.Username) ? "(nincs felhasználónév)" : AuthService.Username)</div>
+                                @if (!string.IsNullOrEmpty(AuthService.Email))
+                                {
+                                    <div style="color:#ccc; font-size:0.85rem; padding: 0 10px 10px 10px;">@AuthService.Email</div>
+                                }
+                                <div></div>
+                                @* <ul class="" style="list-style-type: none;" aria-labelledby="dropdownMenuButton1">
+                                <li><a class="dropdown-item" href="#">@AuthService.Username</a></li>
+                                <li><a class="dropdown-item" href="#">@AuthService.</a></li>
+                            </ul> *@
+                                @if (AuthService?.IsAuthenticated == true)
+                                {
+                                    <button class="dropdown-item btn btn-sm btn-danger" @onclick="LogoutAsync">Kijelentkezés</button>
+                                }
+                            </div>
                         </div>
                     }
                     else
                     {
-                        @* <a href="profile" class="icon-button"><img src="Images/profile_user_avatar_people_icon_219228.png" alt="User" style="border-radius: 50%; width: 30px; height: 30px;"></a> *@
-                        @* <a class="icon-button d-flex align-items-center" @onclick="ToggleProfileDropdown" @onclick:preventDefault="true">
-                            <img src="Images/profile_user_avatar_people_icon_219228.png" alt="User" style="border-radius: 50%; width: 30px; height: 30px;" />
-                        </a>
-                        @if (showProfileDropdown)
-                        {
-                            <div class="dropdown-menu show" style="position: absolute; z-index: 2000;">
-                                <div class="dropdown-divider"></div>
-                                <button class="dropdown-item" @onclick="OnLogoutClicked">Kijelentkezés</button>
-                            </div>
-                        } *@
+                    
                         <div class="dropdown">
                             <a class="icon-button d-flex align-items-center" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
                                 <img src="Images/profile_user_avatar_people_icon_219228.png" alt="User" style="border-radius: 50%; width: 30px; height: 30px;" />
                             </a>
-                            <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
-                                <li><a class="dropdown-item" href="#">Another action</a></li>
-                                <li><a class="dropdown-item" href="#">Something else here</a></li>
-                                <button class="dropdown-item" @onclick="OnLogoutClicked">Kijelentkezés</button>
-                            </ul>
+                            <div class="dropdown-menu" style="padding: 10px; margin: 1%; width: 100px">
+                                <p style="color: white; margin: 1%">Jelentkezz be, vagy regisztrálj.</p>
+                                <a href="register" class="btn dropdown-item" style="margin: 1%; text-align: center">Regisztráció</a>
+                                <a href="login" class="btn dropdown-item" style="margin: 1%; text-align: center">Bejelentkezés</a>
+                            </div>
                         </div>
                     }
                 </div>
@@ -155,13 +133,40 @@
 </nav>
 
 @code {
-    [Microsoft.AspNetCore.Components.Inject]
-    private ComputerpartsFrontendBlazor.Services.AuthService AuthService { get; set; } = default!;
+    // [Microsoft.AspNetCore.Components.Inject]
+    // private ComputerpartsFrontendBlazor.Services.AuthService AuthService { get; set; } = default!;
 
-    [Microsoft.AspNetCore.Components.Inject]
-    private Microsoft.AspNetCore.Components.NavigationManager Navigation { get; set; } = default!;
+    // [Microsoft.AspNetCore.Components.Inject]
+    // private Microsoft.AspNetCore.Components.NavigationManager Navigation { get; set; } = default!;
 
     private bool showProfileDropdown = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+        // Subscribe to auth state changes so the nav updates when login/logout happens
+        try
+        {
+            AuthService.AuthStateChanged += OnAuthStateChanged;
+        }
+        catch
+        {
+            // ignore
+        }
+
+        // Ensure service reads localStorage as early as possible so components render correct state
+        try
+        {
+            await AuthService.InitializeAsync();
+        }
+        catch { }
+        StateHasChanged();
+    }
+
+    private void OnAuthStateChanged()
+    {
+        InvokeAsync(StateHasChanged);
+    }
 
     private void ToggleProfileDropdown()
     {
@@ -178,12 +183,40 @@
         Navigation.NavigateTo("/", true);
     }
 
-    protected override async System.Threading.Tasks.Task OnAfterRenderAsync(bool firstRender)
+    // keep OnAfterRender empty — initialization is done in OnInitializedAsync
+
+    public void Dispose()
     {
-        if (firstRender && AuthService != null)
+        try
+        {
+            AuthService.AuthStateChanged -= OnAuthStateChanged;
+        }
+        catch { }
+    }
+
+    private string ShortToken(string? token)
+    {
+        if (string.IsNullOrEmpty(token)) return "(nincs token)";
+        return token.Length > 40 ? token.Substring(0, 20) + "..." + token.Substring(token.Length - 16) : token;
+    }
+
+    private async Task CheckAuthAsync()
+    {
+        if (AuthService != null)
         {
             await AuthService.InitializeAsync();
-            StateHasChanged();
         }
+        StateHasChanged();
+    }
+
+    private async Task LogoutAsync()
+    {
+        if (AuthService != null)
+        {
+            await AuthService.LogoutAsync();
+        }
+        // refresh local state/UI
+        await CheckAuthAsync();
+        StateHasChanged();
     }
 }
