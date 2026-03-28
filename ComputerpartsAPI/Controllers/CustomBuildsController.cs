@@ -90,8 +90,24 @@ namespace ComputerpartsAPI.Controllers
         }
 
         [HttpDelete("{id}")]
+        [Authorize]
         public async Task<ActionResult> DeleteCustomBuild(int id)
         {
+            var customBuild = await _customBuildService.GetCustomBuildByIdAsync(id);
+            if (customBuild == null) return NotFound();
+
+            // ensure the authenticated user is the owner of the build
+            var idClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(idClaim) || !int.TryParse(idClaim, out var uid))
+            {
+                return Unauthorized();
+            }
+
+            if (customBuild.User_id != uid)
+            {
+                return Forbid();
+            }
+
             await _customBuildService.DeleteCustomBuildAsync(id);
             return NoContent();
         }
