@@ -8,9 +8,10 @@
 @rendermode InteractiveServer
 @if (Show)
 {
-    <div class="modal fade show d-block" tabindex="-1" style="background: rgba(0,0,0,0.4);" role="dialog" aria-modal="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
+    <div class="glassy-backdrop"></div>
+    <div class="modal fade show d-block" id="profileModal" data-bs-backdrop="false" tabindex="-1" role="dialog" aria-modal="true">
+        <div class="modal-dialog modal-lg modal-dialog-scrollable modal-dialog-centered">
+            <div class="modal-content" style="color: white; background-color: #181818; box-shadow: 1px 1px 20px black;">
                 <div class="modal-header">
                     <h5 class="modal-title">Profil</h5>
                     <button type="button" class="btn-close" aria-label="Close" @onclick="Close"></button>
@@ -32,14 +33,14 @@
                         }
                         else if (savedBuilds == null || !savedBuilds.Any())
                         {
-                            <div class="text-muted">Nincsenek mentett konfigurációk.</div>
+                            <div>Nincsenek mentett konfigurációk.</div>
                         }
                         else
                         {
                             <ul class="list-group">
                             @foreach (var b in savedBuilds)
                             {
-                                    <li style="background-color: #181818; color: white" class="list-group-item">
+                                    <li style="background-color: #181818; color: white; border: 1px solid dimgray;" class="list-group-item">
                                         <div class="d-flex justify-content-between align-items-start">
                                         <div>
                                             <div><strong>@(string.IsNullOrEmpty(b.name) ? "(névtelen)" : b.name)</strong></div>
@@ -60,7 +61,14 @@
                                             <ul class="list-unstyled" style="margin-left:0.5rem;">
                                                 @foreach (var c in selectedComponents)
                                                 {
-                                                    <li>@(c.type ?? "") - <strong>@(c.name ?? "(név nélkül)")</strong> @if (c.price.HasValue) { <span>(@c.price.Value.ToString("C", currencyformat))</span> }</li>
+                                                    @if ((c.type ?? string.Empty).ToUpperInvariant() == "NOTE")
+                                                    {
+                                                        <li><em>Megjegyzés:</em> <span>@(c.note ?? "")</span></li>
+                                                    }
+                                                    else
+                                                    {
+                                                        <li>@(c.type ?? "") - <strong>@(c.name ?? "(név nélkül)")</strong> @if (c.price.HasValue) { <span>(@c.price.Value.ToString("C", currencyformat))</span> }</li>
+                                                    }
                                                 }
                                             </ul>
                                         </div>
@@ -183,8 +191,8 @@
     {
         // close modal first so it doesn't overlay the configurator
         await Close();
-        // force a full page navigation so the configurator reliably reloads and applies the build
-        Navigation.NavigateTo($"/configurator?buildId={id}", forceLoad: true);
+        // navigate client-side so the Configurator component can handle the query and apply selections
+        Navigation.NavigateTo($"/configurator?buildId={id}");
     }
 
     private class ComponentItem
@@ -193,6 +201,7 @@
         public int? id { get; set; }
         public string? name { get; set; }
         public decimal? price { get; set; }
+        public string? note { get; set; }
     }
 
     private async Task DeleteBuildAsync(int id)

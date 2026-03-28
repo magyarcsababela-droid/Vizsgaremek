@@ -42,6 +42,11 @@
     <h2>Népszerű alkatrész kategóriák</h2>
     <div class="config-grid">
         <div class="config-card">
+            <h3>Alaplap</h3>
+            <p>A számítógép alap alkotó eleme - válassz okosan, mert ettől függhetnek más alkatrészek.</p>
+            <button type="button" class="btn" @onclick="() => DebugAndLoad(8)">Opciók megtekintése</button>
+        </div>
+        <div class="config-card">
             <h3>CPU</h3>
             <p>Intel vagy AMD processzorok – válaszd a Számodra megfelelő magot a munkádhoz!</p>
             <button type="button" class="btn" @onclick="() => DebugAndLoad(1)">Opciók megtekintése</button>
@@ -115,7 +120,7 @@
                                     <div class="fw-bold">@comp.name</div>
                                     @comp.description
                                 </div>
-                                <span class="badge bg-primary rounded-pill">@comp.price.ToString("C")</span>
+                                <span class="badge bg-primary rounded-pill">@comp.price.ToString("C", currencyformat)</span>
                             </li>
                         }
                     </ul>

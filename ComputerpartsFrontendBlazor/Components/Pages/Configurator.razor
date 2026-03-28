@@ -31,6 +31,16 @@
                     </select>
                 </div>
                 <div>
+                    <label for="motherboard">Alaplap</label>
+                    <select id="motherboard" @bind="SelectedMotherboardId">
+                        <option value="">--Válassz alkatrészt--</option>
+                        @foreach (var component in componentsByType.GetValueOrDefault(8, new List<Components>()))
+                        {
+                            <option value="@component.id">@component.name (@component.price.ToString("C", currencyformat))</option>
+                        }
+                    </select>
+                </div>
+                <div>
                     <label for="gpu">GPU</label>
                     <select id="gpu" @bind="SelectedGpuId">
                         <option value="">--Válassz alkatrészt--</option>
@@ -90,7 +100,7 @@
                         }
                     </select>
                 </div>
-                <div class="full"><label for="notes">Megjegyzés</label><textarea id="notes" placeholder="Adja hozzá egyéb kérését vagy preferenciáját itt..."></textarea></div>
+                <div class="full"><label for="notes">Megjegyzés</label><textarea id="notes" @bind="NoteText" placeholder="Adja hozzá egyéb kérését vagy preferenciáját itt..."></textarea></div>
             </div>
             <div class="form-actions">
                 @if (isEditing)
@@ -107,6 +117,7 @@
         <div class="detail-card summary-box">
             <h3>Várható végösszeg</h3>
             <div class="summary-line"><span>CPU</span><strong>@(GetName(SelectedCpu)) <span class="price">@(SelectedCpu != null ? SelectedCpu.price.ToString("C", currencyformat) : "")</span></strong></div>
+            <div class="summary-line"><span>Alaplap</span><strong>@(GetName(SelectedMotherboard)) <span class="price">@(SelectedMotherboard != null ? SelectedMotherboard.price.ToString("C", currencyformat) : "")</span></strong></div>
             <div class="summary-line"><span>GPU</span><strong>@(GetName(SelectedGpu)) <span class="price">@(SelectedGpu != null ? SelectedGpu.price.ToString("C", currencyformat) : "")</span></strong></div>
             <div class="summary-line"><span>Memória</span><strong>@(GetName(SelectedRam)) <span class="price">@(SelectedRam != null ? SelectedRam.price.ToString("C", currencyformat) : "")</span></strong></div>
             <div class="summary-line"><span>Tárkapacitás</span><strong>@(GetName(SelectedStorage)) <span class="price">@(SelectedStorage != null ? SelectedStorage.price.ToString("C", currencyformat) : "")</span></strong></div>
@@ -125,6 +136,7 @@
     private System.Globalization.CultureInfo currencyformat = System.Globalization.CultureInfo.GetCultureInfo("en-US");
 
     private int? SelectedCpuId;
+    private int? SelectedMotherboardId;
     private int? SelectedGpuId;
     private int? SelectedRamId;
     private int? SelectedStorageId;
@@ -133,8 +145,10 @@
     private int? SelectedPsuId;
     private ComputerpartsLibrary.MODEL.Custom_builds? currentBuild = null;
     private bool isEditing = false;
+    private string? NoteText;
 
     private Components? SelectedCpu => FindSelected(SelectedCpuId);
+    private Components? SelectedMotherboard => FindSelected(SelectedMotherboardId);
     private Components? SelectedGpu => FindSelected(SelectedGpuId);
     private Components? SelectedRam => FindSelected(SelectedRamId);
     private Components? SelectedStorage => FindSelected(SelectedStorageId);
@@ -143,7 +157,7 @@
     private Components? SelectedPsu => FindSelected(SelectedPsuId);
 
     private decimal TotalPrice =>
-        (SelectedCpu?.price ?? 0) + (SelectedGpu?.price ?? 0) + (SelectedRam?.price ?? 0) +
+        (SelectedCpu?.price ?? 0) + (SelectedMotherboard?.price ?? 0) + (SelectedGpu?.price ?? 0) + (SelectedRam?.price ?? 0) +
         (SelectedStorage?.price ?? 0) + (SelectedCooler?.price ?? 0) + (SelectedCase?.price ?? 0) +
         (SelectedPsu?.price ?? 0);
 
@@ -184,12 +198,18 @@
         // prepare components list same way as SaveConfigurationAsync
         var selected = new List<object>();
         if (SelectedCpu != null) selected.Add(new { type = "CPU", id = SelectedCpu.id, name = SelectedCpu.name, price = SelectedCpu.price });
+        if (SelectedMotherboard != null) selected.Add(new { type = "MOTHERBOARD", id = SelectedMotherboard.id, name = SelectedMotherboard.name, price = SelectedMotherboard.price });
         if (SelectedGpu != null) selected.Add(new { type = "GPU", id = SelectedGpu.id, name = SelectedGpu.name, price = SelectedGpu.price });
         if (SelectedRam != null) selected.Add(new { type = "RAM", id = SelectedRam.id, name = SelectedRam.name, price = SelectedRam.price });
         if (SelectedStorage != null) selected.Add(new { type = "Storage", id = SelectedStorage.id, name = SelectedStorage.name, price = SelectedStorage.price });
         if (SelectedCooler != null) selected.Add(new { type = "Cooler", id = SelectedCooler.id, name = SelectedCooler.name, price = SelectedCooler.price });
         if (SelectedCase != null) selected.Add(new { type = "Case", id = SelectedCase.id, name = SelectedCase.name, price = SelectedCase.price });
         if (SelectedPsu != null) selected.Add(new { type = "PSU", id = SelectedPsu.id, name = SelectedPsu.name, price = SelectedPsu.price });
+
+        if (!string.IsNullOrEmpty(NoteText))
+        {
+            selected.Add(new { type = "NOTE", id = (int?)null, name = (string?)null, price = (decimal?)null, note = NoteText });
+        }
 
         currentBuild.components_json = System.Text.Json.JsonSerializer.Serialize(selected);
 
@@ -279,7 +299,8 @@
                 if (items == null) return;
 
                 // reset selections
-                SelectedCpuId = null; SelectedGpuId = null; SelectedRamId = null; SelectedStorageId = null; SelectedCoolerId = null; SelectedCaseId = null; SelectedPsuId = null;
+                SelectedCpuId = null; SelectedMotherboardId = null; SelectedGpuId = null; SelectedRamId = null; SelectedStorageId = null; SelectedCoolerId = null; SelectedCaseId = null; SelectedPsuId = null;
+                NoteText = null;
 
                 foreach (var it in items)
                 {
@@ -289,10 +310,12 @@
                         case "CPU": SelectedCpuId = it.id; break;
                         case "GPU": SelectedGpuId = it.id; break;
                         case "RAM": SelectedRamId = it.id; break;
+                        case "MOTHERBOARD": SelectedMotherboardId = it.id; break;
                         case "STORAGE": SelectedStorageId = it.id; break;
                         case "COOLER": SelectedCoolerId = it.id; break;
                         case "CASE": SelectedCaseId = it.id; break;
                         case "PSU": SelectedPsuId = it.id; break;
+                        case "NOTE": NoteText = it.note; break;
                     }
                 }
 
@@ -309,6 +332,7 @@
         public int? id { get; set; }
         public string? name { get; set; }
         public decimal? price { get; set; }
+        public string? note { get; set; }
     }
 
     private Components? FindSelected(int? id)
@@ -349,12 +373,22 @@
         if (SelectedCpu != null) selected.Add(new { type = "CPU", id = SelectedCpu.id, name = SelectedCpu.name, price = SelectedCpu.price });
         if (SelectedGpu != null) selected.Add(new { type = "GPU", id = SelectedGpu.id, name = SelectedGpu.name, price = SelectedGpu.price });
         if (SelectedRam != null) selected.Add(new { type = "RAM", id = SelectedRam.id, name = SelectedRam.name, price = SelectedRam.price });
+        if (SelectedMotherboard != null) selected.Add(new { type = "MOTHERBOARD", id = SelectedMotherboard.id, name = SelectedMotherboard.name, price = SelectedMotherboard.price });
         if (SelectedStorage != null) selected.Add(new { type = "Storage", id = SelectedStorage.id, name = SelectedStorage.name, price = SelectedStorage.price });
         if (SelectedCooler != null) selected.Add(new { type = "Cooler", id = SelectedCooler.id, name = SelectedCooler.name, price = SelectedCooler.price });
         if (SelectedCase != null) selected.Add(new { type = "Case", id = SelectedCase.id, name = SelectedCase.name, price = SelectedCase.price });
         if (SelectedPsu != null) selected.Add(new { type = "PSU", id = SelectedPsu.id, name = SelectedPsu.name, price = SelectedPsu.price });
 
+        // include note as a separate item in the components JSON so the server doesn't need a dedicated column
+        if (!string.IsNullOrEmpty(NoteText))
+        {
+            selected.Add(new { type = "NOTE", id = (int?)null, name = (string?)null, price = (decimal?)null, note = NoteText });
+        }
+
         build.components_json = System.Text.Json.JsonSerializer.Serialize(selected);
+
+        // log serialized payload for debugging to browser console
+        await JS.InvokeVoidAsync("console.log", "Saving components_json: " + build.components_json);
 
         try
         {
@@ -420,7 +454,7 @@
                 // clear current state and navigate to configurator base page (remove query)
                 currentBuild = null;
                 isEditing = false;
-                SelectedCpuId = null; SelectedGpuId = null; SelectedRamId = null; SelectedStorageId = null; SelectedCoolerId = null; SelectedCaseId = null; SelectedPsuId = null;
+                SelectedCpuId = null; SelectedMotherboardId = null; SelectedGpuId = null; SelectedRamId = null; SelectedStorageId = null; SelectedCoolerId = null; SelectedCaseId = null; SelectedPsuId = null;
                 // navigate to same page without query
                 var uri = new Uri(Navigation.Uri);
                 var baseUri = uri.GetLeftPart(UriPartial.Path);

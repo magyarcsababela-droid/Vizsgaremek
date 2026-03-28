@@ -120,7 +120,7 @@
     </div>
 </nav>
 
-<ProfileModal Show="showProfile" ShowChanged="@(async val => { showProfile = val; await InvokeAsync(StateHasChanged); })" />
+<ProfileModal Show="@showProfile" ShowChanged="EventCallback.Factory.Create<bool>(this, OnProfileShowChanged)" />
 
 @code {
     private bool showProfileDropdown = false;
@@ -209,5 +209,11 @@
     private void OpenProfileModal()
     {
         showProfile = true;
+    }
+
+    private async Task OnProfileShowChanged(bool val)
+    {
+        showProfile = val;
+        await InvokeAsync(StateHasChanged);
     }
 }
