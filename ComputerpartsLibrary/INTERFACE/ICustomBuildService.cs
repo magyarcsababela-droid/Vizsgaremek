@@ -14,5 +14,6 @@ namespace ComputerpartsLibrary.INTERFACE
         Task AddCustomBuildAsync(Custom_builds customBuild);
         Task UpdateCustomBuildAsync(Custom_builds customBuild);
         Task DeleteCustomBuildAsync(int id);
+        Task<IEnumerable<Custom_builds>> GetCustomBuildsByUserAsync(int userId);
     }
 }

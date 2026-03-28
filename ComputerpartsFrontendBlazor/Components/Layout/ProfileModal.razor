@@ -1,0 +1,193 @@
+@using Microsoft.AspNetCore.Components
+@using System.Linq
+@using System.Text.Json
+@inject ComputerpartsFrontendBlazor.Services.AuthService AuthService
+@inject HttpClient Http
+@inject IJSRuntime JS
+@inject Microsoft.AspNetCore.Components.NavigationManager Navigation
+@rendermode InteractiveServer
+@if (Show)
+{
+    <div class="modal fade show d-block" tabindex="-1" style="background: rgba(0,0,0,0.4);" role="dialog" aria-modal="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Profil</h5>
+                    <button type="button" class="btn-close" aria-label="Close" @onclick="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div>
+                        <strong>@(string.IsNullOrEmpty(AuthService.Username) ? "(nincs felhasználónév)" : AuthService.Username)</strong>
+                        @if (!string.IsNullOrEmpty(AuthService.Email))
+                        {
+                            <div>@AuthService.Email</div>
+                        }
+                    </div>
+                    <hr />
+                    <div>
+                        <h6>Mentett konfigurációk</h6>
+                        @if (isLoading)
+                        {
+                            <div>Betöltés...</div>
+                        }
+                        else if (savedBuilds == null || !savedBuilds.Any())
+                        {
+                            <div class="text-muted">Nincsenek mentett konfigurációk.</div>
+                        }
+                        else
+                        {
+                            <ul class="list-group">
+                            @foreach (var b in savedBuilds)
+                            {
+                                <li class="list-group-item">
+                                    <div class="d-flex justify-content-between align-items-start">
+                                        <div>
+                                            <div><strong>@(string.IsNullOrEmpty(b.name) ? "(névtelen)" : b.name)</strong></div>
+                                            <div class="text-muted" style="font-size:0.85rem;">@b.created_at.LocalDateTime.ToString("g") - @b.total_price.ToString("C")</div>
+                                        </div>
+                                        <div class="d-flex flex-column align-items-end">
+                                            <button class="btn btn-sm btn-outline-primary mb-1" @onclick="() => ToggleBuildDetails(b.build_id, b.components_json)">@(expandedBuildId == b.build_id ? "Rejt" : "Megnyit")</button>
+                                            <button class="btn btn-sm btn-primary" @onclick="async () => await OpenInConfigurator(b.build_id)">Megnyit a konfigurátorban</button>
+                                        </div>
+                                    </div>
+                                    @if (expandedBuildId == b.build_id && selectedComponents != null)
+                                    {
+                                        <div class="mt-2">
+                                            <strong>Alkatrészek:</strong>
+                                            <ul class="list-unstyled" style="margin-left:0.5rem;">
+                                                @foreach (var c in selectedComponents)
+                                                {
+                                                    <li>@(c.type ?? "") - <strong>@(c.name ?? "(név nélkül)")</strong> @if (c.price.HasValue) { <span class="text-muted">(@c.price.Value.ToString("C"))</span> }</li>
+                                                }
+                                            </ul>
+                                        </div>
+                                    }
+                                </li>
+                            }
+                            </ul>
+                        }
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" @onclick="Close">Bezár</button>
+                    <button class="btn btn-danger" @onclick="Logout">Kijelentkezés</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter]
+    public bool Show { get; set; }
+
+    [Parameter]
+    public EventCallback<bool> ShowChanged { get; set; }
+
+    private bool isLoading = false;
+    private List<ComputerpartsLibrary.MODEL.Custom_builds>? savedBuilds;
+    private int? expandedBuildId = null;
+    private List<ComponentItem>? selectedComponents = null;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (Show)
+        {
+            await LoadSavedBuildsAsync();
+        }
+    }
+
+    private async Task LoadSavedBuildsAsync()
+    {
+        isLoading = true;
+        try
+        {
+            if (!AuthService.IsAuthenticated)
+            {
+                savedBuilds = new List<ComputerpartsLibrary.MODEL.Custom_builds>();
+                return;
+            }
+
+            // ensure token present in AuthService
+            if (string.IsNullOrEmpty(AuthService.Token))
+            {
+                await AuthService.InitializeAsync();
+            }
+
+            var uid = AuthService.UserId ?? 0;
+            var builds = await AuthService.GetJsonAsync<List<ComputerpartsLibrary.MODEL.Custom_builds>>($"api/custombuilds/user/{uid}");
+            savedBuilds = builds ?? new List<ComputerpartsLibrary.MODEL.Custom_builds>();
+        }
+        catch
+        {
+            savedBuilds = new List<ComputerpartsLibrary.MODEL.Custom_builds>();
+        }
+        finally
+        {
+            isLoading = false;
+            StateHasChanged();
+        }
+    }
+
+    private async Task Logout()
+    {
+        await AuthService.LogoutAsync();
+        await Close();
+        Navigation.NavigateTo("/", true);
+    }
+
+    private async Task Close()
+    {
+        Show = false;
+        await ShowChanged.InvokeAsync(Show);
+    }
+
+    private void OpenBuild(int id)
+    {
+        // navigate to configurator and pass query param to open that build (consumer can implement)
+        Navigation.NavigateTo($"/configurator?buildId={id}");
+    }
+
+    private void ToggleBuildDetails(int id, string? componentsJson)
+    {
+        if (expandedBuildId == id)
+        {
+            expandedBuildId = null;
+            selectedComponents = null;
+            return;
+        }
+
+        expandedBuildId = id;
+        if (string.IsNullOrEmpty(componentsJson))
+        {
+            selectedComponents = new List<ComponentItem>();
+        }
+        else
+        {
+            try
+            {
+                selectedComponents = JsonSerializer.Deserialize<List<ComponentItem>>(componentsJson) ?? new List<ComponentItem>();
+            }
+            catch
+            {
+                selectedComponents = new List<ComponentItem>();
+            }
+        }
+    }
+
+    private async Task OpenInConfigurator(int id)
+    {
+        // close modal first so it doesn't overlay the configurator
+        await Close();
+        // force a full page navigation so the configurator reliably reloads and applies the build
+        Navigation.NavigateTo($"/configurator?buildId={id}", forceLoad: true);
+    }
+
+    private class ComponentItem
+    {
+        public string? type { get; set; }
+        public int? id { get; set; }
+        public string? name { get; set; }
+        public decimal? price { get; set; }
+    }
+}

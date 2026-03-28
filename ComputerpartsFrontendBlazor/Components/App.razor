@@ -37,6 +37,9 @@
         window.getLocalEmail = () => localStorage.getItem('authEmail');
         window.setLocalEmail = (e) => localStorage.setItem('authEmail', e);
         window.removeLocalEmail = () => localStorage.removeItem('authEmail');
+        window.getLocalUserId = () => localStorage.getItem('authUserId');
+        window.setLocalUserId = (id) => localStorage.setItem('authUserId', id);
+        window.removeLocalUserId = () => localStorage.removeItem('authUserId');
     </script>
     <script src="_framework/blazor.server.js"></script>
     <script src="bootstrap/bootstrap-5.3.8-dist/js/bootstrap.bundle.min.js"></script>

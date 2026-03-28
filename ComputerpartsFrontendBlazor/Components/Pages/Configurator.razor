@@ -4,6 +4,10 @@
 @using System.Net.Http.Json
 @inject HttpClient Http
 @inject IJSRuntime JS
+@inject ComputerpartsFrontendBlazor.Services.AuthService AuthService
+@inject Microsoft.AspNetCore.Components.NavigationManager Navigation
+@using Microsoft.AspNetCore.Components.Routing
+@using Microsoft.AspNetCore.WebUtilities
 @inherits LayoutComponentBase
 @rendermode InteractiveServer
 <main style="min-height: 75vh;">
@@ -87,7 +91,7 @@
                 </div>
                 <div class="full"><label for="notes">Megjegyzés</label><textarea id="notes" placeholder="Adja hozzá egyéb kérését vagy preferenciáját itt..."></textarea></div>
             </div>
-            <div class="form-actions"><button class="btn" data-demo="Demo mode: configuration saved.">Konfiguráció mentése</button></div>
+            <div class="form-actions"><button class="btn" @onclick="SaveConfigurationAsync">Konfiguráció mentése</button></div>
         </div>
         <div class="detail-card summary-box">
             <h3>Várható végösszeg</h3>
@@ -145,6 +149,94 @@
             }
         }
         catch { }
+        // try to load build from query if present on first init
+        await LoadBuildFromQueryAsync();
+        // subscribe to location changes so query updates trigger loading when navigating client-side
+        Navigation.LocationChanged += OnLocationChanged;
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        await base.OnParametersSetAsync();
+        // when navigated to with a query (client-side nav), this will run — attempt to load build
+        await LoadBuildFromQueryAsync();
+    }
+
+    private async void OnLocationChanged(object? sender, LocationChangedEventArgs e)
+    {
+        // when location changes, attempt to load a build if a buildId query param exists
+        try
+        {
+            await LoadBuildFromQueryAsync();
+        }
+        catch { }
+    }
+
+    private async Task LoadBuildFromQueryAsync()
+    {
+        try
+        {
+            var uri = Navigation.ToAbsoluteUri(Navigation.Uri);
+            var qs = QueryHelpers.ParseQuery(uri.Query);
+            if (!qs.TryGetValue("buildId", out var bidValues)) return;
+            if (!int.TryParse(bidValues.FirstOrDefault(), out var bid)) return;
+
+            // ensure components are loaded
+            if (componentsByType == null || componentsByType.Count == 0)
+            {
+                try
+                {
+                    var all = await Http.GetFromJsonAsync<List<Components>>("api/components");
+                    if (all != null)
+                    {
+                        componentsByType = all.GroupBy(x => x.type_id).ToDictionary(g => g.Key, g => g.ToList());
+                    }
+                }
+                catch { }
+            }
+
+            // fetch saved build
+            var build = await Http.GetFromJsonAsync<ComputerpartsLibrary.MODEL.Custom_builds>($"api/custombuilds/{bid}");
+            if (build == null) return;
+
+            if (string.IsNullOrEmpty(build.components_json)) return;
+
+            try
+            {
+                var items = System.Text.Json.JsonSerializer.Deserialize<List<ComponentItem>>(build.components_json);
+                if (items == null) return;
+
+                // reset selections
+                SelectedCpuId = null; SelectedGpuId = null; SelectedRamId = null; SelectedStorageId = null; SelectedCoolerId = null; SelectedCaseId = null; SelectedPsuId = null;
+
+                foreach (var it in items)
+                {
+                    if (it == null) continue;
+                    switch ((it.type ?? string.Empty).ToUpperInvariant())
+                    {
+                        case "CPU": SelectedCpuId = it.id; break;
+                        case "GPU": SelectedGpuId = it.id; break;
+                        case "RAM": SelectedRamId = it.id; break;
+                        case "STORAGE": SelectedStorageId = it.id; break;
+                        case "COOLER": SelectedCoolerId = it.id; break;
+                        case "CASE": SelectedCaseId = it.id; break;
+                        case "PSU": SelectedPsuId = it.id; break;
+                    }
+                }
+
+                StateHasChanged();
+            }
+            catch { }
+        }
+        catch { }
+    }
+
+    private class ComponentItem
+    {
+        public string? type { get; set; }
+        public int? id { get; set; }
+        public string? name { get; set; }
+        public decimal? price { get; set; }
     }
 
     private Components? FindSelected(int? id)
@@ -159,4 +251,70 @@
     }
 
     private string GetName(Components? c) => c?.name ?? "-";
+
+    private async Task SaveConfigurationAsync()
+    {
+        // only allow saving when authenticated
+        if (AuthService == null || !AuthService.IsAuthenticated || AuthService.Token == null)
+        {
+            // show toast or alert
+            await JS.InvokeVoidAsync("alert", "Mentés csak bejelentkezett felhasználóknak lehetséges.");
+            return;
+        }
+
+        var build = new ComputerpartsLibrary.MODEL.Custom_builds
+        {
+            User_id = AuthService?.UserId ?? 0,
+            name = "Saved build",
+            // set status required by DB constraint
+            status = "draft",
+            total_price = TotalPrice,
+            created_at = DateTimeOffset.UtcNow
+        };
+
+        // prepare components list
+        var selected = new List<object>();
+        if (SelectedCpu != null) selected.Add(new { type = "CPU", id = SelectedCpu.id, name = SelectedCpu.name, price = SelectedCpu.price });
+        if (SelectedGpu != null) selected.Add(new { type = "GPU", id = SelectedGpu.id, name = SelectedGpu.name, price = SelectedGpu.price });
+        if (SelectedRam != null) selected.Add(new { type = "RAM", id = SelectedRam.id, name = SelectedRam.name, price = SelectedRam.price });
+        if (SelectedStorage != null) selected.Add(new { type = "Storage", id = SelectedStorage.id, name = SelectedStorage.name, price = SelectedStorage.price });
+        if (SelectedCooler != null) selected.Add(new { type = "Cooler", id = SelectedCooler.id, name = SelectedCooler.name, price = SelectedCooler.price });
+        if (SelectedCase != null) selected.Add(new { type = "Case", id = SelectedCase.id, name = SelectedCase.name, price = SelectedCase.price });
+        if (SelectedPsu != null) selected.Add(new { type = "PSU", id = SelectedPsu.id, name = SelectedPsu.name, price = SelectedPsu.price });
+
+        build.components_json = System.Text.Json.JsonSerializer.Serialize(selected);
+
+        try
+        {
+            // ensure token is loaded
+            if (!AuthService.IsAuthenticated || string.IsNullOrEmpty(AuthService.Token))
+            {
+                await AuthService.InitializeAsync();
+            }
+
+            var resp = await AuthService.PostAsJsonAsync("api/custombuilds", build);
+            if (resp.IsSuccessStatusCode)
+            {
+                await JS.InvokeVoidAsync("alert", "Konfiguráció elmentve.");
+            }
+            else
+            {
+                var body = string.Empty;
+                try { body = await resp.Content.ReadAsStringAsync(); } catch { }
+                await JS.InvokeVoidAsync("console.log", $"Save config failed: {resp.StatusCode} {body}");
+                if (resp.StatusCode == System.Net.HttpStatusCode.Unauthorized || resp.StatusCode == System.Net.HttpStatusCode.Forbidden)
+                {
+                    await JS.InvokeVoidAsync("alert", "Nincs jogosultság a mentéshez. Kérlek jelentkezz be újra.");
+                }
+                else
+                {
+                    await JS.InvokeVoidAsync("alert", "Hiba történt a mentés során: " + resp.StatusCode + " - " + body);
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            await JS.InvokeVoidAsync("alert", "Hiba: " + ex.Message);
+        }
+    }
 }

@@ -36,6 +36,11 @@ namespace ComputerpartsLibrary.SERVICE
             var custom_Builds = await _service.Custom_builds.FindAsync(id);
             return custom_Builds;
         }
+        public async Task<IEnumerable<Custom_builds>> GetCustomBuildsByUserAsync(int userId)
+        {
+            var list = await _service.Custom_builds.Where(cb => cb.User_id == userId).ToListAsync();
+            return list;
+        }
         public async Task<IEnumerable<Custom_builds>> GetAllCustomBuildsAsync()
         {
             var custom_Builds = await _service.Custom_builds.ToListAsync();
