@@ -10,13 +10,9 @@
         <p class="muted" style="margin-bottom:1rem;">Készíts új vevői fiókot a rendelésekhez, mentett konfigurációkhoz és segítségkérések követéséhez.</p>
 
         <div class="form-grid">
-            <div>
-                <label for="regFirst">Keresztnév</label>
-                <input id="regFirst" @bind="Model.FirstName" type="text" placeholder="Keresztnév" />
-            </div>
-            <div>
-                <label for="regLast">Családnév</label>
-                <input id="regLast" @bind="Model.LastName" type="text" placeholder="Családnév" />
+            <div class="full">
+                <label for="regUsername">Felhasználónév</label>
+                <input id="regUsername" @bind="Model.Username" type="text" placeholder="Felhasználónév" />
             </div>
             <div class="full">
                 <label for="regEmail">Email</label>
@@ -34,19 +30,21 @@
 
         <div class="form-actions">
             <button class="btn" style="width: 100%" @onclick="RegisterAsync" disabled="@(IsSubmitting)">
-                @(IsSubmitting ? "Creating..." : "Create Account")
+                @(IsSubmitting ? "Regisztrálás..." : "Regisztrálás")
             </button>
         </div>
 
-        @if (!string.IsNullOrEmpty(StatusMessage))
-        {
-            <p class="muted">@StatusMessage</p>
-        }
+
 
         <p class="switch-link">Van már fiókod? <a href="login">Térj vissza a bejelentkezéshez.</a>.</p>
         <p class="switch-link">Vissza a kezőlapra <a href="/">Kezdőlap</a></p>
     </section>
 </main>
+
+@if (!string.IsNullOrEmpty(StatusMessage))
+{
+    <Toast Message="@StatusMessage" Type="warning" Position="bottom-center" AutoHide="true" Duration="5000" />
+}
 
 
 @code {
@@ -56,8 +54,7 @@
 
     private class RegisterFormModel
     {
-        public string FirstName { get; set; } = string.Empty;
-        public string LastName { get; set; } = string.Empty;
+        public string Username { get; set; } = string.Empty;
         public string Email { get; set; } = string.Empty;
         public string Password { get; set; } = string.Empty;
         public string ConfirmPassword { get; set; } = string.Empty;
@@ -68,27 +65,27 @@
         StatusMessage = null;
 
         // Basic client-side validation
-        if (string.IsNullOrWhiteSpace(Model.FirstName) || string.IsNullOrWhiteSpace(Model.LastName))
+        if (string.IsNullOrWhiteSpace(Model.Username))
         {
-            StatusMessage = "Please enter your first and last name.";
+            StatusMessage = "Kérem adjon meg egy felhasználónevet";
             return;
         }
 
         if (string.IsNullOrWhiteSpace(Model.Email))
         {
-            StatusMessage = "Please enter an email address.";
+            StatusMessage = "Kérem adjon meg egy Email címet.";
             return;
         }
 
         if (string.IsNullOrEmpty(Model.Password) || Model.Password.Length < 8)
         {
-            StatusMessage = "Password must be at least 8 characters long.";
+            StatusMessage = "A jelszónak legalább 8 karakterből kell állnia.";
             return;
         }
 
         if (Model.Password != Model.ConfirmPassword)
         {
-            StatusMessage = "Passwords do not match.";
+            StatusMessage = "A jelszavak nem egyeznek";
             return;
         }
 
@@ -96,17 +93,9 @@
 
         try
         {
-            // Derive a username from first and last name (fallback to email local-part)
-            var username = (Model.FirstName + Model.LastName).Replace(" ", "").ToLowerInvariant();
-            if (string.IsNullOrWhiteSpace(username))
-            {
-                var at = Model.Email.IndexOf('@');
-                username = at > 0 ? Model.Email.Substring(0, at) : Model.Email;
-            }
-
             var payload = new
             {
-                Username = username,
+                Username = Model.Username,
                 Email = Model.Email,
                 Password = Model.Password
             };
@@ -116,7 +105,7 @@
             if (response.IsSuccessStatusCode)
             {
                 // Registration successful - navigate to login
-                StatusMessage = "Registration successful. Redirecting to login...";
+                StatusMessage = "Regisztrálás sikeres.";
                 // small delay to let user read message
                 await Task.Delay(800);
                 Navigation.NavigateTo("/login");
@@ -127,17 +116,17 @@
                 try
                 {
                     var errorObj = await response.Content.ReadFromJsonAsync<ServerError?>();
-                    StatusMessage = errorObj?.message ?? "Registration failed. Please try again.";
+                    StatusMessage = errorObj?.message ?? "Regiszrálás sikertelen. Kérem próbálja újra.";
                 }
                 catch
                 {
-                    StatusMessage = "Registration failed. Please try again.";
+                    StatusMessage = "Regiszrálás sikertelen. Kérem próbálja újra";
                 }
             }
         }
         catch (Exception ex)
         {
-            StatusMessage = "An error occurred: " + ex.Message;
+            StatusMessage = "Hiba történt: " + ex.Message;
         }
         finally
         {

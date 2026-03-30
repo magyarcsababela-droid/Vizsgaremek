@@ -321,6 +321,64 @@ img {
     gap: .7rem;
 }
 
+/* Admin responsive tweaks */
+.admin-toolbar {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+}
+.admin-sections {
+    display: flex;
+    gap: .5rem;
+    flex-wrap: wrap;
+}
+.admin-actions {
+    display: flex;
+    gap: .5rem;
+    align-items: center;
+    flex-wrap: wrap;
+}
+.admin-actions .admin-search {
+    padding: .45rem .6rem;
+    border-radius: 6px;
+    border: 1px solid rgba(255,255,255,0.08);
+    background: transparent;
+    color: var(--text-primary);
+}
+.table-responsive {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+/* small screens */
+@media (max-width: 768px) {
+    .admin-toolbar { flex-direction: column; align-items: stretch; gap: 8px; }
+    .admin-actions { justify-content: flex-start; }
+    .admin-actions .admin-search { min-width: 160px; flex: 1 1 auto; }
+    .admin-sections button { padding: .4rem .6rem; font-size: .9rem; }
+    .table td, .table th { white-space: nowrap; }
+}
+
+/* Toast styles */
+.toast-custom {
+    position: fixed;
+    right: 1rem;
+    top: 1rem;
+    min-width: 240px;
+    z-index: 2000;
+    border-radius: .5rem;
+    box-shadow: 0 6px 18px rgba(0,0,0,.15);
+    overflow: hidden;
+}
+.toast-custom .toast-body { padding: .75rem 1rem; display:flex; justify-content:space-between; align-items:center; }
+.toast-custom .toast-text { flex:1; margin-right:.5rem; }
+.toast-custom .toast-close { background:transparent; border:0; color:inherit; font-size:1.2rem; cursor:pointer; }
+.toast-custom.toast-danger { background:#c82333; color:white; }
+.toast-custom.toast-success { background:#198754; color:white; }
+.toast-custom.toast-warning { background:#ffc107; color:black; }
+
  Glassy modal styles 
 .modal-backdrop,
 .modal-backdrop.show {

@@ -58,7 +58,7 @@
 
         @if (!string.IsNullOrEmpty(SuccessMessage))
         {
-            <p class="muted">@SuccessMessage</p>
+            <Toast Message="@SuccessMessage" Type="success" AutoHide="true" />
         }
     </section>
 </main>

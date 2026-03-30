@@ -3,6 +3,7 @@
 @inject ComputerpartsFrontendBlazor.Services.AuthService AuthService
 @inject HttpClient Http
 @inject Microsoft.AspNetCore.Components.NavigationManager Navigation
+@using ComputerpartsFrontendBlazor.Components.Shared
 @rendermode InteractiveServer
 @inherits LayoutComponentBase
 
@@ -23,18 +24,17 @@ else
         </section>
 
         <section class="page-section">
-            <div style="margin-bottom:1rem; display:flex; gap:.5rem; align-items:center;">
-                <div>
-                    <button class="btn @(currentSection==ManagerSection.Components?"btn-secondary":"")" @onclick="() => SetSection(ManagerSection.Components)">Alkatrészek</button>
-                    <button class="btn @(currentSection==ManagerSection.Products?"btn-secondary":"")" @onclick="() => SetSection(ManagerSection.Products)">Termékek</button>
-                    <button class="btn @(currentSection==ManagerSection.Deals?"btn-secondary":"")" @onclick="() => SetSection(ManagerSection.Deals)">Ajánlatok</button>
-                    <button class="btn @(currentSection==ManagerSection.Users?"btn-secondary":"")" @onclick="() => SetSection(ManagerSection.Users)">Felhasználók</button>
+            <div class="admin-toolbar" style="margin-bottom:1rem;">
+                <div class="admin-sections">
+                    <button style="margin: 5px" class="btn @(currentSection == ManagerSection.Components ? "btn-secondary" : "")" @onclick="() => SetSection(ManagerSection.Components)">Alkatrészek</button>
+                    <button style="margin: 5px" class="btn @(currentSection == ManagerSection.Products ? "btn-secondary" : "")" @onclick="() => SetSection(ManagerSection.Products)">Termékek</button>
+                    <button style="margin: 5px" class="btn @(currentSection == ManagerSection.Deals ? "btn-secondary" : "")" @onclick="() => SetSection(ManagerSection.Deals)">Ajánlatok</button>
+                    <button style="margin: 5px" class="btn @(currentSection == ManagerSection.Users ? "btn-secondary" : "")" @onclick="() => SetSection(ManagerSection.Users)">Felhasználók</button>
                 </div>
-                <div style="flex:1"></div>
-                <div>
-                    <input placeholder="Keresés név alapján" @bind="search" />
-                    <button class="btn btn-primary" @onclick="LoadItems">Keresés</button>
-                    <button class="btn btn-primary" @onclick="ShowAddForm">Új</button>
+                <div class="admin-actions" style="margin: 15px">
+                    <input class="admin-search" style="margin: 5px" placeholder="Keresés név alapján" @bind="search" />
+                    <button class="btn btn-primary" style="margin: 5px" @onclick="LoadItems">Keresés</button>
+                    <button class="btn btn-primary" style="margin: 5px" @onclick="ShowAddForm">Új</button>
                 </div>
             </div>
 
@@ -50,6 +50,7 @@ else
             {
                 @if (currentSection == ManagerSection.Components)
                 {
+                    <div class="table-responsive">
                     <table class="table table-dark table-striped">
                         <thead>
                             <tr>
@@ -78,9 +79,11 @@ else
                             }
                         </tbody>
                     </table>
+                    </div>
                 }
                 else if (currentSection == ManagerSection.Users)
                 {
+                    <div class="table-responsive">
                     <table class="table table-dark table-striped">
                         <thead>
                             <tr>
@@ -110,9 +113,11 @@ else
                             }
                         </tbody>
                     </table>
+                    </div>
                 }
                 else if (currentSection == ManagerSection.Products)
                 {
+                    <div class="table-responsive">
                     <table class="table table-dark table-striped">
                         <thead>
                             <tr>
@@ -141,9 +146,11 @@ else
                             }
                         </tbody>
                     </table>
+                    </div>
                 }
                 else if (currentSection == ManagerSection.Deals)
                 {
+                    <div class="table-responsive">
                     <table class="table table-dark table-striped">
                         <thead>
                             <tr>
@@ -170,13 +177,14 @@ else
                             }
                         </tbody>
                     </table>
+                    </div>
                 }
             }
         </section>
 
         @if (showForm)
         {
-            <section class="page-section">
+            <section class="page-section" style="border: 1px solid #3498db; border-radius: 10px; padding: 20px; background-color: #2b2b2b; box-shadow: 1px 1px 20px black; max-width: 500px">
                 <h3>@(editing ? "Módosítás" : "Új") - @currentSection</h3>
                 @if (currentSection == ManagerSection.Components)
                 {
@@ -262,13 +270,13 @@ else
                 <div style="margin-top:1rem;">
                     @if (currentSection == ManagerSection.Users)
                     {
-                        <button class="btn btn-primary" @onclick="SaveUser">Mentés</button>
+                        <button style="margin: 5px" class="btn btn-primary" @onclick="SaveUser">Mentés</button>
                     }
                     else
                     {
-                        <button class="btn btn-primary" @onclick="SaveItem">Mentés</button>
+                        <button style="margin: 5px" class="btn btn-primary" @onclick="SaveItem">Mentés</button>
                     }
-                    <button class="btn" @onclick="CancelForm">Mégse</button>
+                    <button class="btn btn-primary" style="margin: 5px" @onclick="CancelForm">Mégse</button>
                 </div>
             </section>
         }
