@@ -17,6 +17,7 @@ namespace ComputerpartsFrontendBlazor.Services
         public string? Token { get; private set; }
         public string? Username { get; private set; }
         public string? Email { get; private set; }
+        public string? Role { get; private set; }
         public int? UserId { get; private set; }
         public event Action? AuthStateChanged;
 
@@ -24,6 +25,33 @@ namespace ComputerpartsFrontendBlazor.Services
         {
             _http = http;
             _js = js;
+        }
+
+        // Expose a PUT helper that includes the current token explicitly on the request
+        public async Task<HttpResponseMessage> PutAsJsonAsync<T>(string url, T payload)
+        {
+            var req = new HttpRequestMessage(HttpMethod.Put, url)
+            {
+                Content = JsonContent.Create(payload)
+            };
+
+            if (!string.IsNullOrEmpty(Token))
+            {
+                req.Headers.Authorization = new AuthenticationHeaderValue("Bearer", Token);
+            }
+
+            return await _http.SendAsync(req);
+        }
+
+        // Expose a DELETE helper that includes the current token explicitly on the request
+        public async Task<HttpResponseMessage> DeleteAsync(string url)
+        {
+            var req = new HttpRequestMessage(HttpMethod.Delete, url);
+            if (!string.IsNullOrEmpty(Token))
+            {
+                req.Headers.Authorization = new AuthenticationHeaderValue("Bearer", Token);
+            }
+            return await _http.SendAsync(req);
         }
 
         // Expose a POST helper that includes the current token explicitly on the request
@@ -35,9 +63,14 @@ namespace ComputerpartsFrontendBlazor.Services
                 Content = JsonContent.Create(payload)
             };
 
+            // prefer explicit Token, but fall back to HttpClient default header if present
             if (!string.IsNullOrEmpty(Token))
             {
                 req.Headers.Authorization = new AuthenticationHeaderValue("Bearer", Token);
+            }
+            else if (_http.DefaultRequestHeaders.Authorization != null)
+            {
+                req.Headers.Authorization = _http.DefaultRequestHeaders.Authorization;
             }
 
             return await _http.SendAsync(req);
@@ -76,11 +109,13 @@ namespace ComputerpartsFrontendBlazor.Services
                 {
                     if (!string.IsNullOrEmpty(user.username)) Username = user.username;
                     if (!string.IsNullOrEmpty(user.email)) Email = user.email;
+                    if (!string.IsNullOrEmpty(user.role)) Role = user.role;
                     if (user.id != 0) UserId = user.id;
                     // persist to localStorage
                     try { if (!string.IsNullOrEmpty(Username)) await _js.InvokeVoidAsync("setLocalUsername", Username); } catch { }
                     try { if (!string.IsNullOrEmpty(Email)) await _js.InvokeVoidAsync("setLocalEmail", Email); } catch { }
                     try { if (UserId.HasValue) await _js.InvokeVoidAsync("setLocalUserId", UserId.Value.ToString()); } catch { }
+                    try { if (!string.IsNullOrEmpty(Role)) await _js.InvokeVoidAsync("setLocalRole", Role); } catch { }
                 }
             }
             catch { }
@@ -107,12 +142,27 @@ namespace ComputerpartsFrontendBlazor.Services
                         var email = await _js.InvokeAsync<string>("getLocalEmail");
                         if (!string.IsNullOrEmpty(email)) Email = email;
                         var uid = await _js.InvokeAsync<string>("getLocalUserId");
+                        var role = await _js.InvokeAsync<string>("getLocalRole");
+                        if (!string.IsNullOrEmpty(role)) Role = role;
                         if (int.TryParse(uid, out var parsedUid)) UserId = parsedUid;
                     }
                     catch { }
                     // try to refresh user info from server for authoritative username/email
                     try { await FetchCurrentUserAsync(); } catch { }
                     // notify subscribers that auth state may have changed
+                    AuthStateChanged?.Invoke();
+                }
+                else
+                {
+                    // No token in browser: ensure we are completely logged out on the server-side service
+                    Token = null;
+                    Username = null;
+                    Role = null;
+                    Email = null;
+                    UserId = null;
+                    IsAuthenticated = false;
+                    try { _http.DefaultRequestHeaders.Authorization = null; } catch { }
+                    // make sure any UI subscribed to auth state updates is notified
                     AuthStateChanged?.Invoke();
                 }
             }
@@ -177,6 +227,7 @@ namespace ComputerpartsFrontendBlazor.Services
                 await _js.InvokeVoidAsync("setLocalToken", Token);
                 try { var toSave = !string.IsNullOrEmpty(Username) ? Username : username; if (!string.IsNullOrEmpty(toSave)) await _js.InvokeVoidAsync("setLocalUsername", toSave); } catch { }
                 try { if (UserId.HasValue) await _js.InvokeVoidAsync("setLocalUserId", UserId.Value.ToString()); } catch { }
+                try { if (!string.IsNullOrEmpty(Role)) await _js.InvokeVoidAsync("setLocalRole", Role); } catch { }
                 try
                 {
                     // try to extract email from returned user object
@@ -204,11 +255,13 @@ namespace ComputerpartsFrontendBlazor.Services
         {
             Token = null;
             Username = null;
+            Role = null;
             Email = null;
             IsAuthenticated = false;
             _http.DefaultRequestHeaders.Authorization = null;
             try { await _js.InvokeVoidAsync("removeLocalToken"); } catch { }
             try { await _js.InvokeVoidAsync("removeLocalUsername"); } catch { }
+            try { await _js.InvokeVoidAsync("removeLocalRole"); } catch { }
             try { await _js.InvokeVoidAsync("removeLocalEmail"); } catch { }
             AuthStateChanged?.Invoke();
         }

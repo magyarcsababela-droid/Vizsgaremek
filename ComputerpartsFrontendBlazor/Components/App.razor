@@ -40,6 +40,9 @@
         window.getLocalUserId = () => localStorage.getItem('authUserId');
         window.setLocalUserId = (id) => localStorage.setItem('authUserId', id);
         window.removeLocalUserId = () => localStorage.removeItem('authUserId');
+        window.getLocalRole = () => localStorage.getItem('authRole');
+        window.setLocalRole = (r) => localStorage.setItem('authRole', r);
+        window.removeLocalRole = () => localStorage.removeItem('authRole');
     </script>
     <script src="_framework/blazor.server.js"></script>
     <script src="bootstrap/bootstrap-5.3.8-dist/js/bootstrap.bundle.min.js"></script>

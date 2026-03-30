@@ -55,6 +55,10 @@
                             
                             @if (AuthService?.IsAuthenticated == true)
                             {
+                                @if (string.Equals(AuthService.Role, "Admin", System.StringComparison.OrdinalIgnoreCase))
+                                {
+                                    <NavLink style="margin: 1%" class="dropdown-item btn btn-sm btn-danger" href="/admin">Admin oldal</NavLink>
+                                }
                                 <button style="margin: 1%" class="dropdown-item btn btn-sm btn-danger" @onclick="OpenProfileModal">Profil megtekintése</button>
                                 <button style="margin: 1%" class="dropdown-item btn btn-sm btn-danger" @onclick="LogoutAsync">Kijelentkezés</button>
                             }
@@ -95,6 +99,10 @@
                                     <div style="color:#ccc; font-size:0.85rem; padding: 0 10px 10px 10px;">@AuthService.Email</div>
                                 }
 
+                                @if (string.Equals(AuthService.Role, "Admin", System.StringComparison.OrdinalIgnoreCase))
+                                {
+                                    <NavLink style="margin: 1%" class="dropdown-item btn btn-sm btn-primary" href="/admin">Admin oldal</NavLink>
+                                }
                                 <button style="margin: 1%" class="dropdown-item btn btn-sm btn-danger" @onclick="OpenProfileModal">Profil megtekintése</button>
                                 <button style="margin: 1%" class="dropdown-item btn btn-sm btn-danger" @onclick="LogoutAsync">Kijelentkezés</button>
                             </div>
@@ -215,5 +223,14 @@
     {
         showProfile = val;
         await InvokeAsync(StateHasChanged);
+    }
+
+    private void GoToAdmin()
+    {
+        try
+        {
+            Navigation.NavigateTo("/admin");
+        }
+        catch { }
     }
 }

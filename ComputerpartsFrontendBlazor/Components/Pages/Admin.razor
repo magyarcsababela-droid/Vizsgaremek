@@ -1,0 +1,739 @@
+@page "/admin"
+@using CP = ComputerpartsLibrary.MODEL
+@inject ComputerpartsFrontendBlazor.Services.AuthService AuthService
+@inject HttpClient Http
+@inject Microsoft.AspNetCore.Components.NavigationManager Navigation
+@rendermode InteractiveServer
+@inherits LayoutComponentBase
+
+@if (!checkedAuth)
+{
+    <div>Ellenőrzés...</div>
+}
+else if (!isAdmin)
+{
+    <div class="alert alert-danger">Hozzáférés megtagadva. csak adminoknak.</div>
+}
+else
+{
+    <main style="min-height:75vh;">
+        <section class="page-header_custom page-header hero-mini">
+            <h1>Admin - Alkatrészek kezelése</h1>
+            <p>Új alkatrészek hozzáadása, meglévők módosítása vagy törlése.</p>
+        </section>
+
+        <section class="page-section">
+            <div style="margin-bottom:1rem; display:flex; gap:.5rem; align-items:center;">
+                <div>
+                    <button class="btn @(currentSection==ManagerSection.Components?"btn-secondary":"")" @onclick="() => SetSection(ManagerSection.Components)">Alkatrészek</button>
+                    <button class="btn @(currentSection==ManagerSection.Products?"btn-secondary":"")" @onclick="() => SetSection(ManagerSection.Products)">Termékek</button>
+                    <button class="btn @(currentSection==ManagerSection.Deals?"btn-secondary":"")" @onclick="() => SetSection(ManagerSection.Deals)">Ajánlatok</button>
+                    <button class="btn @(currentSection==ManagerSection.Users?"btn-secondary":"")" @onclick="() => SetSection(ManagerSection.Users)">Felhasználók</button>
+                </div>
+                <div style="flex:1"></div>
+                <div>
+                    <input placeholder="Keresés név alapján" @bind="search" />
+                    <button class="btn btn-primary" @onclick="LoadItems">Keresés</button>
+                    <button class="btn btn-primary" @onclick="ShowAddForm">Új</button>
+                </div>
+            </div>
+
+            @if (isLoading)
+            {
+                <div>Betöltés...</div>
+            }
+            else if (!string.IsNullOrEmpty(errorMessage))
+            {
+                <div class="alert alert-danger">@errorMessage</div>
+            }
+            else
+            {
+                @if (currentSection == ManagerSection.Components)
+                {
+                    <table class="table table-dark table-striped">
+                        <thead>
+                            <tr>
+                                <th>Id</th>
+                                <th>Type Id</th>
+                                <th>SKU</th>
+                                <th>Name</th>
+                                <th>Price</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var c in components)
+                            {
+                                <tr>
+                                    <td>@c.id</td>
+                                    <td>@($"{c.type_id} ({GetTypeName(c.type_id)})")</td>
+                                    <td>@c.sku</td>
+                                    <td>@c.name</td>
+                                    <td>@c.price.ToString("C", currencyformat)</td>
+                                    <td>
+                                        <button class="btn btn-sm btn-secondary" @onclick="() => EditComponent(c)">Szerkeszt</button>
+                                        <button class="btn btn-sm btn-secondary" @onclick="() => DeleteItem(c.id)">Töröl</button>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                }
+                else if (currentSection == ManagerSection.Users)
+                {
+                    <table class="table table-dark table-striped">
+                        <thead>
+                            <tr>
+                                <th>Id</th>
+                                <th>Username</th>
+                                <th>Email</th>
+                                <th>Role</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var u in users)
+                            {
+                                <tr>
+                                    <td>@u.id</td>
+                                    <td>@u.username</td>
+                                    <td>@u.email</td>
+                                    <td>@u.role</td>
+                                    <td>
+                                        <button class="btn btn-sm btn-secondary" @onclick="() => EditUser(u)">Szerkeszt</button>
+                                        @if (!string.Equals(u.role, "Admin", StringComparison.OrdinalIgnoreCase))
+                                        {
+                                            <button class="btn btn-sm btn-secondary" @onclick="() => DeleteUser(u.id)">Töröl</button>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                }
+                else if (currentSection == ManagerSection.Products)
+                {
+                    <table class="table table-dark table-striped">
+                        <thead>
+                            <tr>
+                                <th>Id</th>
+                                <th>Category</th>
+                                <th>Name</th>
+                                <th>SKU</th>
+                                <th>Price</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var p in products)
+                            {
+                                <tr>
+                                    <td>@p.id</td>
+                                    <td>@p.category_id</td>
+                                    <td>@p.name</td>
+                                    <td>@p.sku</td>
+                                    <td>@p.base_price.ToString("C", currencyformat)</td>
+                                    <td>
+                                        <button class="btn btn-sm btn-secondary" @onclick="() => EditProduct(p)">Szerkeszt</button>
+                                        <button class="btn btn-sm btn-secondary" @onclick="() => DeleteItem(p.id)">Töröl</button>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                }
+                else if (currentSection == ManagerSection.Deals)
+                {
+                    <table class="table table-dark table-striped">
+                        <thead>
+                            <tr>
+                                <th>Id</th>
+                                <th>Name</th>
+                                <th>Description</th>
+                                <th>Price</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var d in deals)
+                            {
+                                <tr>
+                                    <td>@d.id</td>
+                                    <td>@d.name</td>
+                                    <td>@d.description</td>
+                                    <td>@d.price.ToString("C", currencyformat)</td>
+                                    <td>
+                                        <button class="btn btn-sm btn-secondary" @onclick="() => EditDeal(d)">Szerkeszt</button>
+                                        <button class="btn btn-sm btn-secondary" @onclick="() => DeleteItem(d.id)">Töröl</button>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                }
+            }
+        </section>
+
+        @if (showForm)
+        {
+            <section class="page-section">
+                <h3>@(editing ? "Módosítás" : "Új") - @currentSection</h3>
+                @if (currentSection == ManagerSection.Components)
+                {
+                    <div class="form-group">
+                        <label>Type ID</label>
+                        <input class="form-control" @bind="editModel.type_id" />
+                    </div>
+                    <div class="form-group">
+                        <label>SKU</label>
+                        <input class="form-control" @bind="editModel.sku" />
+                    </div>
+                    <div class="form-group">
+                        <label>Name</label>
+                        <input class="form-control" @bind="editModel.name" />
+                    </div>
+                    <div class="form-group">
+                        <label>Description</label>
+                        <textarea class="form-control" @bind="editModel.description"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Price</label>
+                        <input class="form-control" @bind="editModel.price" />
+                    </div>
+                }
+                else if (currentSection == ManagerSection.Products)
+                {
+                    <div class="form-group">
+                        <label>Category ID</label>
+                        <input class="form-control" @bind="editProduct.category_id" />
+                    </div>
+                    <div class="form-group">
+                        <label>Name</label>
+                        <input class="form-control" @bind="editProduct.name" />
+                    </div>
+                    <div class="form-group">
+                        <label>SKU</label>
+                        <input class="form-control" @bind="editProduct.sku" />
+                    </div>
+                    <div class="form-group">
+                        <label>Base Price</label>
+                        <input class="form-control" @bind="editProduct.base_price" />
+                    </div>
+                    <div class="form-group">
+                        <label>Image URL</label>
+                        <input class="form-control" @bind="editProduct.image_url" />
+                    </div>
+                    <div class="form-group">
+                        <label>Description</label>
+                        <textarea class="form-control" @bind="editProduct.description"></textarea>
+                    </div>
+                }
+                else if (currentSection == ManagerSection.Deals)
+                {
+                    <div class="form-group">
+                        <label>Name</label>
+                        <input class="form-control" @bind="editDeal.name" />
+                    </div>
+                    <div class="form-group">
+                        <label>Description</label>
+                        <textarea class="form-control" @bind="editDeal.description"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Price</label>
+                        <input class="form-control" @bind="editDeal.price" />
+                    </div>
+                }
+                else if (currentSection == ManagerSection.Users)
+                {
+                    <div class="form-group">
+                        <label>Username</label>
+                        <input class="form-control" @bind="editUser.username" />
+                    </div>
+                    <div class="form-group">
+                        <label>Email</label>
+                        <input class="form-control" @bind="editUser.email" />
+                    </div>
+                    <div class="form-group">
+                        <label>Role</label>
+                        <input class="form-control" @bind="editUser.role" />
+                    </div>
+                }
+
+                <div style="margin-top:1rem;">
+                    @if (currentSection == ManagerSection.Users)
+                    {
+                        <button class="btn btn-primary" @onclick="SaveUser">Mentés</button>
+                    }
+                    else
+                    {
+                        <button class="btn btn-primary" @onclick="SaveItem">Mentés</button>
+                    }
+                    <button class="btn" @onclick="CancelForm">Mégse</button>
+                </div>
+            </section>
+        }
+    </main>
+}
+
+@code {
+    private bool checkedAuth = false;
+    private bool isAdmin = false;
+    private List<ComputerpartsLibrary.MODEL.Components> components = new();
+    private List<ComputerpartsLibrary.MODEL.Products> products = new();
+    private List<ComputerpartsLibrary.MODEL.Deals> deals = new();
+    private List<ComputerpartsLibrary.MODEL.Users> users = new();
+    private bool isLoading = false;
+    private string? errorMessage;
+    private int? lastResponseStatus;
+    private string? lastResponseBody;
+    private string search = string.Empty;
+    private bool showForm = false;
+    private bool editing = false;
+    private ComputerpartsLibrary.MODEL.Components editModel = new();
+    private ComputerpartsLibrary.MODEL.Products editProduct = new();
+    private ComputerpartsLibrary.MODEL.Deals editDeal = new();
+    private enum ManagerSection { Components, Products, Deals, Users }
+    private ManagerSection currentSection = ManagerSection.Components;
+
+    private async Task LoadUsers()
+    {
+        isLoading = true;
+        errorMessage = null;
+        try
+        {
+            var all = await Http.GetFromJsonAsync<List<ComputerpartsLibrary.MODEL.Users>>("api/users");
+            users = all ?? new List<ComputerpartsLibrary.MODEL.Users>();
+        }
+        catch (Exception ex)
+        {
+            errorMessage = ex.Message;
+            users = new List<ComputerpartsLibrary.MODEL.Users>();
+        }
+        isLoading = false;
+        StateHasChanged();
+    }
+
+    private ComputerpartsLibrary.MODEL.Users editUser = new();
+
+    private void EditUser(ComputerpartsLibrary.MODEL.Users u)
+    {
+        // ensure admin is authenticated before editing
+        if (!AuthService.IsAuthenticated)
+        {
+            Navigation.NavigateTo("/login");
+            return;
+        }
+
+        editing = true;
+        editUser = new ComputerpartsLibrary.MODEL.Users
+        {
+            id = u.id,
+            username = u.username,
+            email = u.email,
+            role = u.role,
+            created_at = u.created_at,
+            password_hash = u.password_hash
+        };
+        showForm = true;
+    }
+
+    private async Task DeleteUser(int id)
+    {
+        // ensure admin is authenticated before deleting
+        if (!AuthService.IsAuthenticated)
+        {
+            Navigation.NavigateTo("/login");
+            return;
+        }
+
+        try
+        {
+            var resp = await AuthService.DeleteAsync($"api/users/{id}");
+            if (!resp.IsSuccessStatusCode)
+            {
+                var txt = await resp.Content.ReadAsStringAsync();
+                errorMessage = !string.IsNullOrEmpty(txt) ? txt : "Failed to delete user";
+            }
+            await LoadItems();
+        }
+        catch (Exception ex)
+        {
+            errorMessage = ex.Message;
+        }
+    }
+    private System.Globalization.CultureInfo currencyformat = System.Globalization.CultureInfo.GetCultureInfo("en-US");
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Ensure auth state is loaded
+        await AuthService.InitializeAsync();
+        checkedAuth = true;
+        isAdmin = string.Equals(AuthService.Role, "Admin", StringComparison.OrdinalIgnoreCase);
+        if (!isAdmin)
+        {
+            StateHasChanged();
+            return;
+        }
+
+        await LoadItems();
+    }
+
+    private void SetSection(ManagerSection sec)
+    {
+        currentSection = sec;
+        search = string.Empty;
+        _ = LoadItems();
+    }
+
+    private async Task LoadItems()
+    {
+        switch (currentSection)
+        {
+            case ManagerSection.Components:
+                await LoadComponents();
+                break;
+            case ManagerSection.Products:
+                await LoadProducts();
+                break;
+            case ManagerSection.Deals:
+                await LoadDeals();
+                break;
+            case ManagerSection.Users:
+                await LoadUsers();
+                break;
+        }
+    }
+
+    private async Task LoadComponents()
+    {
+        isLoading = true;
+        errorMessage = null;
+        try
+        {
+            var all = await Http.GetFromJsonAsync<List<ComputerpartsLibrary.MODEL.Components>>("api/components");
+            if (all == null)
+            {
+                components = new List<ComputerpartsLibrary.MODEL.Components>();
+            }
+            else
+            {
+                if (string.IsNullOrEmpty(search)) components = all;
+                else components = all.Where(x => !string.IsNullOrEmpty(x.name) && x.name.Contains(search, StringComparison.OrdinalIgnoreCase)).ToList();
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = ex.Message;
+            components = new List<ComputerpartsLibrary.MODEL.Components>();
+        }
+        isLoading = false;
+        // load component types for name resolution
+        try
+        {
+            await LoadComponentTypes();
+        }
+        catch { }
+        StateHasChanged();
+    }
+
+    private List<CP.Component_type> componentTypes = new();
+    private Dictionary<int, string> componentTypeLookup = new();
+
+    private async Task LoadComponentTypes()
+    {
+        try
+        {
+            var all = await Http.GetFromJsonAsync<List<CP.Component_type>>("api/componenttypes");
+            componentTypes = all ?? new List<CP.Component_type>();
+            componentTypeLookup = componentTypes.Where(t => t != null).ToDictionary(t => t.id, t => t.name ?? string.Empty);
+        }
+        catch
+        {
+            componentTypes = new List<CP.Component_type>();
+            componentTypeLookup = new Dictionary<int, string>();
+        }
+    }
+
+    private string GetTypeName(int id)
+    {
+        if (componentTypeLookup != null && componentTypeLookup.TryGetValue(id, out var name) && !string.IsNullOrEmpty(name))
+            return name;
+        return "ismeretlen";
+    }
+
+    private async Task LoadProducts()
+    {
+        isLoading = true;
+        errorMessage = null;
+        try
+        {
+            var all = await Http.GetFromJsonAsync<List<ComputerpartsLibrary.MODEL.Products>>("api/products");
+            if (all == null) products = new List<ComputerpartsLibrary.MODEL.Products>();
+            else products = string.IsNullOrEmpty(search) ? all : all.Where(x => !string.IsNullOrEmpty(x.name) && x.name.Contains(search, StringComparison.OrdinalIgnoreCase)).ToList();
+        }
+        catch (Exception ex)
+        {
+            errorMessage = ex.Message;
+            products = new List<ComputerpartsLibrary.MODEL.Products>();
+        }
+        isLoading = false;
+        StateHasChanged();
+    }
+
+    // Users load handled synchronously in this simple UI flow via LoadUsers()
+
+    private async Task LoadDeals()
+    {
+        isLoading = true;
+        errorMessage = null;
+        try
+        {
+            var all = await Http.GetFromJsonAsync<List<ComputerpartsLibrary.MODEL.Deals>>("api/deals");
+            if (all == null) deals = new List<ComputerpartsLibrary.MODEL.Deals>();
+            else deals = string.IsNullOrEmpty(search) ? all : all.Where(x => !string.IsNullOrEmpty(x.name) && x.name.Contains(search, StringComparison.OrdinalIgnoreCase)).ToList();
+        }
+        catch (Exception ex)
+        {
+            errorMessage = ex.Message;
+            deals = new List<ComputerpartsLibrary.MODEL.Deals>();
+        }
+        isLoading = false;
+        StateHasChanged();
+    }
+
+    private void ShowAddForm()
+    {
+        // ensure admin is authenticated before adding
+        if (!AuthService.IsAuthenticated)
+        {
+            Navigation.NavigateTo("/login");
+            return;
+        }
+
+        editing = false;
+        editModel = new ComputerpartsLibrary.MODEL.Components();
+        editProduct = new ComputerpartsLibrary.MODEL.Products();
+        editDeal = new ComputerpartsLibrary.MODEL.Deals();
+        editUser = new ComputerpartsLibrary.MODEL.Users();
+
+        // ensure required non-null fields have defaults to avoid server-side model/db errors
+        editProduct.image_url = editProduct.image_url ?? string.Empty;
+        editProduct.description = editProduct.description ?? string.Empty;
+        editUser.password_hash = editUser.password_hash ?? string.Empty;
+        editUser.created_at = DateTimeOffset.UtcNow;
+        showForm = true;
+    }
+
+    private void EditComponent(ComputerpartsLibrary.MODEL.Components c)
+    {
+        editing = true;
+        editModel = new ComputerpartsLibrary.MODEL.Components
+        {
+            id = c.id,
+            type_id = c.type_id,
+            sku = c.sku,
+            name = c.name,
+            description = c.description,
+            price = c.price
+        };
+        showForm = true;
+    }
+
+    private void EditProduct(ComputerpartsLibrary.MODEL.Products p)
+    {
+        editing = true;
+        editProduct = new ComputerpartsLibrary.MODEL.Products
+        {
+            id = p.id,
+            category_id = p.category_id,
+            name = p.name,
+            sku = p.sku,
+            base_price = p.base_price,
+            image_url = p.image_url,
+            description = p.description
+        };
+        showForm = true;
+    }
+
+    private void EditDeal(ComputerpartsLibrary.MODEL.Deals d)
+    {
+        editing = true;
+        editDeal = new ComputerpartsLibrary.MODEL.Deals
+        {
+            id = d.id,
+            name = d.name,
+            description = d.description,
+            price = d.price
+        };
+        showForm = true;
+    }
+
+    private void CancelForm()
+    {
+        showForm = false;
+    }
+
+    private async Task SaveComponent()
+    {
+        try
+        {
+            if (editing)
+            {
+                var resp = await AuthService.PutAsJsonAsync($"api/components/{editModel.id}", editModel);
+                if (!resp.IsSuccessStatusCode)
+                {
+                    errorMessage = await resp.Content.ReadAsStringAsync();
+                }
+            }
+            else
+            {
+                var resp = await AuthService.PostAsJsonAsync("api/components", editModel);
+                if (!resp.IsSuccessStatusCode)
+                {
+                    errorMessage = await resp.Content.ReadAsStringAsync();
+                }
+            }
+            showForm = false;
+            await LoadComponents();
+        }
+        catch (Exception ex)
+        {
+            errorMessage = ex.Message;
+        }
+    }
+
+    private async Task SaveItem()
+    {
+        try
+        {
+            if (currentSection == ManagerSection.Components)
+            {
+                if (editing)
+                {
+                    var resp = await AuthService.PutAsJsonAsync($"api/components/{editModel.id}", editModel);
+                    lastResponseStatus = (int)resp.StatusCode;
+                    lastResponseBody = await resp.Content.ReadAsStringAsync();
+                    if (!resp.IsSuccessStatusCode) errorMessage = lastResponseBody;
+                }
+                else
+                {
+                    var resp = await AuthService.PostAsJsonAsync("api/components", editModel);
+                    lastResponseStatus = (int)resp.StatusCode;
+                    lastResponseBody = await resp.Content.ReadAsStringAsync();
+                    if (!resp.IsSuccessStatusCode) errorMessage = lastResponseBody;
+                }
+            }
+            else if (currentSection == ManagerSection.Products)
+            {
+                    if (editing)
+                    {
+                        var resp = await AuthService.PutAsJsonAsync($"api/products/{editProduct.id}", editProduct);
+                        lastResponseStatus = (int)resp.StatusCode;
+                        lastResponseBody = await resp.Content.ReadAsStringAsync();
+                        if (!resp.IsSuccessStatusCode) errorMessage = lastResponseBody;
+                    }
+                    else
+                    {
+                        var resp = await AuthService.PostAsJsonAsync("api/products", editProduct);
+                        lastResponseStatus = (int)resp.StatusCode;
+                        lastResponseBody = await resp.Content.ReadAsStringAsync();
+                        if (!resp.IsSuccessStatusCode) errorMessage = lastResponseBody;
+                    }
+            }
+            else if (currentSection == ManagerSection.Deals)
+            {
+                if (editing)
+                {
+                    var resp = await AuthService.PutAsJsonAsync($"api/deals/{editDeal.id}", editDeal);
+                    lastResponseStatus = (int)resp.StatusCode;
+                    lastResponseBody = await resp.Content.ReadAsStringAsync();
+                    if (!resp.IsSuccessStatusCode) errorMessage = lastResponseBody;
+                }
+                else
+                {
+                    var resp = await AuthService.PostAsJsonAsync("api/deals", editDeal);
+                    lastResponseStatus = (int)resp.StatusCode;
+                    lastResponseBody = await resp.Content.ReadAsStringAsync();
+                    if (!resp.IsSuccessStatusCode) errorMessage = lastResponseBody;
+                }
+            }
+
+            showForm = false;
+            await LoadItems();
+        }
+        catch (Exception ex)
+        {
+            errorMessage = ex.Message;
+        }
+    }
+
+    // Save user from users section
+    private async Task SaveUser()
+    {
+        try
+        {
+            // basic client-side validation
+            if (string.IsNullOrWhiteSpace(editUser.username))
+            {
+                errorMessage = "Felhasználónév megadása kötelező.";
+                return;
+            }
+            if (string.IsNullOrWhiteSpace(editUser.email))
+            {
+                errorMessage = "Email megadása kötelező.";
+                return;
+            }
+            if (editing)
+            {
+                var resp = await AuthService.PutAsJsonAsync($"api/users/{editUser.id}", editUser);
+                lastResponseStatus = (int)resp.StatusCode;
+                lastResponseBody = await resp.Content.ReadAsStringAsync();
+                if (!resp.IsSuccessStatusCode) errorMessage = lastResponseBody;
+            }
+            else
+            {
+                var resp = await AuthService.PostAsJsonAsync("api/users", editUser);
+                lastResponseStatus = (int)resp.StatusCode;
+                lastResponseBody = await resp.Content.ReadAsStringAsync();
+                if (!resp.IsSuccessStatusCode) errorMessage = lastResponseBody;
+            }
+            showForm = false;
+            await LoadItems();
+        }
+        catch (Exception ex)
+        {
+            errorMessage = ex.Message;
+        }
+    }
+
+    private async Task DeleteItem(int id)
+    {
+        try
+        {
+            HttpResponseMessage resp = null;
+            if (currentSection == ManagerSection.Components) resp = await AuthService.DeleteAsync($"api/components/{id}");
+            else if (currentSection == ManagerSection.Products) resp = await AuthService.DeleteAsync($"api/products/{id}");
+            else if (currentSection == ManagerSection.Deals) resp = await AuthService.DeleteAsync($"api/deals/{id}");
+            else if (currentSection == ManagerSection.Users) resp = await AuthService.DeleteAsync($"api/users/{id}");
+            if (resp != null && !resp.IsSuccessStatusCode) errorMessage = await resp.Content.ReadAsStringAsync();
+            await LoadItems();
+        }
+        catch (Exception ex)
+        {
+            errorMessage = ex.Message;
+        }
+    }
+
+    private async Task DeleteComponent(int id)
+    {
+        try
+        {
+            await Http.DeleteAsync($"api/components/{id}");
+            await LoadComponents();
+        }
+        catch (Exception ex)
+        {
+            errorMessage = ex.Message;
+        }
+    }
+}

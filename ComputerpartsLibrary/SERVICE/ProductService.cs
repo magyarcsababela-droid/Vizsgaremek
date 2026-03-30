@@ -20,6 +20,7 @@ namespace ComputerpartsLibrary.SERVICE
         public async Task AddProductAsync(Products product)
         {
             await _service.Products.AddAsync(product);
+            await _service.SaveChangesAsync();
         }
         public async Task DeleteProductAsync(int id)
         {
@@ -27,7 +28,7 @@ namespace ComputerpartsLibrary.SERVICE
             if (entity != null)
             {
                 _service.Products.Remove(entity);
-                _service.SaveChanges();
+                await _service.SaveChangesAsync();
             }
         }
         public async Task<Products> GetProductByIdAsync(int id)
