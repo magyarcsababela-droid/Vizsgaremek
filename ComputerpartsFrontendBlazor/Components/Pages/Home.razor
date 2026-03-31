@@ -15,7 +15,7 @@
         <button class="btn"><a href="/configurator">Konfigurálás megkezdése</a></button>
     </div>
 </section>
-<!-- Auth test panel -->
+<!-- Authetikácó tesztelése -->
 @* <section style="margin:1rem 0;">
     <h4>Auth teszt</h4>
     <div>
@@ -37,7 +37,7 @@
         </div>
     </div>
 </section> *@
-<!-- Popular categories -->
+<!-- Népszerű kategóriák -->
 <section class="configurator-section">
     <h2>Népszerű alkatrész kategóriák</h2>
     <div class="config-grid">
@@ -89,7 +89,7 @@
     <div class="glassy-backdrop" @onclick="CloseModal"></div>
 }
 
-@* Modal for showing filtered components (Bootstrap backdrop disabled because we render a custom one) *@
+@* Modal a az adott kategória alkatrészeinek listázására *@
 <div class="modal fade" id="componentsModal" data-bs-backdrop="false" tabindex="-1" aria-labelledby="componentsModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-scrollable modal-dialog-centered">
         <div class="modal-content" style="color: white; background-color: #181818; box-shadow: 1px 1px 20px black;">
@@ -133,7 +133,7 @@
     </div>
 </div>
 
-<!-- Featured products -->
+<!-- Kiemelt Termékek -->
 <section class="section-title">Kiemelt Termékek</section>
 <div class="product-grid">
     @if (filteredproducts == null || filteredproducts.Count == 0)
@@ -219,14 +219,14 @@
 
     private async Task DebugAndLoad(int typeId)
     {
-        // immediate visible feedback for debugging
+        // Azonnali visszajelzés a gomb megnyomására, hogy lássuk a reakciót
         errorMessage = $"Gomb megnyomva: {typeId}";
         isLoading = true;
         StateHasChanged();
-        // also log to browser console
+        // a böngésző konzoljában is megjelenik a log, hogy lássuk a gombkattintást és a típus azonosítóját
         try { await JS.InvokeVoidAsync("console.log", $"Button clicked for type {typeId}"); } catch { }
         await LoadComponentsByType(typeId);
-        // show modal after loading
+        // jelenleg a modal megjelenítése után töltjük be az adatokat
         showBackdrop = true;
         StateHasChanged();
         try { await JS.InvokeVoidAsync("showModal", "componentsModal"); } catch { }
@@ -274,7 +274,7 @@
         showBackdrop = false;
         StateHasChanged();
     }
-
+    /* Authentikáció tesztelés logika*/
     // private string ShortToken(string? token)
     // {
     //     if (string.IsNullOrEmpty(token)) return "(nincs token)";
@@ -323,7 +323,7 @@
     {
         isAddToCartModalOpen = false;
         showBackdrop = false;
-        isScrollLocked = false; // Unlock scroll
-        StateHasChanged(); // Modal closes instantly
+        isScrollLocked = false;
+        StateHasChanged();
     }
 }
