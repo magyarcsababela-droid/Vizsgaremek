@@ -67,28 +67,28 @@
     {
         StatusMessage = null;
 
-        // Basic client-side validation
+        // Alapvető, kliens oldali validáció a gyakori hibák elkerüléséhez
         if (string.IsNullOrWhiteSpace(Model.FirstName) || string.IsNullOrWhiteSpace(Model.LastName))
         {
-            StatusMessage = "Please enter your first and last name.";
+            StatusMessage = "Kérlek, add meg a kereszt- és vezetékneved!";
             return;
         }
 
         if (string.IsNullOrWhiteSpace(Model.Email))
         {
-            StatusMessage = "Please enter an email address.";
+            StatusMessage = "Kérlek, adj meg egy email címet!";
             return;
         }
 
         if (string.IsNullOrEmpty(Model.Password) || Model.Password.Length < 8)
         {
-            StatusMessage = "Password must be at least 8 characters long.";
+            StatusMessage = "A jelszónak minimum nyolc (8) karakter hosszúnak kell lennie!";
             return;
         }
 
         if (Model.Password != Model.ConfirmPassword)
         {
-            StatusMessage = "Passwords do not match.";
+            StatusMessage = "A jelszavak nem egyeznek!";
             return;
         }
 
@@ -96,7 +96,7 @@
 
         try
         {
-            // Derive a username from first and last name (fallback to email local-part)
+            // Felhasználónév kinyerése kerszt- és vezetéknévből, szóközök eltávolítása és kisbetűsítés (tartalék az email local-partje)
             var username = (Model.FirstName + Model.LastName).Replace(" ", "").ToLowerInvariant();
             if (string.IsNullOrWhiteSpace(username))
             {
@@ -115,23 +115,23 @@
 
             if (response.IsSuccessStatusCode)
             {
-                // Registration successful - navigate to login
-                StatusMessage = "Registration successful. Redirecting to login...";
+                // Sikeres regisztráció - átirányítás a bejelentkező oldalra
+                StatusMessage = "Sikeres regisztráció. Átirányítás a bejelentkező oldalra...";
                 // small delay to let user read message
                 await Task.Delay(800);
                 Navigation.NavigateTo("/login");
             }
             else
             {
-                // Try to extract error message from API
+                // Hibaüzenet kivonása a válaszból, ha elérhető
                 try
                 {
                     var errorObj = await response.Content.ReadFromJsonAsync<ServerError?>();
-                    StatusMessage = errorObj?.message ?? "Registration failed. Please try again.";
+                    StatusMessage = errorObj?.message ?? "Sikertelen regisztráció. Kérjük, próbáld úja!";
                 }
                 catch
                 {
-                    StatusMessage = "Registration failed. Please try again.";
+                    StatusMessage = "Sikertelen regisztráció. Kérjük, próbáld úja!";
                 }
             }
         }

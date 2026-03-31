@@ -20,7 +20,7 @@
         </div>
         <div class="form-actions">
             <button class="btn" @onclick="LoginAsync" disabled="@(IsSubmitting)">
-                @(IsSubmitting ? "Signing in..." : "Login")
+                @(IsSubmitting ? "Bejelentkezés folyamatban..." : "Login")
             </button>
         </div>
 
@@ -52,13 +52,13 @@
 
         if (string.IsNullOrWhiteSpace(Model.UsernameOrEmail))
         {
-            StatusMessage = "Please enter your username or email.";
+            StatusMessage = "Kérjük, add meg a felhasználóneved vagy email címed!";
             return;
         }
 
         if (string.IsNullOrEmpty(Model.Password))
         {
-            StatusMessage = "Please enter your password.";
+            StatusMessage = "Kérjük, add meg a jelszavad!";
             return;
         }
 

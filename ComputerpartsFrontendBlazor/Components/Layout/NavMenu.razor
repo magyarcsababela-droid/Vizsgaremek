@@ -128,17 +128,17 @@
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
-        // Subscribe to auth state changes so the nav updates when login/logout happens
+        // Feliratkozás a hitelesítési állapot változásaira, hogy a navigáció frissüljön a bejelentkezés/kijelentkezéskor
         try
         {
             AuthService.AuthStateChanged += OnAuthStateChanged;
         }
         catch
         {
-            // ignore
+            // Egyszerűen figyelmen kívül hagyható, ha a szolgáltatás még nem áll készen - a "StateHasChanged" meghívásával biztosítjuk, hogy amint elérhető lesz, frissül a komponens
         }
 
-        // Ensure service reads localStorage as early as possible so components render correct state
+        // Meg kell bizonyosodni, hogy a service a "localStorage"-ot olyan hamar olvassa, amennyire csak lehet, hogy a komponensek időben, a helyes státuszban jelenjenek meg
         try
         {
             await AuthService.InitializeAsync();
@@ -167,7 +167,7 @@
         Navigation.NavigateTo("/", true);
     }
 
-    // keep OnAfterRender empty — initialization is done in OnInitializedAsync
+    // "OnAfterRender" üresen tartása - az initializáció végbe megy az "OnInitializedAsync metóduson
 
     public void Dispose()
     {
@@ -199,7 +199,7 @@
         {
             await AuthService.LogoutAsync();
         }
-        // refresh local state/UI
+        // Helyi állapot/felület frissítése
         await CheckAuthAsync();
         StateHasChanged();
     }
