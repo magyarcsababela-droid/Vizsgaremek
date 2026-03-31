@@ -28,6 +28,37 @@
             const modal = bootstrap.Modal.getOrCreateInstance(el);
             modal.hide();
         };
+        // Simple toast helper for replacing alert() usage across the app.
+        // Usage: window.showToast(message, type, durationMs, position)
+        // type: "success" | "warning" | "danger" (defaults to "warning")
+        // position: "top-right" (default) or "bottom-center"
+        window.showToast = (message, type = 'warning', duration = 5000, position = 'top-right') => {
+            try {
+                const id = 'toast-' + Date.now() + '-' + Math.floor(Math.random() * 1000);
+                const container = document.createElement('div');
+                container.id = id;
+                container.className = `toast-custom toast-${type}`;
+                container.innerHTML = `<div class="toast-body"><div class="toast-text">${message}</div><button class="toast-close">×</button></div>`;
+                // position handling
+                if (position === 'bottom-center') {
+                    container.style.left = '50%';
+                    container.style.right = 'auto';
+                    container.style.transform = 'translateX(-50%)';
+                    container.style.top = 'auto';
+                    container.style.bottom = '1rem';
+                }
+                document.body.appendChild(container);
+                // wire close button
+                const btn = container.querySelector('.toast-close');
+                if (btn) btn.addEventListener('click', () => { try { container.remove(); } catch(e){} });
+                // auto remove
+                setTimeout(() => { try { container.remove(); } catch(e){} }, duration);
+            }
+            catch (e) {
+                // fallback to native alert if something goes wrong
+                try { alert(message); } catch { }
+            }
+        };
         window.getLocalToken = () => localStorage.getItem('authToken');
         window.setLocalToken = (t) => localStorage.setItem('authToken', t);
         window.removeLocalToken = () => localStorage.removeItem('authToken');
@@ -40,9 +71,13 @@
         window.getLocalUserId = () => localStorage.getItem('authUserId');
         window.setLocalUserId = (id) => localStorage.setItem('authUserId', id);
         window.removeLocalUserId = () => localStorage.removeItem('authUserId');
+        window.getLocalRole = () => localStorage.getItem('authRole');
+        window.setLocalRole = (r) => localStorage.setItem('authRole', r);
+        window.removeLocalRole = () => localStorage.removeItem('authRole');
     </script>
-    <script src="_framework/blazor.server.js"></script>
     <script src="bootstrap/bootstrap-5.3.8-dist/js/bootstrap.bundle.min.js"></script>
+    <script src="js/toast.js"></script>
+    <script src="_framework/blazor.server.js"></script>
 </body>
 
 </html>

@@ -31,11 +31,56 @@ namespace ComputerpartsLibrary.SERVICE
         public async Task DeleteUserAsync(int id)
         {
             var entity = await _service.Users.FindAsync(id);
-            if (entity != null)
+            if (entity == null) return;
+
+            // prevent deleting Admin users
+            if (!string.IsNullOrEmpty(entity.role) && string.Equals(entity.role, "Admin", StringComparison.OrdinalIgnoreCase))
             {
-                _service.Users.Remove(entity);
-                _service.SaveChanges();
+                throw new InvalidOperationException("Cannot delete users with Admin role.");
             }
+
+            // Remove related Addresses
+            try
+            {
+                var addrs = _service.Addresses.Where(a => a.user_id == id).ToList();
+                if (addrs.Any())
+                {
+                    _service.Addresses.RemoveRange(addrs);
+                }
+            }
+            catch { }
+
+            // Remove related custom builds
+            try
+            {
+                var builds = _service.Custom_builds.Where(b => b.User_id == id).ToList();
+                if (builds.Any())
+                {
+                    _service.Custom_builds.RemoveRange(builds);
+                }
+            }
+            catch { }
+
+            // Remove orders and their items
+            try
+            {
+                var orders = _service.Orders.Where(o => o.user_id == id).ToList();
+                foreach (var ord in orders)
+                {
+                    var itemsP = _service.Order_items_p.Where(i => i.order_id == ord.order_id).ToList();
+                    if (itemsP.Any()) _service.Order_items_p.RemoveRange(itemsP);
+
+                    var itemsB = _service.Order_items_b.Where(i => i.order_id == ord.order_id).ToList();
+                    if (itemsB.Any()) _service.Order_items_b.RemoveRange(itemsB);
+
+                    _service.Orders.Remove(ord);
+                }
+            }
+            catch { }
+
+            // Finally remove user
+            _service.Users.Remove(entity);
+            await _service.SaveChangesAsync();
         }
         public async Task<Users> GetUserByIdAsync(int id)
         {

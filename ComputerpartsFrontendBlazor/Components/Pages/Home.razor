@@ -15,7 +15,7 @@
         <button class="btn"><a href="/configurator">Konfigurálás megkezdése</a></button>
     </div>
 </section>
-<!-- Auth test panel -->
+<!-- Authetikácó tesztelése -->
 @* <section style="margin:1rem 0;">
     <h4>Auth teszt</h4>
     <div>
@@ -37,10 +37,15 @@
         </div>
     </div>
 </section> *@
-<!-- Popular categories -->
+<!-- Népszerű kategóriák -->
 <section class="configurator-section">
     <h2>Népszerű alkatrész kategóriák</h2>
     <div class="config-grid">
+        <div class="config-card">
+            <h3>Alaplap</h3>
+            <p>A számítógép alap alkotó eleme - válassz okosan, mert ettől függhetnek más alkatrészek.</p>
+            <button type="button" class="btn" @onclick="() => DebugAndLoad(8)">Opciók megtekintése</button>
+        </div>
         <div class="config-card">
             <h3>CPU</h3>
             <p>Intel vagy AMD processzorok – válaszd a Számodra megfelelő magot a munkádhoz!</p>
@@ -84,13 +89,13 @@
     <div class="glassy-backdrop" @onclick="CloseModal"></div>
 }
 
-@* Modal for showing filtered components (Bootstrap backdrop disabled because we render a custom one) *@
+@* Modal a az adott kategória alkatrészeinek listázására *@
 <div class="modal fade" id="componentsModal" data-bs-backdrop="false" tabindex="-1" aria-labelledby="componentsModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-scrollable modal-dialog-centered">
         <div class="modal-content" style="color: white; background-color: #181818; box-shadow: 1px 1px 20px black;">
             <div class="modal-header">
                 <h5 class="modal-title" id="componentsModalLabel">Elérhető alkatrészek</h5>
-                @* <button type="button" class="btn-close" style="border: 1px solid white;" data-bs-dismiss="modal" aria-label="Close" @onclick="CloseModal"></button> *@
+                
             </div>
             <div class="modal-body">
                 @if (isLoading)
@@ -115,7 +120,7 @@
                                     <div class="fw-bold">@comp.name</div>
                                     @comp.description
                                 </div>
-                                <span class="badge bg-primary rounded-pill">@comp.price.ToString("C")</span>
+                                <span class="badge bg-primary rounded-pill">@comp.price.ToString("C", currencyformat)</span>
                             </li>
                         }
                     </ul>
@@ -128,7 +133,7 @@
     </div>
 </div>
 
-<!-- Featured products -->
+<!-- Kiemelt Termékek -->
 <section class="section-title">Kiemelt Termékek</section>
 <div class="product-grid">
     @if (filteredproducts == null || filteredproducts.Count == 0)
@@ -140,61 +145,42 @@
         @foreach (var product in filteredproducts)
         {
             <div class="product-card">
-                @* <img src="https://via.placeholder.com/300x200?text=Intel+Core+i7" alt="Intel Core i7"> *@
-                <h3 class="product-name">@product.name</h3>
-                <p class="product-price">@product.base_price</p>
-                <div class="product-rating">★★★★★</div>
-                <p class="product-description">@product.description</p>
+                <div>
+                    @* <img src="https://via.placeholder.com/300x200?text=Intel+Core+i7" alt="Intel Core i7"> *@
+                    <h3 class="product-name">@product.name</h3>
+                    <p class="product-price">@product.base_price.ToString("C", currencyformat)</p>
+                    <div class="product-rating">★★★★★</div>
+                    <p class="product-description">@product.description</p>
+                </div>
                 <div class="product-actions">
-                    <button class="btn-primary">Hozzáadás Kosárhoz</button>
+                    <button class="btn-primary" @onclick="OpenAddToCartModal">Hozzáadás Kosárhoz</button>
                 </div>
             </div>
         }
     }
-    @* <div class="product-card">
-        <img src="https://via.placeholder.com/300x200?text=Intel+Core+i7" alt="Intel Core i7">
-        <h3 class="product-name">Intel Core i7‑13700K</h3>
-        <p class="product-price">$499.99</p>
-        <div class="product-rating">★★★★★</div>
-        <p class="product-description">13th Gen Intel Core i7 with 14 cores & 20 threads.</p>
-        <div class="product-actions">
-            <button class="btn-primary">Hozzáadás Kosárhoz</button>
-        </div>
-    </div>
-
-    <div class="product-card">
-        <img src="https://via.placeholder.com/300x200?text=NVIDIA+RTX+4080" alt="NVIDIA RTX 4080">
-        <h3 class="product-name">NVIDIA GeForce RTX 4080</h3>
-        <p class="product-price">$1,499.99</p>
-        <div class="product-rating">★★★★★</div>
-        <p class="product-description">16 GB GDDR6X, 1000 MHz boost clock.</p>
-        <div class="product-actions">
-            <button class="btn-primary">Hozzáadás Kosárhoz</button>
-        </div>
-    </div>
-
-    <div class="product-card">
-        <img src="https://via.placeholder.com/300x200?text=Kingston+DDR5+64GB" alt="Kingston DDR5 64GB">
-        <h3 class="product-name">Kingston DDR5 64 GB (2×32 GB)</h3>
-        <p class="product-price">$299.99</p>
-        <div class="product-rating">★★★★★</div>
-        <p class="product-description">DDR5 5600 MHz, CL30, dual‑channel.</p>
-        <div class="product-actions">
-            <button class="btn-primary">Hozzáadás Kosárhoz</button>
-        </div>
-    </div>
-
-    <div class="product-card">
-        <img src="https://via.placeholder.com/300x200?text=Samsung+980+Pro" alt="Samsung 980 Pro">
-        <h3 class="product-name">Samsung 980 Pro 2TB NVMe SSD</h3>
-        <p class="product-price">$249.99</p>
-        <div class="product-rating">★★★★★</div>
-        <p class="product-description">PCIe 4.0, 7,450 MB/s read speed.</p>
-        <div class="product-actions">
-            <button class="btn-primary">Hozzáadás Kosárhoz</button>
-        </div>
-    </div> *@
 </div>
+@if (showBackdrop)
+{
+    <div class="glassy-backdrop" @onclick="CloseModal"></div>
+}
+<!-- MODAL - "Fejlesztés alatt" -->
+@if (isAddToCartModalOpen)
+{
+    <div class="modal fade" id="developementModal" data-bs-backdrop="false" tabindex="-1" aria-labelledby="developementModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-scrollable modal-dialog-centered">
+            <div class="modal-content" style="color: white; background-color: #181818; box-shadow: 1px 1px 20px black;">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="developementModalLabel">Funkció fejlesztés alatt - Hozzáadás kosárhoz</h5>
+                </div>
+                <div class="modal-body">Mivel a weboldal, folyamatos fejlesztés alatt áll, ez a funkció a késsöbbiekben, lesz hozzáadva.</div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" @onclick="CloseModal">Bezár</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
 @code {
     private List<Components>? filteredComponents;
     private List<Products>? filteredproducts;
@@ -233,14 +219,14 @@
 
     private async Task DebugAndLoad(int typeId)
     {
-        // immediate visible feedback for debugging
+        // Azonnali visszajelzés a gomb megnyomására, hogy lássuk a reakciót
         errorMessage = $"Gomb megnyomva: {typeId}";
         isLoading = true;
         StateHasChanged();
-        // also log to browser console
+        // a böngésző konzoljában is megjelenik a log, hogy lássuk a gombkattintást és a típus azonosítóját
         try { await JS.InvokeVoidAsync("console.log", $"Button clicked for type {typeId}"); } catch { }
         await LoadComponentsByType(typeId);
-        // show modal after loading
+        // jelenleg a modal megjelenítése után töltjük be az adatokat
         showBackdrop = true;
         StateHasChanged();
         try { await JS.InvokeVoidAsync("showModal", "componentsModal"); } catch { }
@@ -288,7 +274,7 @@
         showBackdrop = false;
         StateHasChanged();
     }
-
+    /* Authentikáció tesztelés logika*/
     // private string ShortToken(string? token)
     // {
     //     if (string.IsNullOrEmpty(token)) return "(nincs token)";
@@ -314,4 +300,30 @@
     //     await CheckAuthAsync();
     //     StateHasChanged();
     // }
+
+    // Modal state - "Fejlesztés alatt" confirmation
+    private bool isAddToCartModalOpen = true;
+    private bool isScrollLocked = false;
+    /// <summary>
+    /// Nyissa meg a modal-t amikor rányomunk "Hozzáadás Kosárhoz" gombra
+    /// </summary>
+    private void OpenAddToCartModal()
+    {
+        isAddToCartModalOpen = true;
+        try { JS.InvokeVoidAsync("showModal", "developementModal"); } catch { }
+        showBackdrop = true;
+        isScrollLocked = true; // Lock scroll immediately
+        StateHasChanged(); // Reactive update - modal opens immediately
+    }
+
+    /// <summary>
+    /// Zárja be a modal-t
+    /// </summary>
+    private void CloseAddToCartModal()
+    {
+        isAddToCartModalOpen = false;
+        showBackdrop = false;
+        isScrollLocked = false;
+        StateHasChanged();
+    }
 }

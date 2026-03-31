@@ -11,8 +11,4 @@
     <ProjectReference Include="..\ComputerpartsLibrary\ComputerpartsLibrary.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Pages\" />
-  </ItemGroup>
-
 </Project>

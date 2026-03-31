@@ -27,5 +27,6 @@ namespace ComputerpartsLibrary.DATA
         public DbSet<Prebuilt_pc_comp> Prebuilt_pc_comp { get; set; }
         public DbSet<Inventory_components> Inventory_components { get; set; }
         public DbSet<Inventory_products> Inventory_products { get; set; }
+        public DbSet<Deals> Deals { get; set; }
     }
 }

@@ -2,22 +2,76 @@
 @rendermode InteractiveServer
 @using ComputerpartsFrontendBlazor.Components.Layout
 @inherits LayoutComponentBase
+@inject HttpClient Http
+
 <main style="min-height: 75vh;">
     <section class="page-header_custom page-header hero-mini">
         <h1>Ajánlatok & Promóciók</h1>
         <p>Jelenlegi kampányaink, limitált leárazásaink és csomag ajánlataink kiemelve, amik elérhetőek áruházunkon.</p>
     </section>
     <section class="page-section">
-        <div class="deal-grid">
-            <div class="deal-card"><span class="deal-tag">Limitált Ajánlat</span><h3>RTX Bundle Weekend</h3><p class="muted">Vásárolj egyet a megjelölt GPU-k közül és igényelj mellé 15%-os kupont egy választható Tápegységre, ami biztosan kiszolgálja gépe energia igényeit.</p><p class="price" style="margin:1rem 0;">Takaríts meg akár $120-t!</p><button class="btn" data-demo="Demo mode: deal opened.">AJánlat igénylése</button></div>
-            <div class="deal-card"><span class="deal-tag">SSD Megtakarítás</span><h3>Storage Upgrade Event</h3><p class="muted">Gyors NVMe meghajtók 1TB-tól akár 4TB-ig kedvezményes áron egy rövid ideig!</p><p class="price" style="margin:1rem 0;">Kezdőár: $69</p><button class="btn" data-demo="Demo mode: deal opened.">Meghajtók megtekintése</button></div>
-            <div class="deal-card"><span class="deal-tag">Kezdeti Alkatrész csomag</span><h3>Budget PC Combo</h3><p class="muted">CPU, alaplap és memória csomag kiváló 1080p élményért!</p><p class="price" style="margin:1rem 0;">Csomagok már $399-tól</p><button class="btn" data-demo="Demo mode: deal opened.">Csomag megtekintése</button></div>
-        </div>
+        @if (isLoading)
+        {
+            <div>Betöltés...</div>
+        }
+        else if (!string.IsNullOrEmpty(errorMessage))
+        {
+            <div class="alert alert-danger">@errorMessage</div>
+        }
+        else if (deals == null || deals.Count == 0)
+        {
+            <p>Nincsenek ajánlatok jelenleg.</p>
+        }
+        else
+        {
+            <div class="deal-grid">
+                @foreach (var d in deals)
+                {
+                    <div class="deal-card">
+                        <span class="deal-tag">Ajánlat</span>
+                        <h3>@d.name</h3>
+                        @if (!string.IsNullOrEmpty(d.description))
+                        {
+                            <p class="muted">@d.description</p>
+                        }
+                        <p class="price" style="margin:1rem 0;">@d.price.ToString("C", currencyformat)</p>
+                        <button class="btn">Részletek</button>
+                    </div>
+                }
+            </div>
+        }
     </section>
 </main>
 
-
-
 @code {
+    private List<ComputerpartsLibrary.MODEL.Deals>? deals;
+    private bool isLoading = false;
+    private string? errorMessage;
+    private System.Globalization.CultureInfo currencyformat = System.Globalization.CultureInfo.GetCultureInfo("en-US");
 
+    protected override async System.Threading.Tasks.Task OnInitializedAsync()
+    {
+        isLoading = true;
+        errorMessage = null;
+        try
+        {
+            var all = await Http.GetFromJsonAsync<List<ComputerpartsLibrary.MODEL.Deals>>("api/deals");
+            if (all == null)
+            {
+                errorMessage = "Nem sikerült lekérni az ajánlatokat.";
+                deals = new List<ComputerpartsLibrary.MODEL.Deals>();
+            }
+            else
+            {
+                deals = all;
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Hiba történt: {ex.Message}";
+            deals = new List<ComputerpartsLibrary.MODEL.Deals>();
+        }
+        isLoading = false;
+        StateHasChanged();
+    }
 }

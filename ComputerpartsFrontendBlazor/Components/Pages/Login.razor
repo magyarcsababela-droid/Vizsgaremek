@@ -11,28 +11,30 @@
         <div class="form-grid">
             <div class="full">
                 <label for="loginEmail">Email vagy Felhasználónév</label>
-                <input id="loginEmail" @bind="Model.UsernameOrEmail" type="text" placeholder="you@example.com vagy Felhasználónév" />
+                <input id="loginEmail" @bind="Model.UsernameOrEmail" type="text" placeholder="Felhasználnév" />
             </div>
             <div class="full">
                 <label for="loginPassword">Jelszó</label>
-                <input id="loginPassword" @bind="Model.Password" type="password" placeholder="••••••••" />
+                <input id="loginPassword" @bind="Model.Password" type="password" placeholder="Jelszó" />
             </div>
         </div>
         <div class="form-actions">
             <button class="btn" @onclick="LoginAsync" disabled="@(IsSubmitting)">
-                @(IsSubmitting ? "Bejelentkezés folyamatban..." : "Login")
+                @(IsSubmitting ? "Bejelentkezés..." : "Bejelentkezés")
             </button>
         </div>
 
-        @if (!string.IsNullOrEmpty(StatusMessage))
-        {
-            <p class="muted">@StatusMessage</p>
-        }
+
 
         <p class="switch-link">Nincs még fiókod? <a href="register">Készíts egyet itt...</a>.</p>
         <p class="switch-link">Vissza a kezőlapra <a href="/">Kezdőlap</a></p>
     </section>
 </main>
+
+@if (!string.IsNullOrEmpty(StatusMessage))
+{
+    <Toast Message="@StatusMessage" Type="warning" Position="bottom-center" AutoHide="true" Duration="5000" />
+}
 
 
 @code {
@@ -52,13 +54,13 @@
 
         if (string.IsNullOrWhiteSpace(Model.UsernameOrEmail))
         {
-            StatusMessage = "Kérjük, add meg a felhasználóneved vagy email címed!";
+            StatusMessage = "Please enter your username or email.";
             return;
         }
 
         if (string.IsNullOrEmpty(Model.Password))
         {
-            StatusMessage = "Kérjük, add meg a jelszavad!";
+            StatusMessage = "Please enter your password.";
             return;
         }
 
@@ -81,7 +83,7 @@
         }
         catch (Exception ex)
         {
-            StatusMessage = "An error occurred: " + ex.Message;
+            StatusMessage = "Hiba történt: " + ex.Message;
         }
         finally
         {

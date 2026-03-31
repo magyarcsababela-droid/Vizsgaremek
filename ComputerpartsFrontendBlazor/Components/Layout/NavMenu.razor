@@ -1,5 +1,6 @@
 ﻿@inject ComputerpartsFrontendBlazor.Services.AuthService AuthService
 @inject Microsoft.AspNetCore.Components.NavigationManager Navigation
+@inject IJSRuntime JS
 @rendermode InteractiveServer
 @inherits LayoutComponentBase
 <nav class="navbar navbar-expand-xl navbar-dark fixed-top shadow-sm" style="border-radius: 10px; border: 1px solid #3498db; margin: 1%;">
@@ -47,7 +48,7 @@
                             <img src="Images/profile_user_avatar_people_icon_219228.png" alt="User" style="border-radius: 50%; width: 30px; height: 30px;" />
                         </a>
                         <div class="dropdown-menu">
-                            <div style="color:lightgreen; font-weight: 10; padding: 10px 10px 0px 10px;">@(string.IsNullOrEmpty(AuthService.Username) ? "(nincs felhasználónév)" : AuthService.Username)</div>
+                            <div style="color:lightgreen; font-weight: 10; font-size: 20px; padding: 10px 10px 0px 10px;">@(string.IsNullOrEmpty(AuthService.Username) ? "(nincs felhasználónév)" : AuthService.Username)</div>
                             @if (!string.IsNullOrEmpty(AuthService.Email))
                             {
                                 <div style="color:#ccc; font-size:0.85rem; padding: 0 10px 10px 10px;">@AuthService.Email</div>
@@ -55,6 +56,10 @@
                             
                             @if (AuthService?.IsAuthenticated == true)
                             {
+                                @if (string.Equals(AuthService.Role, "Admin", System.StringComparison.OrdinalIgnoreCase))
+                                {
+                                    <NavLink style="margin: 1%" class="dropdown-item btn btn-sm btn-danger" href="/admin">Admin oldal</NavLink>
+                                }
                                 <button style="margin: 1%" class="dropdown-item btn btn-sm btn-danger" @onclick="OpenProfileModal">Profil megtekintése</button>
                                 <button style="margin: 1%" class="dropdown-item btn btn-sm btn-danger" @onclick="LogoutAsync">Kijelentkezés</button>
                             }
@@ -89,12 +94,16 @@
                                 <img src="Images/profile_user_avatar_people_icon_219228.png" alt="User" style="border-radius: 50%; width: 30px; height: 30px;" />
                             </a>
                             <div class="dropdown-menu">
-                                <div style="color:lightgreen; font-weight: 10; padding: 10px 10px 0px 10px;">@(string.IsNullOrEmpty(AuthService.Username) ? "(nincs felhasználónév)" : AuthService.Username)</div>
+                                <div style="color:lightgreen; font-weight: 10; font-size: 20px; padding: 10px 10px 0px 10px;">@(string.IsNullOrEmpty(AuthService.Username) ? "(nincs felhasználónév)" : AuthService.Username)</div>
                                 @if (!string.IsNullOrEmpty(AuthService.Email))
                                 {
                                     <div style="color:#ccc; font-size:0.85rem; padding: 0 10px 10px 10px;">@AuthService.Email</div>
                                 }
 
+                                @if (string.Equals(AuthService.Role, "Admin", System.StringComparison.OrdinalIgnoreCase))
+                                {
+                                    <NavLink style="margin: 1%" class="dropdown-item btn btn-sm btn-danger" href="/admin">Admin oldal</NavLink>
+                                }
                                 <button style="margin: 1%" class="dropdown-item btn btn-sm btn-danger" @onclick="OpenProfileModal">Profil megtekintése</button>
                                 <button style="margin: 1%" class="dropdown-item btn btn-sm btn-danger" @onclick="LogoutAsync">Kijelentkezés</button>
                             </div>
@@ -120,7 +129,7 @@
     </div>
 </nav>
 
-<ProfileModal Show="showProfile" ShowChanged="@(async val => { showProfile = val; await InvokeAsync(StateHasChanged); })" />
+<ProfileModal Show="@showProfile" ShowChanged="EventCallback.Factory.Create<bool>(this, OnProfileShowChanged)" OpenBuildRequested="EventCallback.Factory.Create<int>(this, OnOpenBuildRequested)" />
 
 @code {
     private bool showProfileDropdown = false;
@@ -201,6 +210,8 @@
         }
         // Helyi állapot/felület frissítése
         await CheckAuthAsync();
+        try { await JS.InvokeVoidAsync("setPendingToast", "Kijelentkezés sikeres.", "success", 4000, "bottom-center"); } catch { }
+        try { await JS.InvokeVoidAsync("showToast", "Kijelentkezés sikeres.", "success", 4000, "bottom-center"); } catch { }
         StateHasChanged();
     }
 
@@ -209,5 +220,37 @@
     private void OpenProfileModal()
     {
         showProfile = true;
+    }
+
+    private async Task OnProfileShowChanged(bool val)
+    {
+        showProfile = val;
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private async Task OnOpenBuildRequested(int id)
+    {
+        // Close the modal in this parent and then force a full navigation via JS to ensure immediate load.
+        showProfile = false;
+        await InvokeAsync(StateHasChanged);
+        try { await Task.Delay(80); } catch { }
+        var url = Navigation.ToAbsoluteUri($"/configurator?buildId={id}").ToString();
+        try
+        {
+            await JS.InvokeVoidAsync("open", url, "_self");
+        }
+        catch
+        {
+            try { Navigation.NavigateTo($"/configurator?buildId={id}", true); } catch { }
+        }
+    }
+
+    private void GoToAdmin()
+    {
+        try
+        {
+            Navigation.NavigateTo("/admin");
+        }
+        catch { }
     }
 }
