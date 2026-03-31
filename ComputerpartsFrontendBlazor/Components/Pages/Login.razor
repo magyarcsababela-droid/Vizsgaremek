@@ -54,13 +54,13 @@
 
         if (string.IsNullOrWhiteSpace(Model.UsernameOrEmail))
         {
-            StatusMessage = "Kérem adja meg a felhasználónevét.";
+            StatusMessage = "Please enter your username or email.";
             return;
         }
 
         if (string.IsNullOrEmpty(Model.Password))
         {
-            StatusMessage = "Kérem adja meg a jelszavát.";
+            StatusMessage = "Please enter your password.";
             return;
         }
 
