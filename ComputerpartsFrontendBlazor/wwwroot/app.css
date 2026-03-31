@@ -968,3 +968,18 @@ textarea {
 .dropdown-menu.show {
     animation: dropdownOpen 0.3s ease-out forwards;
 }
+
+.product-card {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between; /* ez tolja szét a tartalmat */
+    height: 100%; /* fontos, hogy minden kártya azonos magasságú legyen */
+}
+
+    .product-card > div:first-child {
+        flex-grow: 1; /* a felső rész kitölti a helyet */
+    }
+
+.product-actions {
+    margin-top: auto; /* ez tolja le a gombot */
+}
