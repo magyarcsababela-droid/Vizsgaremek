@@ -12,6 +12,17 @@
     --transition: .4s ease;
 }
 
+/* Ensure part-row hover rules win (more specific) and are applied after other declarations */
+.part-list .part-row {
+    transition: transform var(--transition), box-shadow var(--transition), background var(--transition);
+}
+.part-list .part-row:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.45);
+    background: linear-gradient(90deg, rgba(52,152,219,0.06), rgba(255,255,255,0.02));
+    border-left: 4px solid var(--primary);
+}
+
  /*2. Global styles */
 *, *::before, *::after {
     box-sizing: border-box;
@@ -320,6 +331,33 @@ img {
     display: flex;
     gap: .7rem;
 }
+
+/* Parts list hover effect */
+.part-list {
+    display: flex;
+    flex-direction: column;
+    gap: .6rem;
+}
+.part-row {
+    padding: .9rem 1rem;
+    border-radius: 8px;
+    transition: transform var(--transition), box-shadow var(--transition), background var(--transition);
+}
+    .part-row:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.45);
+        background: linear-gradient(90deg, rgba(52,152,219,0.06), rgba(255,255,255,0.02));
+        border-left: 4px solid var(--primary);
+    }
+
+    /* programmatic hover class used by Blazor handlers when native :hover may be blocked */
+    .part-row.hover-active {
+        transform: translateY(-4px);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.45);
+        background: linear-gradient(90deg, rgba(52,152,219,0.06), rgba(255,255,255,0.02));
+        border-left: 4px solid var(--primary);
+    }
+
 
 /* Admin responsive tweaks */
 .admin-toolbar {

@@ -128,33 +128,10 @@ namespace ComputerpartsFrontendBlazor.Services
                 // Use the window wrapper functions defined in App.razor to access browser localStorage
                 var token = await _js.InvokeAsync<string>("getLocalToken");
                 var username = await _js.InvokeAsync<string>("getLocalUsername");
-                if (!string.IsNullOrEmpty(token))
+
+                if (string.IsNullOrEmpty(token))
                 {
-                    Token = token;
-                    _http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", Token);
-                    IsAuthenticated = true;
-                    if (!string.IsNullOrEmpty(username))
-                    {
-                        Username = username;
-                    }
-                    try
-                    {
-                        var email = await _js.InvokeAsync<string>("getLocalEmail");
-                        if (!string.IsNullOrEmpty(email)) Email = email;
-                        var uid = await _js.InvokeAsync<string>("getLocalUserId");
-                        var role = await _js.InvokeAsync<string>("getLocalRole");
-                        if (!string.IsNullOrEmpty(role)) Role = role;
-                        if (int.TryParse(uid, out var parsedUid)) UserId = parsedUid;
-                    }
-                    catch { }
-                    // try to refresh user info from server for authoritative username/email
-                    try { await FetchCurrentUserAsync(); } catch { }
-                    // notify subscribers that auth state may have changed
-                    AuthStateChanged?.Invoke();
-                }
-                else
-                {
-                    // No token in browser: ensure we are completely logged out on the server-side service
+                    // No token in browser: ensure logged-out state
                     Token = null;
                     Username = null;
                     Role = null;
@@ -162,13 +139,90 @@ namespace ComputerpartsFrontendBlazor.Services
                     UserId = null;
                     IsAuthenticated = false;
                     try { _http.DefaultRequestHeaders.Authorization = null; } catch { }
-                    // make sure any UI subscribed to auth state updates is notified
                     AuthStateChanged?.Invoke();
+                    return;
                 }
+
+                // Basic client-side validation: try to decode token and check expiry
+                try
+                {
+                    var handler = new System.IdentityModel.Tokens.Jwt.JwtSecurityTokenHandler();
+                    var jwt = handler.ReadJwtToken(token);
+                    if (jwt.ValidTo < DateTime.UtcNow)
+                    {
+                        // token expired client-side -> force logout
+                        await LogoutAsync();
+                        return;
+                    }
+                }
+                catch
+                {
+                    // invalid token format -> logout
+                    await LogoutAsync();
+                    return;
+                }
+
+                // token looks unexpired locally, set it and verify against server
+                Token = token;
+                _http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", Token);
+                IsAuthenticated = true;
+                if (!string.IsNullOrEmpty(username))
+                {
+                    Username = username;
+                }
+
+                try
+                {
+                    var email = await _js.InvokeAsync<string>("getLocalEmail");
+                    if (!string.IsNullOrEmpty(email)) Email = email;
+                    var uid = await _js.InvokeAsync<string>("getLocalUserId");
+                    var role = await _js.InvokeAsync<string>("getLocalRole");
+                    if (!string.IsNullOrEmpty(role)) Role = role;
+                    if (int.TryParse(uid, out var parsedUid)) UserId = parsedUid;
+                }
+                catch { }
+
+                // Verify server will accept the token: request current user
+                try
+                {
+                    var resp = await _http.GetAsync("api/auth/me");
+                    if (!resp.IsSuccessStatusCode)
+                    {
+                        // server rejected token (expired/invalid) -> logout
+                        await LogoutAsync();
+                        return;
+                    }
+                    // success -> update current user info
+                    try
+                    {
+                        var user = await resp.Content.ReadFromJsonAsync<ComputerpartsLibrary.MODEL.Users>();
+                        if (user != null)
+                        {
+                            if (!string.IsNullOrEmpty(user.username)) Username = user.username;
+                            if (!string.IsNullOrEmpty(user.email)) Email = user.email;
+                            if (!string.IsNullOrEmpty(user.role)) Role = user.role;
+                            if (user.id != 0) UserId = user.id;
+                            try { if (!string.IsNullOrEmpty(Username)) await _js.InvokeVoidAsync("setLocalUsername", Username); } catch { }
+                            try { if (!string.IsNullOrEmpty(Email)) await _js.InvokeVoidAsync("setLocalEmail", Email); } catch { }
+                            try { if (UserId.HasValue) await _js.InvokeVoidAsync("setLocalUserId", UserId.Value.ToString()); } catch { }
+                            try { if (!string.IsNullOrEmpty(Role)) await _js.InvokeVoidAsync("setLocalRole", Role); } catch { }
+                        }
+                    }
+                    catch { }
+                }
+                catch
+                {
+                    // network/server error - be conservative and logout
+                    await LogoutAsync();
+                    return;
+                }
+
+                // notify subscribers that auth state may have changed
+                AuthStateChanged?.Invoke();
             }
             catch
             {
-                // ignore
+                // ignore unexpected errors
             }
         }
 

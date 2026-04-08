@@ -102,7 +102,7 @@
                 </div>
                 <div class="full"><label for="notes">Megjegyzés</label><textarea id="notes" @bind="NoteText" placeholder="Adja hozzá egyéb kérését vagy preferenciáját itt..."></textarea></div>
             </div>
-            <div class="form-actions">
+    <div class="form-actions">
                 @if (isEditing)
                 {
                     <button class="btn btn-primary" @onclick="UpdateConfigurationAsync">Szerkesztés mentése</button>
@@ -113,6 +113,29 @@
                     <button class="btn" @onclick="SaveConfigurationAsync">Konfiguráció mentése</button>
                 }
             </div>
+
+            @if (showSaveModal)
+            {
+                <div class="glassy-backdrop"></div>
+                <div class="modal fade show d-block" id="saveConfigModal" tabindex="-1" role="dialog" aria-modal="true">
+                    <div class="modal-dialog modal-sm modal-dialog-centered">
+                        <div class="modal-content" style="color: white; background-color: #181818; box-shadow: 1px 1px 20px black;">
+                            <div class="modal-header">
+                                <h5 class="modal-title">Konfiguráció mentése</h5>
+                                <button type="button" class="btn-close" aria-label="Close" @onclick="() => showSaveModal = false"></button>
+                            </div>
+                            <div class="modal-body">
+                                <label for="saveName">Név</label>
+                                <input id="saveName" class="form-control" @bind="saveName" placeholder="Adj nevet a konfigurációnak" />
+                            </div>
+                            <div class="modal-footer">
+                                <button class="btn btn-secondary" @onclick="() => showSaveModal = false">Mégse</button>
+                                <button class="btn btn-primary" @onclick="ConfirmSaveAsync">Mentés</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
         </div>
         <div class="detail-card summary-box">
             <h3>Várható végösszeg</h3>
@@ -164,6 +187,8 @@
     private bool isLoading = false;
     private string? errorMessage;
     private bool showBackdrop = false;
+    private bool showSaveModal = false;
+    private string saveName = string.Empty;
 
     protected override async Task OnInitializedAsync()
     {
@@ -228,7 +253,7 @@
             var resp = await Http.SendAsync(req);
             if (resp.IsSuccessStatusCode)
             {
-                await JS.InvokeVoidAsync("alert", "Konfiguráció frissítve.");
+                await JS.InvokeVoidAsync("showToast", "Konfiguráció frissítve.", "success", 4000, "bottom-center");
             }
             else
             {
@@ -350,6 +375,16 @@
 
     private async Task SaveConfigurationAsync()
     {
+        // show modal to enter name before saving
+        showSaveModal = true;
+    }
+
+    private async Task ConfirmSaveAsync()
+    {
+        // proceed with actual save using saveName
+        // hide modal
+        showSaveModal = false;
+
         // only allow saving when authenticated
         if (AuthService == null || !AuthService.IsAuthenticated || AuthService.Token == null)
         {
@@ -361,7 +396,7 @@
         var build = new ComputerpartsLibrary.MODEL.Custom_builds
         {
             User_id = AuthService?.UserId ?? 0,
-            name = "Saved build",
+            name = string.IsNullOrWhiteSpace(saveName) ? "Saved build" : saveName,
             // set status required by DB constraint
             status = "draft",
             total_price = TotalPrice,
@@ -402,6 +437,9 @@
             if (resp.IsSuccessStatusCode)
             {
                 await JS.InvokeVoidAsync("showToast", "Konfiguráció elmentve.", "success", 4000);
+                // reset modal and name
+                saveName = string.Empty;
+                showSaveModal = false;
             }
             else
             {
