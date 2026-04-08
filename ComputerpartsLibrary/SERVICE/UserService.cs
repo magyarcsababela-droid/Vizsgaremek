@@ -103,7 +103,10 @@ namespace ComputerpartsLibrary.SERVICE
         /// </summary>
         public async Task<JwtToken> GenerateTokenAsync(int userId, string role)
         {
-            return _jwtTokenService.GenerateToken(userId, role);
+            // load user from database to include full user data into token
+            var user = await _service.Users.FindAsync(userId);
+            if (user == null) throw new InvalidOperationException("User not found");
+            return _jwtTokenService.GenerateToken(user);
         }
 
         /// <summary>

@@ -65,8 +65,8 @@ namespace ComputerpartsAPI.Controllers
                     request.Email,
                     request.Password
                 );
-                // Generate JWT token for the newly created user
-                var jwt = _jwtService.GenerateToken(user.id, user.role);
+                // Generate JWT token for the newly created user (include full user data in token)
+                var jwt = _jwtService.GenerateToken(user);
 
                 // Build response object without sensitive fields
                 var responseUser = new Users
@@ -97,8 +97,8 @@ namespace ComputerpartsAPI.Controllers
             if (user == null)
                 return Unauthorized(new { message = "Invalid username or password" });
 
-            // Generate JWT token
-            var jwt = _jwtService.GenerateToken(user.id, user.role);
+            // Generate JWT token including full user data
+            var jwt = _jwtService.GenerateToken(user);
 
             // Remove sensitive data from response
             var responseUser = new Users

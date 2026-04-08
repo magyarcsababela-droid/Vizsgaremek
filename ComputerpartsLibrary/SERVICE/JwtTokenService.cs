@@ -38,12 +38,18 @@ namespace ComputerpartsLibrary.SERVICE
             }
         }
 
-        public JwtToken GenerateToken(int userId, string role)
+        // Generate token using full user object so we can include all user data as claims
+        public JwtToken GenerateToken(ComputerpartsLibrary.MODEL.Users user)
         {
-            var claims = new[]
+            var claims = new List<Claim>
             {
-                new Claim(ClaimTypes.NameIdentifier, userId.ToString()),
-                new Claim(ClaimTypes.Role, role),
+                new Claim(ClaimTypes.NameIdentifier, user.id.ToString()),
+                new Claim(ClaimTypes.Role, user.role ?? string.Empty),
+                new Claim("authEmail", user.email ?? string.Empty),
+                new Claim("authUsername", user.username ?? string.Empty),
+                new Claim("authUserId", user.id.ToString()),
+                // store created_at in ISO 8601 format
+                new Claim("authCreatedAt", user.created_at.ToString("o"))
             };
 
             var expires = DateTime.UtcNow.AddMinutes(_expireMinutes);
@@ -66,8 +72,8 @@ namespace ComputerpartsLibrary.SERVICE
             {
                 Token = tokenString,
                 Expiration = new DateTimeOffset(expires),
-                UserId = userId,
-                Role = role
+                UserId = user.id,
+                Role = user.role ?? string.Empty
             };
         }
         
@@ -89,27 +95,12 @@ namespace ComputerpartsLibrary.SERVICE
                     ValidAudience = _audience,
                     ClockSkew = TimeSpan.Zero
                 };
-                
-                var validatedToken = jwtHandler.ValidateToken(token, tokenValidationParameters, out SecurityToken securityToken);
-                
-                if (securityToken is JwtSecurityToken jwtSecurityToken)
-                {
-                    // Convert Claims to ClaimsIdentity for ClaimsPrincipal constructor
-                    var claimsIdentities = new List<ClaimsIdentity>();
-                    foreach (var claim in jwtSecurityToken.Claims)
-                    {
-                        var identity = new ClaimsIdentity();
-                        identity.AddClaim(claim);
-                        claimsIdentities.Add(identity);
-                    }
-                    return new ClaimsPrincipal(claimsIdentities);
-                }
-                
-                throw new InvalidOperationException("Invalid token type");
+
+                var principal = jwtHandler.ValidateToken(token, tokenValidationParameters, out SecurityToken securityToken);
+                return principal;
             }
             catch (Exception ex)
             {
-                // Token validation failed - could be expired, invalid signature, etc.
                 throw new UnauthorizedAccessException($"Token validation failed: {ex.Message}", ex);
             }
         }

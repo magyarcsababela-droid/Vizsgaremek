@@ -5,6 +5,8 @@ using System.Net.Http.Json;
 using System.Threading.Tasks;
 using Microsoft.JSInterop;
 using System.Text.Json;
+using System.Linq;
+using System.Security.Claims;
 
 namespace ComputerpartsFrontendBlazor.Services
 {
@@ -107,15 +109,11 @@ namespace ComputerpartsFrontendBlazor.Services
                 var user = await resp.Content.ReadFromJsonAsync<ComputerpartsLibrary.MODEL.Users>();
                 if (user != null)
                 {
-                    if (!string.IsNullOrEmpty(user.username)) Username = user.username;
-                    if (!string.IsNullOrEmpty(user.email)) Email = user.email;
-                    if (!string.IsNullOrEmpty(user.role)) Role = user.role;
-                    if (user.id != 0) UserId = user.id;
-                    // persist to localStorage
-                    try { if (!string.IsNullOrEmpty(Username)) await _js.InvokeVoidAsync("setLocalUsername", Username); } catch { }
-                    try { if (!string.IsNullOrEmpty(Email)) await _js.InvokeVoidAsync("setLocalEmail", Email); } catch { }
-                    try { if (UserId.HasValue) await _js.InvokeVoidAsync("setLocalUserId", UserId.Value.ToString()); } catch { }
-                    try { if (!string.IsNullOrEmpty(Role)) await _js.InvokeVoidAsync("setLocalRole", Role); } catch { }
+                    // prefer token claims as source of truth; update in-memory values from server only if missing
+                    if (string.IsNullOrEmpty(Username) && !string.IsNullOrEmpty(user.username)) Username = user.username;
+                    if (string.IsNullOrEmpty(Email) && !string.IsNullOrEmpty(user.email)) Email = user.email;
+                    if (string.IsNullOrEmpty(Role) && !string.IsNullOrEmpty(user.role)) Role = user.role;
+                    if (!UserId.HasValue && user.id != 0) UserId = user.id;
                 }
             }
             catch { }
@@ -127,7 +125,6 @@ namespace ComputerpartsFrontendBlazor.Services
             {
                 // Use the window wrapper functions defined in App.razor to access browser localStorage
                 var token = await _js.InvokeAsync<string>("getLocalToken");
-                var username = await _js.InvokeAsync<string>("getLocalUsername");
 
                 if (string.IsNullOrEmpty(token))
                 {
@@ -154,6 +151,12 @@ namespace ComputerpartsFrontendBlazor.Services
                         await LogoutAsync();
                         return;
                     }
+
+                    // token looks valid locally: set and extract claims as source of user info
+                    Token = token;
+                    PopulateFromToken(token);
+                    _http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", Token);
+                    IsAuthenticated = true;
                 }
                 catch
                 {
@@ -162,53 +165,16 @@ namespace ComputerpartsFrontendBlazor.Services
                     return;
                 }
 
-                // token looks unexpired locally, set it and verify against server
-                Token = token;
-                _http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", Token);
-                IsAuthenticated = true;
-                if (!string.IsNullOrEmpty(username))
-                {
-                    Username = username;
-                }
-
-                try
-                {
-                    var email = await _js.InvokeAsync<string>("getLocalEmail");
-                    if (!string.IsNullOrEmpty(email)) Email = email;
-                    var uid = await _js.InvokeAsync<string>("getLocalUserId");
-                    var role = await _js.InvokeAsync<string>("getLocalRole");
-                    if (!string.IsNullOrEmpty(role)) Role = role;
-                    if (int.TryParse(uid, out var parsedUid)) UserId = parsedUid;
-                }
-                catch { }
-
                 // Verify server will accept the token: request current user
+                // Optionally verify token on server; if server rejects, force logout
                 try
                 {
                     var resp = await _http.GetAsync("api/auth/me");
                     if (!resp.IsSuccessStatusCode)
                     {
-                        // server rejected token (expired/invalid) -> logout
                         await LogoutAsync();
                         return;
                     }
-                    // success -> update current user info
-                    try
-                    {
-                        var user = await resp.Content.ReadFromJsonAsync<ComputerpartsLibrary.MODEL.Users>();
-                        if (user != null)
-                        {
-                            if (!string.IsNullOrEmpty(user.username)) Username = user.username;
-                            if (!string.IsNullOrEmpty(user.email)) Email = user.email;
-                            if (!string.IsNullOrEmpty(user.role)) Role = user.role;
-                            if (user.id != 0) UserId = user.id;
-                            try { if (!string.IsNullOrEmpty(Username)) await _js.InvokeVoidAsync("setLocalUsername", Username); } catch { }
-                            try { if (!string.IsNullOrEmpty(Email)) await _js.InvokeVoidAsync("setLocalEmail", Email); } catch { }
-                            try { if (UserId.HasValue) await _js.InvokeVoidAsync("setLocalUserId", UserId.Value.ToString()); } catch { }
-                            try { if (!string.IsNullOrEmpty(Role)) await _js.InvokeVoidAsync("setLocalRole", Role); } catch { }
-                        }
-                    }
-                    catch { }
                 }
                 catch
                 {
@@ -238,63 +204,16 @@ namespace ComputerpartsFrontendBlazor.Services
                 if (result?.token == null) return false;
 
                 Token = result.token;
-
-                // Try to extract username from the returned user object in a robust way
+                // populate user info from token claims (token contains all needed user fields)
                 try
                 {
-                    if (result.user is JsonElement je && je.ValueKind == JsonValueKind.Object)
-                    {
-                        // try to read numeric id if provided
-                        if (je.TryGetProperty("id", out var idProp) && idProp.ValueKind == JsonValueKind.Number)
-                        {
-                            if (idProp.TryGetInt32(out var parsedId))
-                                UserId = parsedId;
-                        }
-                        if (je.TryGetProperty("username", out var unameProp) || je.TryGetProperty("Username", out unameProp) || je.TryGetProperty("userName", out unameProp))
-                        {
-                            Username = unameProp.GetString();
-                        }
-                        else
-                        {
-                            // fallback: try deserializing to Users model
-                            try
-                            {
-                                var u = JsonSerializer.Deserialize<ComputerpartsLibrary.MODEL.Users>(je.GetRawText());
-                                if (u != null && !string.IsNullOrEmpty(u.username))
-                                    Username = u.username;
-                            }
-                            catch { }
-                        }
-                    }
+                    PopulateFromToken(Token);
                 }
                 catch { }
-
-                // if server did not return a username, fall back to the login identifier
-                if (string.IsNullOrEmpty(Username))
-                {
-                    Username = username; // fallback to what user entered (email or username)
-                }
 
                 IsAuthenticated = true;
-
                 _http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", Token);
                 await _js.InvokeVoidAsync("setLocalToken", Token);
-                try { var toSave = !string.IsNullOrEmpty(Username) ? Username : username; if (!string.IsNullOrEmpty(toSave)) await _js.InvokeVoidAsync("setLocalUsername", toSave); } catch { }
-                try { if (UserId.HasValue) await _js.InvokeVoidAsync("setLocalUserId", UserId.Value.ToString()); } catch { }
-                try { if (!string.IsNullOrEmpty(Role)) await _js.InvokeVoidAsync("setLocalRole", Role); } catch { }
-                try
-                {
-                    // try to extract email from returned user object
-                    if (result.user is JsonElement je && je.ValueKind == JsonValueKind.Object)
-                    {
-                        if (je.TryGetProperty("email", out var emailProp) || je.TryGetProperty("Email", out emailProp))
-                        {
-                            Email = emailProp.GetString();
-                            if (!string.IsNullOrEmpty(Email)) await _js.InvokeVoidAsync("setLocalEmail", Email);
-                        }
-                    }
-                }
-                catch { }
                 try { await _js.InvokeVoidAsync("console.log", $"AuthService.LoginAsync: username={Username} token={(Token?.Length>10?Token.Substring(0,10)+"...":Token)}"); } catch { }
                 AuthStateChanged?.Invoke();
                 return true;
@@ -325,6 +244,28 @@ namespace ComputerpartsFrontendBlazor.Services
             public object? user { get; set; }
             public string? token { get; set; }
             public DateTimeOffset? expires { get; set; }
+        }
+
+        // Parse token and populate Username, Email, Role and UserId from claims
+        private void PopulateFromToken(string token)
+        {
+            try
+            {
+                var handler = new System.IdentityModel.Tokens.Jwt.JwtSecurityTokenHandler();
+                var jwt = handler.ReadJwtToken(token);
+
+                Username = jwt.Claims.FirstOrDefault(c => c.Type == "authUsername" || c.Type == "username" || c.Type == ClaimTypes.Name)?.Value;
+                Email = jwt.Claims.FirstOrDefault(c => c.Type == "authEmail" || c.Type == ClaimTypes.Email || c.Type == "email")?.Value;
+                Role = jwt.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Role || c.Type == "role")?.Value;
+                var idClaim = jwt.Claims.FirstOrDefault(c => c.Type == "authUserId" || c.Type == ClaimTypes.NameIdentifier || c.Type == "userId")?.Value;
+                if (int.TryParse(idClaim, out var parsed)) UserId = parsed;
+
+                // Do NOT persist individual user fields to localStorage — only the token should be stored.
+            }
+            catch
+            {
+                // ignore parse errors
+            }
         }
     }
 }
