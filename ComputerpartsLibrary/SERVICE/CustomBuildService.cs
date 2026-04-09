@@ -48,7 +48,21 @@ namespace ComputerpartsLibrary.SERVICE
         }
         public async Task UpdateCustomBuildAsync(Custom_builds custom_Builds)
         {
-            _service.Custom_builds.Update(custom_Builds);
+            // Use a tracked entity to ensure EF Core updates fields correctly
+            var existing = await _service.Custom_builds.FindAsync(custom_Builds.build_id);
+            if (existing == null)
+            {
+                throw new InvalidOperationException("Custom build not found");
+            }
+
+            // update fields explicitly to avoid issues with detached entities
+            existing.name = custom_Builds.name;
+            existing.status = custom_Builds.status;
+            existing.total_price = custom_Builds.total_price;
+            existing.components_json = custom_Builds.components_json;
+            existing.created_at = custom_Builds.created_at;
+            existing.User_id = custom_Builds.User_id;
+
             await _service.SaveChangesAsync();
         }
     }

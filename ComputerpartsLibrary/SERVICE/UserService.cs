@@ -25,8 +25,18 @@ namespace ComputerpartsLibrary.SERVICE
         }
         public async Task AddUserAsync(Users user)
         {
+            if (user == null) throw new ArgumentNullException(nameof(user));
+
+            // basic validation
+            if (string.IsNullOrWhiteSpace(user.username)) throw new ArgumentException("Username cannot be empty", nameof(user.username));
+            if (string.IsNullOrWhiteSpace(user.email)) throw new ArgumentException("Email cannot be empty", nameof(user.email));
+
+            // prevent duplicates by username or email (case-insensitive)
+            var exists = await _service.Users.AnyAsync(u => u.username.ToLower() == user.username.ToLower() || u.email.ToLower() == user.email.ToLower());
+            if (exists) throw new ArgumentException("Username or email already registered");
+
             await _service.Users.AddAsync(user);
-            _service.SaveChanges();
+            await _service.SaveChangesAsync();
         }
         public async Task DeleteUserAsync(int id)
         {

@@ -41,16 +41,11 @@ namespace ComputerpartsLibrary.SERVICE
             if (password.Length < 8)
                 throw new ArgumentException("Password must be at least 8 characters long", nameof(password));
 
-            // Check if username or email already exists
-            var existingUsers = _context.Users.ToList();
-            foreach (var user in existingUsers)
-            {
-                if (user.username.ToLowerInvariant() == username.ToLowerInvariant())
-                    throw new ArgumentException("Username already taken", nameof(username));
-                
-                if (user.email.ToLowerInvariant() == email.ToLowerInvariant())
-                    throw new ArgumentException("Email already registered", nameof(email));
-            }
+            // Check if username or email already exists (case-insensitive)
+            var usernameExists = _context.Users.Any(u => u.username.ToLower() == username.ToLower());
+            if (usernameExists) throw new ArgumentException("Username already taken", nameof(username));
+            var emailExists = _context.Users.Any(u => u.email.ToLower() == email.ToLower());
+            if (emailExists) throw new ArgumentException("Email already registered", nameof(email));
 
             // Hash the password before storing
             string hashedPassword = _passwordHashService.HashPassword(password);

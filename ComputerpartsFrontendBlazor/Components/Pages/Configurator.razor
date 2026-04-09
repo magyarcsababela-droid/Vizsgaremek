@@ -19,6 +19,14 @@
     <section class="page-section configurator-layout">
         <div class="detail-card">
             <h3>Válaszd ki a megfelelő alkatrészeket</h3>
+            @if (isEditing && currentBuild != null)
+            {
+                <div style="margin-bottom:1rem;">
+                    <label for="editBuildName"><strong>Éppen szerkeszted:</strong></label>
+                    <!-- bind on input so value is updated immediately while typing -->
+                    <input id="editBuildName" class="form-control" @bind="editBuildName" @bind:event="oninput" />
+                </div>
+            }
             <div class="form-grid">
                 <div>
                     <label for="cpu">CPU</label>
@@ -168,6 +176,7 @@
     private int? SelectedPsuId;
     private ComputerpartsLibrary.MODEL.Custom_builds? currentBuild = null;
     private bool isEditing = false;
+    private string editBuildName = string.Empty;
     private string? NoteText;
 
     private Components? SelectedCpu => FindSelected(SelectedCpuId);
@@ -218,6 +227,13 @@
             return;
         }
 
+        // validate build name is not empty
+        if (string.IsNullOrWhiteSpace(editBuildName))
+        {
+            await JS.InvokeVoidAsync("showToast", "A konfiguráció neve nem lehet üres.", "warning", 4000, "bottom-center");
+            return;
+        }
+
         // prepare updated build
         currentBuild.total_price = TotalPrice;
         // prepare components list same way as SaveConfigurationAsync
@@ -243,6 +259,9 @@
             // ensure token present
             if (string.IsNullOrEmpty(AuthService.Token)) await AuthService.InitializeAsync();
 
+            // ensure build name is updated from editable input
+            currentBuild.name = editBuildName;
+
             // send PUT to update
             var req = new HttpRequestMessage(HttpMethod.Put, $"api/custombuilds/{currentBuild.build_id}")
             {
@@ -253,7 +272,19 @@
             var resp = await Http.SendAsync(req);
             if (resp.IsSuccessStatusCode)
             {
-                await JS.InvokeVoidAsync("showToast", "Konfiguráció frissítve.", "success", 4000, "bottom-center");
+                // refresh the build from server to ensure the saved name and data are reflected
+                try
+                {
+                    await JS.InvokeVoidAsync("showToast", "Konfiguráció frissítve.", "success", 4000, "bottom-center");
+                    var refreshed = await Http.GetFromJsonAsync<ComputerpartsLibrary.MODEL.Custom_builds>($"api/custombuilds/{currentBuild.build_id}");
+                    if (refreshed != null)
+                    {
+                        currentBuild = refreshed;
+                        editBuildName = currentBuild.name ?? string.Empty;
+                        StateHasChanged();
+                    }
+                }
+                catch { }
             }
             else
             {
@@ -315,6 +346,7 @@
             // keep reference to current opened build so we can update it later
             currentBuild = build;
             isEditing = true;
+            editBuildName = build.name ?? string.Empty;
 
             if (string.IsNullOrEmpty(build.components_json)) return;
 

@@ -2,6 +2,7 @@
 @using CP = ComputerpartsLibrary.MODEL
 @inject ComputerpartsFrontendBlazor.Services.AuthService AuthService
 @inject HttpClient Http
+@inject Microsoft.JSInterop.IJSRuntime JS
 @inject Microsoft.AspNetCore.Components.NavigationManager Navigation
 @using ComputerpartsFrontendBlazor.Components.Shared
 @rendermode InteractiveServer
@@ -55,10 +56,10 @@ else
                         <thead>
                             <tr>
                                 <th>Id</th>
-                                <th>Type Id</th>
+                                <th>Típus Id</th>
                                 <th>SKU</th>
-                                <th>Name</th>
-                                <th>Price</th>
+                                <th>Név</th>
+                                <th>Ár</th>
                                 <th></th>
                             </tr>
                         </thead>
@@ -73,7 +74,7 @@ else
                                     <td>@c.price.ToString("C", currencyformat)</td>
                                     <td>
                                         <button class="btn btn-sm btn-secondary" @onclick="() => EditComponent(c)">Szerkeszt</button>
-                                        <button class="btn btn-sm btn-secondary" @onclick="() => DeleteItem(c.id)">Töröl</button>
+                                        <button class="btn btn-sm btn-secondary" @onclick="() => ShowDeleteConfirm(c.id)">Töröl</button>
                                     </td>
                                 </tr>
                             }
@@ -88,9 +89,9 @@ else
                         <thead>
                             <tr>
                                 <th>Id</th>
-                                <th>Username</th>
+                                <th>Felhasználónév</th>
                                 <th>Email</th>
-                                <th>Role</th>
+                                <th>Szerepkör</th>
                                 <th></th>
                             </tr>
                         </thead>
@@ -106,7 +107,7 @@ else
                                         <button class="btn btn-sm btn-secondary" @onclick="() => EditUser(u)">Szerkeszt</button>
                                         @if (!string.Equals(u.role, "Admin", StringComparison.OrdinalIgnoreCase))
                                         {
-                                            <button class="btn btn-sm btn-secondary" @onclick="() => DeleteUser(u.id)">Töröl</button>
+                                            <button class="btn btn-sm btn-secondary" @onclick="() => ShowDeleteConfirm(u.id)">Töröl</button>
                                         }
                                     </td>
                                 </tr>
@@ -122,10 +123,10 @@ else
                         <thead>
                             <tr>
                                 <th>Id</th>
-                                <th>Category</th>
-                                <th>Name</th>
+                                <th>Kategória Id</th>
+                                <th>Név</th>
                                 <th>SKU</th>
-                                <th>Price</th>
+                                <th>Ár</th>
                                 <th></th>
                             </tr>
                         </thead>
@@ -155,9 +156,9 @@ else
                         <thead>
                             <tr>
                                 <th>Id</th>
-                                <th>Name</th>
-                                <th>Description</th>
-                                <th>Price</th>
+                                <th>Név</th>
+                                <th>Leírás</th>
+                                <th>Ár</th>
                                 <th></th>
                             </tr>
                         </thead>
@@ -180,6 +181,28 @@ else
                     </div>
                 }
             }
+
+    @if (showDeleteConfirm && pendingDeleteId.HasValue)
+    {
+        <div style="position:fixed;inset:0;z-index:3200;">
+            <div class="glassy-backdrop" style="position:fixed;inset:0;z-index:3200"></div>
+            <div style="position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);z-index:3210;min-width:280px;max-width:90%;">
+                <div class="modal-content" style="color: white; background-color: #181818; box-shadow: 1px 1px 20px black; border-radius: 8px; padding: 15px;">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Megerősítés</h5>
+                        <button type="button" class="btn-close" aria-label="Close" @onclick="CancelDelete"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p>Biztosan törölni szeretnéd ezt a rekordot?</p>
+                    </div>
+                    <div class="modal-footer">
+                        <button style="margin: 2px" type="button" class="btn btn-secondary" @onclick="CancelDelete">Mégse</button>
+                        <button style="margin: 2px" type="button" class="btn btn-primary" @onclick="ConfirmDeleteAsync">Törlés</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
         </section>
 
         @if (showForm)
@@ -189,7 +212,7 @@ else
                 @if (currentSection == ManagerSection.Components)
                 {
                     <div class="form-group">
-                        <label>Type ID</label>
+                        <label>Típus Id</label>
                         <input class="form-control" @bind="editModel.type_id" />
                     </div>
                     <div class="form-group">
@@ -197,26 +220,26 @@ else
                         <input class="form-control" @bind="editModel.sku" />
                     </div>
                     <div class="form-group">
-                        <label>Name</label>
+                        <label>Név</label>
                         <input class="form-control" @bind="editModel.name" />
                     </div>
                     <div class="form-group">
-                        <label>Description</label>
+                        <label>Leírás</label>
                         <textarea class="form-control" @bind="editModel.description"></textarea>
                     </div>
                     <div class="form-group">
-                        <label>Price</label>
+                        <label>Ár</label>
                         <input class="form-control" @bind="editModel.price" />
                     </div>
                 }
                 else if (currentSection == ManagerSection.Products)
                 {
                     <div class="form-group">
-                        <label>Category ID</label>
+                        <label>Kategória Id</label>
                         <input class="form-control" @bind="editProduct.category_id" />
                     </div>
                     <div class="form-group">
-                        <label>Name</label>
+                        <label>Név</label>
                         <input class="form-control" @bind="editProduct.name" />
                     </div>
                     <div class="form-group">
@@ -224,37 +247,37 @@ else
                         <input class="form-control" @bind="editProduct.sku" />
                     </div>
                     <div class="form-group">
-                        <label>Base Price</label>
+                        <label>Alap ár</label>
                         <input class="form-control" @bind="editProduct.base_price" />
                     </div>
                     <div class="form-group">
-                        <label>Image URL</label>
+                        <label>Kép URL</label>
                         <input class="form-control" @bind="editProduct.image_url" />
                     </div>
                     <div class="form-group">
-                        <label>Description</label>
+                        <label>Leírás</label>
                         <textarea class="form-control" @bind="editProduct.description"></textarea>
                     </div>
                 }
                 else if (currentSection == ManagerSection.Deals)
                 {
                     <div class="form-group">
-                        <label>Name</label>
+                        <label>Név</label>
                         <input class="form-control" @bind="editDeal.name" />
                     </div>
                     <div class="form-group">
-                        <label>Description</label>
+                        <label>Leírás</label>
                         <textarea class="form-control" @bind="editDeal.description"></textarea>
                     </div>
                     <div class="form-group">
-                        <label>Price</label>
+                        <label>Ár</label>
                         <input class="form-control" @bind="editDeal.price" />
                     </div>
                 }
                 else if (currentSection == ManagerSection.Users)
                 {
                     <div class="form-group">
-                        <label>Username</label>
+                        <label>Felhasználónév</label>
                         <input class="form-control" @bind="editUser.username" />
                     </div>
                     <div class="form-group">
@@ -262,12 +285,19 @@ else
                         <input class="form-control" @bind="editUser.email" />
                     </div>
                     <div class="form-group">
-                        <label>Role</label>
+                        <label>Szerepkör</label>
                         <select class="form-control" @bind="editUser.role">
                             <option value="User">User</option>
                             <option value="Admin">Admin</option>
                         </select>
                     </div>
+                    @if (!editing)
+                    {
+                        <div class="form-group">
+                            <label>Jelszó</label>
+                            <input class="form-control" type="password" @bind="newUserPassword" placeholder="Minimum 8 karakter" />
+                        </div>
+                    }
                 }
 
                 <div style="margin-top:1rem;">
@@ -325,6 +355,7 @@ else
     }
 
     private ComputerpartsLibrary.MODEL.Users editUser = new();
+    private string newUserPassword = string.Empty;
 
     private void EditUser(ComputerpartsLibrary.MODEL.Users u)
     {
@@ -491,7 +522,6 @@ else
         StateHasChanged();
     }
 
-    // Users load handled synchronously in this simple UI flow via LoadUsers()
 
     private async Task LoadDeals()
     {
@@ -686,13 +716,61 @@ else
             // basic client-side validation
             if (string.IsNullOrWhiteSpace(editUser.username))
             {
-                errorMessage = "Felhasználónév megadása kötelező.";
+                try { await JS.InvokeVoidAsync("showToast", "Felhasználónév megadása kötelező.", "warning", 4000, "bottom-center"); } catch { }
                 return;
             }
             if (string.IsNullOrWhiteSpace(editUser.email))
             {
-                errorMessage = "Email megadása kötelező.";
+                try { await JS.InvokeVoidAsync("showToast", "Email megadása kötelező.", "warning", 4000, "bottom-center"); } catch { }
                 return;
+            }
+            // if creating a new user, require a password and use register endpoint
+            if (!editing)
+            {
+                // client-side duplicate check to provide immediate feedback
+                if (users != null && users.Any(u => string.Equals(u.username, editUser.username, StringComparison.OrdinalIgnoreCase)))
+                {
+                    try { await JS.InvokeVoidAsync("showToast", "Ez a felhasználónév már foglalt.", "warning", 4000, "bottom-center"); } catch { }
+                    return;
+                }
+                if (users != null && users.Any(u => string.Equals(u.email, editUser.email, StringComparison.OrdinalIgnoreCase)))
+                {
+                    try { await JS.InvokeVoidAsync("showToast", "Ez az email cím már regisztrálva van.", "warning", 4000, "bottom-center"); } catch { }
+                    return;
+                }
+
+                if (string.IsNullOrWhiteSpace(newUserPassword) || newUserPassword.Length < 8)
+                {
+                    try { await JS.InvokeVoidAsync("showToast", "Jelszó megadása kötelező (min. 8 karakter).", "warning", 4000, "bottom-center"); } catch { }
+                    return;
+                }
+
+                // call registration endpoint to ensure proper hashing and token generation
+                var payload = new
+                {
+                    Username = editUser.username,
+                    Email = editUser.email,
+                    Password = newUserPassword
+                };
+
+                var resp = await Http.PostAsJsonAsync("api/auth/register", payload);
+                lastResponseStatus = (int)resp.StatusCode;
+                lastResponseBody = await resp.Content.ReadAsStringAsync();
+                if (resp.IsSuccessStatusCode)
+                {
+                    // success toast
+                    try { await JS.InvokeVoidAsync("showToast", "Felhasználó sikeresen hozzáadva.", "success", 4000, "bottom-center"); } catch { }
+                    showForm = false;
+                    newUserPassword = string.Empty;
+                    editUser = new ComputerpartsLibrary.MODEL.Users();
+                    await LoadItems();
+                    return;
+                }
+                else
+                {
+                    try { await JS.InvokeVoidAsync("showToast", string.IsNullOrEmpty(lastResponseBody) ? "Hiba a regisztráció során." : lastResponseBody, "danger", 6000, "bottom-center"); } catch { }
+                    return;
+                }
             }
             if (editing)
             {
@@ -733,6 +811,31 @@ else
         {
             errorMessage = ex.Message;
         }
+    }
+
+    // delete confirmation modal state
+    private bool showDeleteConfirm = false;
+    private int? pendingDeleteId = null;
+
+    private void ShowDeleteConfirm(int id)
+    {
+        pendingDeleteId = id;
+        showDeleteConfirm = true;
+    }
+
+    private void CancelDelete()
+    {
+        pendingDeleteId = null;
+        showDeleteConfirm = false;
+    }
+
+    private async Task ConfirmDeleteAsync()
+    {
+        if (!pendingDeleteId.HasValue) return;
+        var id = pendingDeleteId.Value;
+        pendingDeleteId = null;
+        showDeleteConfirm = false;
+        await DeleteItem(id);
     }
 
     private async Task DeleteComponent(int id)
