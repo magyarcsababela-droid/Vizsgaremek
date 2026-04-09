@@ -429,7 +429,8 @@ img {
 }
 
 .modal {
-    z-index: 1050 !important;
+    /* Ensure modal is above other UI elements and backdrops */
+    z-index: 3000 !important;
 }
 
 .modal-content {
@@ -446,7 +447,8 @@ img {
 .glassy-backdrop {
     position: fixed;
     inset: 0;
-    z-index: 1040;
+    /* keep this under the actual modal/backdrop so it doesn't cover modals */
+    z-index: 2400;
     background-color: rgba(10,10,15,0.45);
     -webkit-backdrop-filter: blur(10px) saturate(120%);
     backdrop-filter: blur(10px) saturate(120%);
