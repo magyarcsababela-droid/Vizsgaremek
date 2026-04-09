@@ -263,7 +263,10 @@ else
                     </div>
                     <div class="form-group">
                         <label>Role</label>
-                        <input class="form-control" @bind="editUser.role" />
+                        <select class="form-control" @bind="editUser.role">
+                            <option value="User">User</option>
+                            <option value="Admin">Admin</option>
+                        </select>
                     </div>
                 }
 
