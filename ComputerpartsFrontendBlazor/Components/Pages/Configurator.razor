@@ -19,6 +19,14 @@
     <section class="page-section configurator-layout">
         <div class="detail-card">
             <h3>Válaszd ki a megfelelő alkatrészeket</h3>
+            @if (isEditing && currentBuild != null)
+            {
+                <div style="margin-bottom:1rem;">
+                    <label for="editBuildName"><strong>Éppen szerkeszted:</strong></label>
+                    <!-- bind on input so value is updated immediately while typing -->
+                    <input id="editBuildName" class="form-control" @bind="editBuildName" @bind:event="oninput" />
+                </div>
+            }
             <div class="form-grid">
                 <div>
                     <label for="cpu">CPU</label>
@@ -102,7 +110,7 @@
                 </div>
                 <div class="full"><label for="notes">Megjegyzés</label><textarea id="notes" @bind="NoteText" placeholder="Adja hozzá egyéb kérését vagy preferenciáját itt..."></textarea></div>
             </div>
-            <div class="form-actions">
+    <div class="form-actions">
                 @if (isEditing)
                 {
                     <button class="btn btn-primary" @onclick="UpdateConfigurationAsync">Szerkesztés mentése</button>
@@ -113,6 +121,29 @@
                     <button class="btn" @onclick="SaveConfigurationAsync">Konfiguráció mentése</button>
                 }
             </div>
+
+            @if (showSaveModal)
+            {
+                <div class="glassy-backdrop"></div>
+                <div class="modal fade show d-block" id="saveConfigModal" tabindex="-1" role="dialog" aria-modal="true">
+                    <div class="modal-dialog modal-sm modal-dialog-centered">
+                        <div class="modal-content" style="color: white; background-color: #181818; box-shadow: 1px 1px 20px black;">
+                            <div class="modal-header">
+                                <h5 class="modal-title">Konfiguráció mentése</h5>
+                                <button type="button" class="btn-close" aria-label="Close" @onclick="() => showSaveModal = false"></button>
+                            </div>
+                            <div class="modal-body">
+                                <label for="saveName">Név</label>
+                                <input id="saveName" class="form-control" @bind="saveName" placeholder="Adj nevet a konfigurációnak" />
+                            </div>
+                            <div class="modal-footer">
+                                <button class="btn btn-secondary" @onclick="() => showSaveModal = false">Mégse</button>
+                                <button class="btn btn-primary" @onclick="ConfirmSaveAsync">Mentés</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
         </div>
         <div class="detail-card summary-box">
             <h3>Várható végösszeg</h3>
@@ -145,6 +176,7 @@
     private int? SelectedPsuId;
     private ComputerpartsLibrary.MODEL.Custom_builds? currentBuild = null;
     private bool isEditing = false;
+    private string editBuildName = string.Empty;
     private string? NoteText;
 
     private Components? SelectedCpu => FindSelected(SelectedCpuId);
@@ -164,6 +196,8 @@
     private bool isLoading = false;
     private string? errorMessage;
     private bool showBackdrop = false;
+    private bool showSaveModal = false;
+    private string saveName = string.Empty;
 
     protected override async Task OnInitializedAsync()
     {
@@ -193,6 +227,13 @@
             return;
         }
 
+        // validate build name is not empty
+        if (string.IsNullOrWhiteSpace(editBuildName))
+        {
+            await JS.InvokeVoidAsync("showToast", "A konfiguráció neve nem lehet üres.", "warning", 4000, "bottom-center");
+            return;
+        }
+
         // prepare updated build
         currentBuild.total_price = TotalPrice;
         // prepare components list same way as SaveConfigurationAsync
@@ -218,6 +259,9 @@
             // ensure token present
             if (string.IsNullOrEmpty(AuthService.Token)) await AuthService.InitializeAsync();
 
+            // ensure build name is updated from editable input
+            currentBuild.name = editBuildName;
+
             // send PUT to update
             var req = new HttpRequestMessage(HttpMethod.Put, $"api/custombuilds/{currentBuild.build_id}")
             {
@@ -228,7 +272,19 @@
             var resp = await Http.SendAsync(req);
             if (resp.IsSuccessStatusCode)
             {
-                await JS.InvokeVoidAsync("alert", "Konfiguráció frissítve.");
+                // refresh the build from server to ensure the saved name and data are reflected
+                try
+                {
+                    await JS.InvokeVoidAsync("showToast", "Konfiguráció frissítve.", "success", 4000, "bottom-center");
+                    var refreshed = await Http.GetFromJsonAsync<ComputerpartsLibrary.MODEL.Custom_builds>($"api/custombuilds/{currentBuild.build_id}");
+                    if (refreshed != null)
+                    {
+                        currentBuild = refreshed;
+                        editBuildName = currentBuild.name ?? string.Empty;
+                        StateHasChanged();
+                    }
+                }
+                catch { }
             }
             else
             {
@@ -290,6 +346,7 @@
             // keep reference to current opened build so we can update it later
             currentBuild = build;
             isEditing = true;
+            editBuildName = build.name ?? string.Empty;
 
             if (string.IsNullOrEmpty(build.components_json)) return;
 
@@ -350,6 +407,16 @@
 
     private async Task SaveConfigurationAsync()
     {
+        // show modal to enter name before saving
+        showSaveModal = true;
+    }
+
+    private async Task ConfirmSaveAsync()
+    {
+        // proceed with actual save using saveName
+        // hide modal
+        showSaveModal = false;
+
         // only allow saving when authenticated
         if (AuthService == null || !AuthService.IsAuthenticated || AuthService.Token == null)
         {
@@ -361,7 +428,7 @@
         var build = new ComputerpartsLibrary.MODEL.Custom_builds
         {
             User_id = AuthService?.UserId ?? 0,
-            name = "Saved build",
+            name = string.IsNullOrWhiteSpace(saveName) ? "Saved build" : saveName,
             // set status required by DB constraint
             status = "draft",
             total_price = TotalPrice,
@@ -402,6 +469,9 @@
             if (resp.IsSuccessStatusCode)
             {
                 await JS.InvokeVoidAsync("showToast", "Konfiguráció elmentve.", "success", 4000);
+                // reset modal and name
+                saveName = string.Empty;
+                showSaveModal = false;
             }
             else
             {

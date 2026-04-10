@@ -13,7 +13,7 @@ namespace ComputerpartsAPI
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            // Add services to the container.
+            // Szolgáltatások hozzáadása a konténerhez.
 
             builder.Services.AddControllers();
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -39,7 +39,7 @@ namespace ComputerpartsAPI
             builder.Services.AddScoped<IPrebuiltPcCompService, PrebuiltPcCompService>();
             builder.Services.AddScoped<IPrebuiltPcService, PrebuiltPcService>();
 
-            // Register authentication services and controller
+            // Hitelesítési szolgáltatások és vezérlő regisztrálása
             builder.Services.AddScoped<UserAuthService>();
 
             builder.Services.AddCors(options =>
@@ -52,7 +52,7 @@ namespace ComputerpartsAPI
 
             
 
-            // Read JWT settings from configuration (appsettings.json)
+            // JWT beállítások beolvasása a konfigurációból (appsettings.json)
             var jwtKey = builder.Configuration["Jwt:Key"];
             var jwtIssuer = builder.Configuration["Jwt:Issuer"];
             var jwtAudience = builder.Configuration["Jwt:Audience"];
@@ -62,7 +62,7 @@ namespace ComputerpartsAPI
                 throw new InvalidOperationException("Jwt:Key must be set in appsettings.json");
             }
 
-            // Configure JWT authentication
+            // JWT hitelesítés konfigurálása
             builder.Services.AddAuthentication(options =>
             {
                 options.DefaultAuthenticateScheme = Microsoft.AspNetCore.Authentication.JwtBearer.JwtBearerDefaults.AuthenticationScheme;
@@ -89,7 +89,7 @@ namespace ComputerpartsAPI
 
             var app = builder.Build();
 
-            // Configure the HTTP request pipeline.
+            // HTTP kérés feldolgozó csővezeték konfigurálása.
             if (app.Environment.IsDevelopment())
             {
                 app.UseSwagger();

@@ -3,8 +3,9 @@
 @using ComputerpartsFrontendBlazor.Components.Layout
 @inherits LayoutComponentBase
 @inject HttpClient Http
+@inject IJSRuntime JS
 
-<main style="min-height: 75vh;">
+<main>
     <section class="page-header_custom page-header hero-mini">
         <h1>Ajánlatok & Promóciók</h1>
         <p>Jelenlegi kampányaink, limitált leárazásaink és csomag ajánlataink kiemelve, amik elérhetőek áruházunkon.</p>
@@ -27,20 +28,43 @@
             <div class="deal-grid">
                 @foreach (var d in deals)
                 {
-                    <div class="deal-card">
-                        <span class="deal-tag">Ajánlat</span>
-                        <h3>@d.name</h3>
-                        @if (!string.IsNullOrEmpty(d.description))
-                        {
-                            <p class="muted">@d.description</p>
-                        }
-                        <p class="price" style="margin:1rem 0;">@d.price.ToString("C", currencyformat)</p>
-                        <button class="btn">Részletek</button>
+                    <div class="product-card">
+                        <div>
+                            <span class="deal-tag">Ajánlat</span>
+                            <h3>@d.name</h3>
+                            @if (!string.IsNullOrEmpty(d.description))
+                            {
+                                <p class="muted">@d.description</p>
+                            }
+                            <p class="price" style="margin:1rem 0;">@d.price.ToString("C", currencyformat)</p>
+                        </div>
+                        <div>
+                            <button class="btn" @onclick="() => OpenDetails(d)">Részletek</button>
+                        </div>
                     </div>
                 }
             </div>
         }
     </section>
+
+    @if (showBackdrop)
+    {
+        <div class="glassy-backdrop" @onclick="CloseModal"></div>
+    }
+
+    <div class="modal fade @(isAddToCartModalOpen ? "show" : "")" id="developementModal" data-bs-backdrop="false" tabindex="-1" aria-labelledby="developementModalLabel" aria-hidden="@(isAddToCartModalOpen ? "false" : "true")" style="display:@(isAddToCartModalOpen ? "block" : "none");">
+        <div class="modal-dialog modal-lg modal-dialog-scrollable modal-dialog-centered">
+            <div class="modal-content" style="color: white; background-color: #181818; box-shadow: 1px 1px 20px black;">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="developementModalLabel">Funkció fejlesztés alatt (WIP) - Ajánlat részletek</h5>
+                </div>
+                <div class="modal-body">Mivel a weboldal folyamatos fejlesztés alatt áll, ez a funkció a későbbiekben lesz hozzáadva.</div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" @onclick="CloseModal">Bezár</button>
+                </div>
+            </div>
+        </div>
+    </div>
 </main>
 
 @code {
@@ -48,6 +72,10 @@
     private bool isLoading = false;
     private string? errorMessage;
     private System.Globalization.CultureInfo currencyformat = System.Globalization.CultureInfo.GetCultureInfo("en-US");
+    private bool isAddToCartModalOpen = false;
+    private ComputerpartsLibrary.MODEL.Deals? selectedDeal;
+    // modal timing flags removed - CSS controls visibility now
+    private bool showBackdrop = false;
 
     protected override async System.Threading.Tasks.Task OnInitializedAsync()
     {
@@ -74,4 +102,25 @@
         isLoading = false;
         StateHasChanged();
     }
+
+    private async Task OpenDetails(ComputerpartsLibrary.MODEL.Deals deal)
+    {
+        selectedDeal = deal;
+        isAddToCartModalOpen = true;
+        showBackdrop = true;
+        // render and then show modal via JS helper
+        await InvokeAsync(StateHasChanged);
+        try { await JS.InvokeVoidAsync("showModal", "developementModal"); } catch { }
+    }
+
+    private async Task CloseModal()
+    {
+        try { await JS.InvokeVoidAsync("hideModal", "developementModal"); } catch { }
+        isAddToCartModalOpen = false;
+        showBackdrop = false;
+        selectedDeal = null;
+        await InvokeAsync(StateHasChanged);
+    }
+
+    // OnAfterRenderAsync not needed for modal handling anymore
 }

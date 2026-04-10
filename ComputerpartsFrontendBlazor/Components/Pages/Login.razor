@@ -3,6 +3,8 @@
 @using System.Net.Http.Json
 @inject ComputerpartsFrontendBlazor.Services.AuthService AuthService
 @inject NavigationManager Navigation
+@inject IJSRuntime JS
+@using Microsoft.AspNetCore.WebUtilities
 
 <main class="auth-wrap">
     <section class="login-card page-anim">
@@ -19,7 +21,7 @@
             </div>
         </div>
         <div class="form-actions">
-            <button class="btn" @onclick="LoginAsync" disabled="@(IsSubmitting)">
+            <button class="btn" style="width: 100%" @onclick="LoginAsync" disabled="@(IsSubmitting)">
                 @(IsSubmitting ? "Bejelentkezés..." : "Bejelentkezés")
             </button>
         </div>
@@ -52,15 +54,42 @@
     {
         StatusMessage = null;
 
+        // determine returnUrl: prefer explicit query param, fall back to document.referrer
+        var uri = Navigation.ToAbsoluteUri(Navigation.Uri);
+        var qs = QueryHelpers.ParseQuery(uri.Query);
+        string? returnUrl = null;
+        if (qs.TryGetValue("returnUrl", out var vals))
+        {
+            returnUrl = vals.FirstOrDefault();
+        }
+        if (string.IsNullOrEmpty(returnUrl))
+        {
+            try
+            {
+                var referrer = await JS.InvokeAsync<string>("eval", "document.referrer");
+                if (!string.IsNullOrEmpty(referrer))
+                {
+                    // only use referrer if it's same origin
+                    var baseUri = Navigation.BaseUri;
+                    if (referrer.StartsWith(baseUri, StringComparison.OrdinalIgnoreCase))
+                    {
+                        var rel = Navigation.ToBaseRelativePath(referrer);
+                        returnUrl = "/" + rel.TrimStart('/');
+                    }
+                }
+            }
+            catch { }
+        }
+
         if (string.IsNullOrWhiteSpace(Model.UsernameOrEmail))
         {
-            StatusMessage = "Please enter your username or email.";
+            StatusMessage = "Kérlek add meg a felhasználóneved.";
             return;
         }
 
         if (string.IsNullOrEmpty(Model.Password))
         {
-            StatusMessage = "Please enter your password.";
+            StatusMessage = "Kérlek add meg a jelszavad.";
             return;
         }
 
@@ -73,12 +102,35 @@
             {
                 StatusMessage = "Sikeres bejelentkezés. Átirányítás...";
                 await Task.Delay(400);
-                // force reload so other components pick up persisted token
+                // navigate back to returnUrl if valid local path
+                if (!string.IsNullOrEmpty(returnUrl))
+                {
+                    try
+                    {
+                        // prevent open redirect: only allow absolute same-origin or relative paths
+                        if (Uri.TryCreate(returnUrl, UriKind.Absolute, out var abs) )
+                        {
+                            var baseUri = new Uri(Navigation.BaseUri);
+                            if (abs.Scheme == baseUri.Scheme && abs.Host == baseUri.Host && abs.Port == baseUri.Port)
+                            {
+                                Navigation.NavigateTo(abs.PathAndQuery, true);
+                                return;
+                            }
+                        }
+                        else if (returnUrl.StartsWith("/"))
+                        {
+                            Navigation.NavigateTo(returnUrl, true);
+                            return;
+                        }
+                    }
+                    catch { }
+
+                }
                 Navigation.NavigateTo("/", true);
             }
             else
             {
-                StatusMessage = "Bejelentkezés sikertelen. Ellenőrizd a hitelesítő adatokat.";
+                StatusMessage = "Bejelentkezés sikertelen. Kérlek próbáld újra.";
             }
         }
         catch (Exception ex)

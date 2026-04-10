@@ -3,6 +3,8 @@
 @using System.Net.Http.Json
 @inject HttpClient Http
 @inject NavigationManager Navigation
+@inject IJSRuntime JS
+@using Microsoft.AspNetCore.WebUtilities
 
 <main class="auth-wrap">
     <section class="login-card page-anim">
@@ -67,25 +69,25 @@
         // Alapvető, kliens oldali validáció a gyakori hibák elkerüléséhez
         if (string.IsNullOrWhiteSpace(Model.Username))
         {
-            StatusMessage = "Please enter your first and last name.";
+            StatusMessage = "Kérlek adj meg egy felhasználónevet.";
             return;
         }
 
         if (string.IsNullOrWhiteSpace(Model.Email))
         {
-            StatusMessage = "Please enter an email address.";
+            StatusMessage = "Kérlek add meg az Email címed.";
             return;
         }
 
         if (string.IsNullOrEmpty(Model.Password) || Model.Password.Length < 8)
         {
-            StatusMessage = "Password must be at least 8 characters long.";
+            StatusMessage = "A jelszónak legalább 8 karakter hosszúnak kell lennie.";
             return;
         }
 
         if (Model.Password != Model.ConfirmPassword)
         {
-            StatusMessage = "Passwords do not match.";
+            StatusMessage = "A jelszavak nem egyeznek.";
             return;
         }
 
@@ -112,10 +114,26 @@
 
             if (response.IsSuccessStatusCode)
             {
-                // Registration successful - navigate to login
-                StatusMessage = "Registration successful. Redirecting to login...";
-                // small delay to let user read message
+                StatusMessage = "Regisztrálás sikeres. Most jelentkezz be.";
                 await Task.Delay(800);
+                // pass returnUrl from referrer so login can navigate back
+                try
+                {
+                    var referrer = await JS.InvokeAsync<string>("eval", "document.referrer");
+                    if (!string.IsNullOrEmpty(referrer))
+                    {
+                        var baseUri = Navigation.BaseUri;
+                        if (referrer.StartsWith(baseUri, StringComparison.OrdinalIgnoreCase))
+                        {
+                            var rel = Navigation.ToBaseRelativePath(referrer);
+                            var returnUrl = "/" + rel.TrimStart('/');
+                            Navigation.NavigateTo($"/login?returnUrl={Uri.EscapeDataString(returnUrl)}");
+                            return;
+                        }
+                    }
+                }
+                catch { }
+
                 Navigation.NavigateTo("/login");
             }
             else
@@ -124,11 +142,11 @@
                 try
                 {
                     var errorObj = await response.Content.ReadFromJsonAsync<ServerError?>();
-                    StatusMessage = errorObj?.message ?? "Registration failed. Please try again.";
+                    StatusMessage = errorObj?.message ?? "Regisztráció sikertelen. Kérlek próbáld újra.";
                 }
                 catch
                 {
-                    StatusMessage = "Registration failed. Please try again.";
+                    StatusMessage = "Regisztráció sikertelen. Kérlek próbáld újra.";
                 }
             }
         }

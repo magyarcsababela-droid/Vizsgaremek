@@ -25,7 +25,7 @@ namespace ComputerpartsAPI.Controllers
         }
 
         /// <summary>
-        /// Returns the current authenticated user's public info - GET /api/auth/me
+        /// Visszaadja a jelenleg hitelesített felhasználó nyilvános adatait - GET /api/auth/me
         /// </summary>
         [HttpGet("me")]
         [Authorize]
@@ -53,7 +53,7 @@ namespace ComputerpartsAPI.Controllers
         }
 
         /// <summary>
-        /// User registration endpoint - POST /api/auth/register
+        /// Felhasználó regisztráció végpont - POST /api/auth/register
         /// </summary>
         [HttpPost("register")]
         public async Task<ActionResult> RegisterUser([FromBody] RegisterRequest request)
@@ -65,8 +65,8 @@ namespace ComputerpartsAPI.Controllers
                     request.Email,
                     request.Password
                 );
-                // Generate JWT token for the newly created user
-                var jwt = _jwtService.GenerateToken(user.id, user.role);
+                // Generate JWT token for the newly created user (include full user data in token)
+                var jwt = _jwtService.GenerateToken(user);
 
                 // Build response object without sensitive fields
                 var responseUser = new Users
@@ -87,7 +87,7 @@ namespace ComputerpartsAPI.Controllers
         }
 
         /// <summary>
-        /// User login endpoint - POST /api/auth/login
+        /// Felhasználó bejelentkezés végpont - POST /api/auth/login
         /// </summary>
         [HttpPost("login")]
         public async Task<ActionResult<Users>> LoginUser([FromBody] LoginRequest request)
@@ -97,8 +97,8 @@ namespace ComputerpartsAPI.Controllers
             if (user == null)
                 return Unauthorized(new { message = "Invalid username or password" });
 
-            // Generate JWT token
-            var jwt = _jwtService.GenerateToken(user.id, user.role);
+            // Generate JWT token including full user data
+            var jwt = _jwtService.GenerateToken(user);
 
             // Remove sensitive data from response
             var responseUser = new Users
@@ -114,7 +114,7 @@ namespace ComputerpartsAPI.Controllers
         }
 
         /// <summary>
-        /// Admin endpoint to update user role - PUT /api/auth/users/{id}/role
+        /// Admin végpont a felhasználó szerepkörének frissítésére - PUT /api/auth/users/{id}/role
         /// </summary>
         [HttpPut("users/{id}/role")]
         [Authorize(Roles = "Admin")]
@@ -132,7 +132,7 @@ namespace ComputerpartsAPI.Controllers
         }
 
         /// <summary>
-        /// Request model for user registration
+        /// Kérés modell a felhasználói regisztrációhoz
         /// </summary>
         public class RegisterRequest
         {
@@ -151,7 +151,7 @@ namespace ComputerpartsAPI.Controllers
         }
 
         /// <summary>
-        /// Request model for user login
+        /// Kérés modell a bejelentkezéshez
         /// </summary>
         public class LoginRequest
         {
@@ -165,7 +165,7 @@ namespace ComputerpartsAPI.Controllers
         }
 
         /// <summary>
-        /// Request model for role update (admin only)
+        /// Kérés modell szerepkör frissítéshez (csak admin)
         /// </summary>
         public class RoleUpdateRequest
         {

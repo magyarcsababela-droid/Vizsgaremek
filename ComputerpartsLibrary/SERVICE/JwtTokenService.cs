@@ -11,7 +11,7 @@ using System.Collections.Generic;
 namespace ComputerpartsLibrary.SERVICE
 {
     /// <summary>
-    /// JWT (JSON Web Token) token generation and validation service
+    /// JWT (JSON Web Token) token generálásért és validálásért felelős szolgáltatás
     /// </summary>
     public class JwtTokenService
     {
@@ -38,12 +38,18 @@ namespace ComputerpartsLibrary.SERVICE
             }
         }
 
-        public JwtToken GenerateToken(int userId, string role)
+        // Generate token using full user object so we can include all user data as claims
+        public JwtToken GenerateToken(ComputerpartsLibrary.MODEL.Users user)
         {
-            var claims = new[]
+            var claims = new List<Claim>
             {
-                new Claim(ClaimTypes.NameIdentifier, userId.ToString()),
-                new Claim(ClaimTypes.Role, role),
+                new Claim(ClaimTypes.NameIdentifier, user.id.ToString()),
+                new Claim(ClaimTypes.Role, user.role ?? string.Empty),
+                new Claim("authEmail", user.email ?? string.Empty),
+                new Claim("authUsername", user.username ?? string.Empty),
+                new Claim("authUserId", user.id.ToString()),
+                // store created_at in ISO 8601 format
+                new Claim("authCreatedAt", user.created_at.ToString("o"))
             };
 
             var expires = DateTime.UtcNow.AddMinutes(_expireMinutes);
@@ -66,8 +72,8 @@ namespace ComputerpartsLibrary.SERVICE
             {
                 Token = tokenString,
                 Expiration = new DateTimeOffset(expires),
-                UserId = userId,
-                Role = role
+                UserId = user.id,
+                Role = user.role ?? string.Empty
             };
         }
         
@@ -89,33 +95,18 @@ namespace ComputerpartsLibrary.SERVICE
                     ValidAudience = _audience,
                     ClockSkew = TimeSpan.Zero
                 };
-                
-                var validatedToken = jwtHandler.ValidateToken(token, tokenValidationParameters, out SecurityToken securityToken);
-                
-                if (securityToken is JwtSecurityToken jwtSecurityToken)
-                {
-                    // Convert Claims to ClaimsIdentity for ClaimsPrincipal constructor
-                    var claimsIdentities = new List<ClaimsIdentity>();
-                    foreach (var claim in jwtSecurityToken.Claims)
-                    {
-                        var identity = new ClaimsIdentity();
-                        identity.AddClaim(claim);
-                        claimsIdentities.Add(identity);
-                    }
-                    return new ClaimsPrincipal(claimsIdentities);
-                }
-                
-                throw new InvalidOperationException("Invalid token type");
+
+                var principal = jwtHandler.ValidateToken(token, tokenValidationParameters, out SecurityToken securityToken);
+                return principal;
             }
             catch (Exception ex)
             {
-                // Token validation failed - could be expired, invalid signature, etc.
                 throw new UnauthorizedAccessException($"Token validation failed: {ex.Message}", ex);
             }
         }
         
         /// <summary>
-        /// Creates a JWT token string
+        /// Létrehoz egy JWT token stringet
         /// </summary>
         private string CreateJwtTokenString(Claim[] claims)
         {
@@ -127,17 +118,17 @@ namespace ComputerpartsLibrary.SERVICE
         }
         
         /// <summary>
-        /// Creates the JWT header
+        /// Létrehozza a JWT fejlécet
         /// </summary>
         private string CreateHeader()
         {
-            // JsonSerializer is a static class - call Serialize() directly
+            // A JsonSerializer statikus osztály - közvetlenül meghívjuk a Serialize()-t
             var headerJson = System.Text.Json.JsonSerializer.Serialize(new { alg = "HS256", typ = "JWT" });
             return Convert.ToBase64String(Encoding.UTF8.GetBytes(headerJson));
         }
         
         /// <summary>
-        /// Creates the JWT payload
+        /// Létrehozza a JWT payload-ot
         /// </summary>
         private string CreatePayload(Claim[] claims)
         {
@@ -147,13 +138,13 @@ namespace ComputerpartsLibrary.SERVICE
                 payload[claim.Type] = claim.Value;
             }
             
-            // JsonSerializer is a static class - call Serialize() directly
+            // A JsonSerializer statikus osztály - közvetlenül meghívjuk a Serialize()-t
             var payloadJson = System.Text.Json.JsonSerializer.Serialize(payload);
             return Convert.ToBase64String(Encoding.UTF8.GetBytes(payloadJson));
         }
         
         /// <summary>
-        /// Creates the JWT signature
+        /// Létrehozza a JWT aláírást
         /// </summary>
         private string CreateSignature(string header, string payload)
         {
@@ -164,11 +155,11 @@ namespace ComputerpartsLibrary.SERVICE
         }
         
         /// <summary>
-        /// Creates a symmetric key for signing
+        /// Létrehoz egy szimmetrikus kulcsot az aláíráshoz
         /// </summary>
         private SymmetricSecurityKey CreateSymmetricKey()
         {
-            // Derive a 256-bit key from the secret using SHA256 so it is stable across restarts
+            // 256-bites kulcsot állítunk elő a titoktól SHA256 használatával, így stabil marad újraindítások között
             using var sha = System.Security.Cryptography.SHA256.Create();
             var hash = sha.ComputeHash(Encoding.UTF8.GetBytes(_secretKey));
             return new SymmetricSecurityKey(hash);

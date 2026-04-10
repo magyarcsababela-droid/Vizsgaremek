@@ -1,7 +1,27 @@
 ﻿@page "/parts"
 @rendermode InteractiveServer
 @using ComputerpartsFrontendBlazor.Components.Layout
+@using ComputerpartsLibrary.MODEL
+@using System.Net.Http.Json
+@inject HttpClient Http
+@inject IJSRuntime JS
 @inherits LayoutComponentBase
+
+<style>
+    /* Component-scoped hover styles to avoid relying on external CSS caching */
+    .part-row {
+        transition: transform .28s ease, box-shadow .28s ease, background .28s ease;
+        cursor: pointer; /* show pointer to indicate clickability */
+    }
+    .part-row:hover,
+    .part-row.hover-active {
+        transform: translateY(-4px);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.45);
+        background: linear-gradient(90deg, rgba(52,152,219,0.06), rgba(255,255,255,0.02));
+        border-left: 4px solid var(--primary);
+        cursor: pointer;
+    }
+</style>
 
 <main>
     <section class="page-header_custom page-header hero-mini">
@@ -9,23 +29,182 @@
         <p>Fedezd fel a fő alktrész kategóriáinkat és ugorj egyből arra az alkatrészre, amire szükséged van a következő gépednek!</p>
     </section>
     <section class="page-section">
-        <h2>Top categories</h2>
+        <h2>Kiemelt kategóriák</h2>
         <div class="part-list">
-            <div class="part-row"><div><strong>Processors</strong><div class="muted">Intel Core, AMD Ryzen, workstation CPU-k</div></div><div class="muted">Gaming, produktivitás és tartalomgyártókra optimalizált opciók különböző magszámokkal és órajelekkel.</div><div><span class="price">$129-tól</span></div></div>
-            <div class="part-row"><div><strong>Graphics Cards</strong><div class="muted">NVIDIA GeForce & AMD Radeon</div></div><div class="muted">Magas teljesítményű gaming, renderelés és AI-ra felkészült grafikus kártyák belépő szinttől zászlóshajóig (Flagship-ig).</div><div><span class="price">$249-tól</span></div></div>
-            <div class="part-row"><div><strong>Memory</strong><div class="muted">DDR4 and DDR5 kit-ek</div></div><div class="muted">Gyors RAM kit-ek, több féle kapacitással és órajellel, gaming-re és több-feladatra hangolva.</div><div><span class="price">$59-tól</span></div></div>
-            <div class="part-row"><div><strong>Storage</strong><div class="muted">NVMe SSD, SATA SSD, HDD</div></div><div class="muted">Boot-meghajtók, játék könyvtárak és archíválásért felelős tárolók kiemelkedő olvasási- és írási teljesítményekkel.</div><div><span class="price">$44-tól</span></div></div>
-            <div class="part-row"><div><strong>Cooling</strong><div class="muted">Léghűtők, All-In-One folyadék hűtők, valamint ventillátorok</div></div><div class="muted">Tartsd a hőmérsékleteket kordában halk, minimalista toronyhűtővel vagy extrém dizájnú, RGB-vel felszerelt folyadék hűtő megoldásokkal.</div><div><span class="price">$29-tól</span></div></div>
-            <div class="part-row"><div><strong>Cases & PSUs</strong><div class="muted">Forma, légáramlat és megbízhatóság</div></div><div class="muted">Válassz letisztult vagy extrém külsőt és megbízható Tápegységet a géped szakszerű befejezéséhez.</div><div><span class="price">$79-tól</span></div></div>
+            <div class="part-row @(hoveredType == 8 ? "hover-active" : null)" @onclick="() => DebugAndLoad(8)" @onmouseover="() => SetHover(8)" @onmouseout="ClearHover"><div><strong>Alaplapok</strong><div class="muted">Az aklatrészek közti kapcsolatot bíztosítja</div></div><div class="muted">Válassz megfelelő alaplapot, ami a számítógép alapjaként szolgál.</div><div>Akár <span class="price">@GetMinPrice(8)-tól</span></div></div>
+            <div class="part-row @(hoveredType == 1 ? "hover-active" : null)" @onclick="() => DebugAndLoad(1)" @onmouseover="() => SetHover(1)" @onmouseout="ClearHover"><div><strong>Processzorok</strong><div class="muted">Intel Core, AMD Ryzen, workstation CPU-k</div></div><div class="muted">Gaming, produktivitás és tartalomgyártókra optimalizált opciók különböző magszámokkal és órajelekkel.</div><div>Akár <span class="price">@GetMinPrice(1)-tól</span></div></div>
+            <div class="part-row @(hoveredType == 2 ? "hover-active" : null)" @onclick="() => DebugAndLoad(2)" @onmouseover="() => SetHover(2)" @onmouseout="ClearHover"><div><strong>Videókártyák</strong><div class="muted">NVIDIA GeForce & AMD Radeon</div></div><div class="muted">Magas teljesítményű gaming, renderelés és AI-ra felkészült grafikus kártyák belépő szinttől zászlóshajóig (Flagship-ig).</div><div>Akár <span class="price">@GetMinPrice(2)-tól</span></div></div>
+            <div class="part-row @(hoveredType == 3 ? "hover-active" : null)" @onclick="() => DebugAndLoad(3)" @onmouseover="() => SetHover(3)" @onmouseout="ClearHover"><div><strong>Memória</strong><div class="muted">DDR4 and DDR5 kit-ek</div></div><div class="muted">Gyors RAM kit-ek, több féle kapacitással és órajellel, gaming-re és több-feladatra hangolva.</div><div>Akár <span class="price">@GetMinPrice(3)-tól</span></div></div>
+            <div class="part-row @(hoveredType == 4 ? "hover-active" : null)" @onclick="() => DebugAndLoad(4)" @onmouseover="() => SetHover(4)" @onmouseout="ClearHover"><div><strong>Tárhely</strong><div class="muted">NVMe SSD, SATA SSD, HDD</div></div><div class="muted">Boot-meghajtók, játék könyvtárak és archíválásért felelős tárolók kiemelkedő olvasási- és írási teljesítményekkel.</div><div>Akár <span class="price">@GetMinPrice(4)-tól</span></div></div>
+            <div class="part-row @(hoveredType == 5 ? "hover-active" : null)" @onclick="() => DebugAndLoad(5)" @onmouseover="() => SetHover(5)" @onmouseout="ClearHover"><div><strong>Hűtés</strong><div class="muted">Léghűtők, All-In-One folyadék hűtők, valamint ventillátorok</div></div><div class="muted">Tartsd a hőmérsékleteket kordában halk, minimalista toronyhűtővel vagy extrém dizájnú, RGB-vel felszerelt folyadék hűtő megoldásokkal.</div><div>Akár <span class="price">@GetMinPrice(5)-tól</span></div></div>
+            <div class="part-row @(hoveredType == 6 ? "hover-active" : null)" @onclick="() => DebugAndLoad(6)" @onmouseover="() => SetHover(6)" @onmouseout="ClearHover"><div><strong>Gépházak</strong><div class="muted">Forma, légáramlat és megbízhatóság</div></div><div class="muted">Válassz letisztult vagy extrém külsőt.</div><div> Akár <span class="price">@GetMinPrice(6)-tól</span></div></div>
+            <div class="part-row @(hoveredType == 7 ? "hover-active" : null)" @onclick="() => DebugAndLoad(7)" @onmouseover="() => SetHover(7)" @onmouseout="ClearHover"><div><strong>Tápegységek</strong><div class="muted">A számítógép áramellátása</div></div><div class="muted">Válassz megbízható Tápegységet a géped szakszerű befejezéséhez.</div><div>Akár <span class="price">@GetMinPrice(7)-tól</span></div></div>
         </div>
     </section>
+    @if (showBackdrop)
+    {
+        <div class="glassy-backdrop active" @onclick="CloseModal"></div>
+    }
+
+    <div class="modal fade" id="componentsModal" data-bs-backdrop="false" tabindex="-1" aria-labelledby="componentsModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-scrollable modal-dialog-centered">
+            <div class="modal-content" style="color: white; background-color: #181818; box-shadow: 1px 1px 20px black;">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="componentsModalLabel">Elérhető alkatrészek</h5>
+                </div>
+                <div class="modal-body">
+                    @if (isLoading)
+                    {
+                        <div>Betöltés...</div>
+                    }
+                    else if (!string.IsNullOrEmpty(errorMessage))
+                    {
+                        <div class="alert alert-danger">@errorMessage</div>
+                    }
+                    else if (filteredComponents == null || filteredComponents.Count == 0)
+                    {
+                        <p>Nincs találat ebben a kategóriában.</p>
+                    }
+                    else
+                    {
+                        <ul class="list-group">
+                            @foreach (var comp in filteredComponents)
+                            {
+                                <li class="list-group-item d-flex justify-content-between align-items-start" style="background-color: rgba(0, 0, 0, 0.1); color: white;">
+                                    <div class="ms-2 me-auto">
+                                        <div class="fw-bold">@comp.name</div>
+                                        @comp.description
+                                    </div>
+                                    <span class="badge bg-primary rounded-pill">@comp.price.ToString("C", currencyformat)</span>
+                                </li>
+                            }
+                        </ul>
+                    }
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" @onclick="CloseModal">Bezár</button>
+                </div>
+            </div>
+        </div>
+    </div>
     <section class="info-grid">
         <div class="info-card"><h3>Építés-kész szűrők</h3><p class="muted"> Találd meg a megelelő alkatrészeket foglalat, memória típus, teljesítmény igény és méret szerint, a kompatibilitása problémák csökkentéséhez.</p><a class="small-link" href="/configurator">Konfigurátor megnyitása</a></div>
+        @*Az összehasonlítás, egy fejlesztési lehetősgé a jövőre tekintve.*@
         @* <div class="info-card"><h3>Fast comparisons</h3><p class="muted">Compare specs, pricing and use-case notes  before adding a part to your shortlist.</p><a class="small-link" href="product.html">Példa termék megnyitása</a></div> *@
         <div class="info-card"><h3>Segítségre van szükséged?</h3><p class="muted">Ha nem vagy benne biztos, mi hogy működik együtt, a "segítség" oldal gyors megoldást biztosít a gyakori kérdésekre.</p><a class="small-link" href="/support">Segítségkérés</a></div>
     </section>
 </main>
 
 @code {
+    private List<Components>? filteredComponents;
+    private bool isLoading = false;
+    private string? errorMessage;
+    private bool showBackdrop = false;
+    private System.Globalization.CultureInfo currencyformat = System.Globalization.CultureInfo.GetCultureInfo("en-US");
 
+    private async Task DebugAndLoad(int typeId)
+    {
+        errorMessage = null;
+        isLoading = true;
+        StateHasChanged();
+        await LoadComponentsByType(typeId);
+        showBackdrop = true;
+        try { await JS.InvokeVoidAsync("showModal", "componentsModal"); } catch { }
+        isLoading = false;
+    }
+
+    private async Task LoadComponentsByType(int typeId)
+    {
+        isLoading = true;
+        errorMessage = null;
+        filteredComponents = null;
+        StateHasChanged();
+        try
+        {
+            var all = await Http.GetFromJsonAsync<List<Components>>("api/components");
+            if (all == null) { filteredComponents = new List<Components>(); errorMessage = "Nem sikerült lekérni az adatokat."; }
+            else filteredComponents = all.Where(x => x.type_id == typeId).ToList();
+            // update cache
+            try
+            {
+                if (filteredComponentsCache == null) filteredComponentsCache = new();
+                filteredComponentsCache[typeId] = filteredComponents;
+            }
+            catch { }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = ex.Message;
+            filteredComponents = new List<Components>();
+        }
+        isLoading = false;
+        StateHasChanged();
+    }
+
+    private async Task CloseModal()
+    {
+        try { await JS.InvokeVoidAsync("hideModal", "componentsModal"); } catch { }
+        showBackdrop = false;
+        StateHasChanged();
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Preload all components once to compute minimum prices per type
+        try
+        {
+            var all = await Http.GetFromJsonAsync<List<Components>>("api/components");
+            if (all != null)
+            {
+                // group by type and cache
+                filteredComponentsCache = all.GroupBy(x => x.type_id).ToDictionary(g => g.Key, g => g.ToList());
+            }
+        }
+        catch
+        {
+            // ignore preload errors — GetMinPrice will show placeholder
+        }
+    }
+
+    // Helper to get the minimum price for a type. Returns formatted price or placeholder.
+    private string GetMinPrice(int typeId)
+    {
+        try
+        {
+            // attempt to use already loaded filteredComponents if applicable
+            // otherwise fetch synchronously from server would be undesirable here, so show placeholder
+            // We'll cache last components query in memory
+            var all = filteredComponentsCache?.GetValueOrDefault(typeId);
+            if (all == null)
+            {
+                // Not cached: return placeholder until user opens the modal which loads actual data
+                return "-";
+            }
+
+            var min = all.MinBy(c => c.price);
+            if (min == null) return "-";
+            return min.price.ToString("C", currencyformat);
+        }
+        catch
+        {
+            return "-";
+        }
+    }
+
+    // small in-memory cache per type to allow GetMinPrice to display values after first load
+    private Dictionary<int, List<Components>>? filteredComponentsCache = new();
+
+    private int? hoveredType;
+
+    private void SetHover(int t)
+    {
+        hoveredType = t;
+        StateHasChanged();
+    }
+
+    private void ClearHover()
+    {
+        hoveredType = null;
+        StateHasChanged();
+    }
 }

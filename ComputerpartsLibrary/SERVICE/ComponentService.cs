@@ -21,7 +21,7 @@ namespace ComputerpartsLibrary.SERVICE
         public async Task AddComponentAsync(Components comp)
         {
             await _service.AddAsync(comp);
-            _service.SaveChanges();
+            await _service.SaveChangesAsync();
         }
         public async Task DeleteComponentAsync(int id)
         {
@@ -29,7 +29,7 @@ namespace ComputerpartsLibrary.SERVICE
             if (entity != null)
             {
                 _service.Components.Remove(entity);
-                _service.SaveChanges();
+                await _service.SaveChangesAsync();
             }
         }
         public async Task<Components> GetComponentByIdAsync(int id)

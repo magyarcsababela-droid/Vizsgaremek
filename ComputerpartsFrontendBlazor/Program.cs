@@ -10,23 +10,23 @@ namespace ComputerpartsFrontendBlazor
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            // Add services to the container.
+            // Szolgáltatások hozzáadása a konténerhez.
             builder.Services.AddRazorComponents()
                 .AddInteractiveServerComponents();
 
-            // Register HttpClient for server-side components (base address can be overridden via configuration "ApiBaseUrl")
+            // HttpClient regisztrálása a szerver oldali komponensekhez (az alap cím felülírható a konfigurációban az "ApiBaseUrl"-lel)
             var apiBase = builder.Configuration["ApiBaseUrl"] ?? "https://localhost:44369/";
             builder.Services.AddScoped(sp => new HttpClient
             {
                 BaseAddress = new Uri(apiBase)
             });
 
-            // Add auth service for token storage
+            // Hitelesítési szolgáltatás hozzáadása a token tárolásához
             builder.Services.AddScoped<ComputerpartsFrontendBlazor.Services.AuthService>();
 
             var app = builder.Build();
 
-            // Configure the HTTP request pipeline.
+            // HTTP kérés-feldolgozó csővezeték konfigurálása.
             if (!app.Environment.IsDevelopment())
             {
                 app.UseExceptionHandler("/Error");

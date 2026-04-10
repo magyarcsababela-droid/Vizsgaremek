@@ -12,6 +12,17 @@
     --transition: .4s ease;
 }
 
+/* Ensure part-row hover rules win (more specific) and are applied after other declarations */
+.part-list .part-row {
+    transition: transform var(--transition), box-shadow var(--transition), background var(--transition);
+}
+.part-list .part-row:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.45);
+    background: linear-gradient(90deg, rgba(52,152,219,0.06), rgba(255,255,255,0.02));
+    border-left: 4px solid var(--primary);
+}
+
  /*2. Global styles */
 *, *::before, *::after {
     box-sizing: border-box;
@@ -138,7 +149,6 @@ img {
         content: "";
         position: absolute;
         inset: 0;
-        background: url('https://images.unsplash.com/photo-1587829741308-e9f6d1e4a3c6?auto=format&fit=crop&w=1500&q=80') center/cover no-repeat;
         filter: brightness(.5);
     }
 
@@ -321,6 +331,33 @@ img {
     gap: .7rem;
 }
 
+/* Parts list hover effect */
+.part-list {
+    display: flex;
+    flex-direction: column;
+    gap: .6rem;
+}
+.part-row {
+    padding: .9rem 1rem;
+    border-radius: 8px;
+    transition: transform var(--transition), box-shadow var(--transition), background var(--transition);
+}
+    .part-row:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.45);
+        background: linear-gradient(90deg, rgba(52,152,219,0.06), rgba(255,255,255,0.02));
+        border-left: 4px solid var(--primary);
+    }
+
+    /* programmatic hover class used by Blazor handlers when native :hover may be blocked */
+    .part-row.hover-active {
+        transform: translateY(-4px);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.45);
+        background: linear-gradient(90deg, rgba(52,152,219,0.06), rgba(255,255,255,0.02));
+        border-left: 4px solid var(--primary);
+    }
+
+
 /* Admin responsive tweaks */
 .admin-toolbar {
     display: flex;
@@ -379,6 +416,26 @@ img {
 .toast-custom.toast-success { background:#198754; color:white; }
 .toast-custom.toast-warning { background:#ffc107; color:black; }
 
+/* Admin page responsiveness */
+.admin-toolbar { display:flex; gap:1rem; align-items:center; justify-content:space-between; flex-wrap:wrap; }
+.admin-sections { display:flex; gap:.5rem; flex-wrap:wrap; }
+.admin-actions { display:flex; gap:.5rem; align-items:center; flex-wrap:wrap; }
+.admin-search { padding:.45rem .6rem; border-radius:6px; border:1px solid rgba(255,255,255,.06); background:transparent; color:var(--text-primary); }
+.table-responsive { overflow:auto; }
+.admin-form { border: 1px solid #3498db; border-radius: 10px; padding: 20px; background-color: #2b2b2b; box-shadow: 1px 1px 20px black; max-width: 500px; margin: 1rem auto; }
+
+@media(max-width:768px) {
+    .admin-toolbar { flex-direction:column; align-items:stretch; }
+    .admin-actions { justify-content:space-between; }
+    .admin-search { flex:1; width:100%; }
+    .table-responsive table { font-size: .9rem; }
+    .admin-form { width: 95%; padding: 14px; }
+    .table thead { display:none; }
+    .table tbody tr { display:block; margin-bottom: .8rem; border-bottom:1px solid rgba(255,255,255,.04); padding-bottom:.6rem; }
+    .table tbody td { display:flex; justify-content:space-between; padding:.35rem 0; }
+    .table tbody td::before { content: attr(data-label); font-weight:600; margin-right:.5rem; color:var(--text-secondary); }
+}
+
  Glassy modal styles 
 .modal-backdrop,
 .modal-backdrop.show {
@@ -391,7 +448,8 @@ img {
 }
 
 .modal {
-    z-index: 1050 !important;
+    /* Ensure modal is above other UI elements and backdrops */
+    z-index: 3000 !important;
 }
 
 .modal-content {
@@ -408,7 +466,8 @@ img {
 .glassy-backdrop {
     position: fixed;
     inset: 0;
-    z-index: 1040;
+    /* keep this under the actual modal/backdrop so it doesn't cover modals */
+    z-index: 2400;
     background-color: rgba(10,10,15,0.45);
     -webkit-backdrop-filter: blur(10px) saturate(120%);
     backdrop-filter: blur(10px) saturate(120%);
@@ -447,29 +506,49 @@ img {
     }
 
  /*7. Footer */
-.footer {
-    background: rgba(24,24,24,.9);
-    color: var(--text-secondary);
-    text-align: center;
-    padding: 2rem 0;
-    margin-top: 15%;
-    position: sticky;
-}
+ .footer {
+     background: rgba(24,24,24,.9);
+     color: var(--text-secondary);
+     text-align: center;
+     padding: 1.5rem 1rem;
+     margin-top: 2rem;
+     position: static; /* make footer flow naturally on the page */
+     width: 100%;
+     box-sizing: border-box;
+ }
 
-.footer-links {
-    display: flex;
-    gap: 1.6rem;
-    justify-content: center;
-    margin-bottom: .8rem;
-}
+ .footer-links {
+     display: flex;
+     gap: 1rem;
+     justify-content: center;
+     margin-bottom: .6rem;
+     flex-wrap: wrap; /* allow links to wrap on small screens */
+     padding-inline: .5rem;
+ }
 
-    .footer-links a {
-        color: var(--text-secondary);
-    }
+ .footer-links a, .footer-links .footer-link {
+     color: var(--text-secondary);
+     display: inline-block;
+     padding: .25rem .5rem;
+     white-space: nowrap;
+ }
 
-        .footer-links a:hover {
-            color: var(--primary);
-        }
+ .footer-links a:hover, .footer-links .footer-link:hover {
+     color: var(--primary);
+ }
+
+ .footer p {
+     font-size: .9rem;
+     color: var(--text-secondary);
+     margin: 0 auto;
+     max-width: 960px;
+     padding: 0 .5rem;
+ }
+
+ @media (max-width: 480px) {
+     .footer-links { gap: .6rem; }
+     .footer p { font-size: .85rem; }
+ }
 
  /*8. Mobile tweaks */
 @media(max-width:768px) {
