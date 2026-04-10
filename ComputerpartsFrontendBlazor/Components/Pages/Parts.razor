@@ -11,6 +11,7 @@
     /* Component-scoped hover styles to avoid relying on external CSS caching */
     .part-row {
         transition: transform .28s ease, box-shadow .28s ease, background .28s ease;
+        cursor: pointer; /* show pointer to indicate clickability */
     }
     .part-row:hover,
     .part-row.hover-active {
@@ -18,6 +19,7 @@
         box-shadow: 0 10px 20px rgba(0,0,0,0.45);
         background: linear-gradient(90deg, rgba(52,152,219,0.06), rgba(255,255,255,0.02));
         border-left: 4px solid var(--primary);
+        cursor: pointer;
     }
 </style>
 

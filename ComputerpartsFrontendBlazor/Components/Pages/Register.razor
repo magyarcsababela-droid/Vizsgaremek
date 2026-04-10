@@ -3,6 +3,8 @@
 @using System.Net.Http.Json
 @inject HttpClient Http
 @inject NavigationManager Navigation
+@inject IJSRuntime JS
+@using Microsoft.AspNetCore.WebUtilities
 
 <main class="auth-wrap">
     <section class="login-card page-anim">
@@ -114,6 +116,24 @@
             {
                 StatusMessage = "Regisztrálás sikeres. Most jelentkezz be.";
                 await Task.Delay(800);
+                // pass returnUrl from referrer so login can navigate back
+                try
+                {
+                    var referrer = await JS.InvokeAsync<string>("eval", "document.referrer");
+                    if (!string.IsNullOrEmpty(referrer))
+                    {
+                        var baseUri = Navigation.BaseUri;
+                        if (referrer.StartsWith(baseUri, StringComparison.OrdinalIgnoreCase))
+                        {
+                            var rel = Navigation.ToBaseRelativePath(referrer);
+                            var returnUrl = "/" + rel.TrimStart('/');
+                            Navigation.NavigateTo($"/login?returnUrl={Uri.EscapeDataString(returnUrl)}");
+                            return;
+                        }
+                    }
+                }
+                catch { }
+
                 Navigation.NavigateTo("/login");
             }
             else

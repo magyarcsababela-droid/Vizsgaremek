@@ -14,7 +14,7 @@ using System.Threading.Tasks;
 namespace ComputerpartsLibrary.SERVICE
 {
     /// <summary>
-    /// User authentication service for login and registration
+    /// Felhasználói hitelesítési szolgáltatás bejelentkezéshez és regisztrációhoz
     /// </summary>
     public class UserAuthService
     {
@@ -27,7 +27,7 @@ namespace ComputerpartsLibrary.SERVICE
         }
         
         /// <summary>
-        /// Registers a new user with password hashing
+        /// Új felhasználó regisztrálása jelszó hash-eléssel
         /// </summary>
         public Users RegisterUser(string username, string email, string password)
         {
@@ -66,7 +66,7 @@ namespace ComputerpartsLibrary.SERVICE
         }
 
         /// <summary>
-        /// Authenticates a user with their credentials
+        /// Felhasználó hitelesítése hitelesítő adatok alapján
         /// </summary>
         public Users? LoginUser(string username, string password)
         {
@@ -89,7 +89,7 @@ namespace ComputerpartsLibrary.SERVICE
         }
 
         /// <summary>
-        /// Updates a user's role (admin privileges)
+        /// Felhasználó szerepkörének frissítése (admin jogosultságok)
         /// </summary>
         public void UpdateUserRole(int userId, string newRole)
         {
@@ -106,7 +106,7 @@ namespace ComputerpartsLibrary.SERVICE
         }
 
         /// <summary>
-        /// Deletes a user account
+        /// Felhasználói fiók törlése
         /// </summary>
         public bool DeleteUser(int userId)
         {

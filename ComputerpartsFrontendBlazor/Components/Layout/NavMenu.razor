@@ -48,10 +48,10 @@
                             <img src="Images/profile_user_avatar_people_icon_219228.png" alt="User" style="border-radius: 50%; width: 30px; height: 30px;" />
                         </a>
                         <div class="dropdown-menu">
-                            <div style="color:lightgreen; font-weight: 10; font-size: 20px; padding: 10px 10px 0px 10px;">@(string.IsNullOrEmpty(AuthService.Username) ? "(nincs felhasználónév)" : AuthService.Username)</div>
+                            <div style="color:lightgreen; font-weight: 10; font-size: 1.5rem; padding: 5px 5px 0px 5px;">@(string.IsNullOrEmpty(AuthService.Username) ? "(nincs felhasználónév)" : AuthService.Username)</div>
                             @if (!string.IsNullOrEmpty(AuthService.Email))
                             {
-                                <div style="color:#ccc; font-size:0.85rem; padding: 0 10px 10px 10px;">@AuthService.Email</div>
+                                <div style="color:#ccc; font-size:0.85rem; padding: 0 5px 5px 5px;">@AuthService.Email</div>
                             }
                             
                             @if (AuthService?.IsAuthenticated == true)
@@ -94,10 +94,10 @@
                                 <img src="Images/profile_user_avatar_people_icon_219228.png" alt="User" style="border-radius: 50%; width: 30px; height: 30px;" />
                             </a>
                             <div class="dropdown-menu">
-                                <div style="color:lightgreen; font-weight: 10; font-size: 20px; padding: 10px 10px 0px 10px;">@(string.IsNullOrEmpty(AuthService.Username) ? "(nincs felhasználónév)" : AuthService.Username)</div>
+                                <div style="color:lightgreen; font-weight: 10; font-size: 1.5rem; padding: 5px 5px 0px 5px;">@(string.IsNullOrEmpty(AuthService.Username) ? "(nincs felhasználónév)" : AuthService.Username)</div>
                                 @if (!string.IsNullOrEmpty(AuthService.Email))
                                 {
-                                    <div style="color:#ccc; font-size:0.85rem; padding: 0 10px 10px 10px;">@AuthService.Email</div>
+                                    <div style="color:#ccc; font-size:0.85rem; padding: 0 5px 5px 5px;">@AuthService.Email</div>
                                 }
 
                                 @if (string.Equals(AuthService.Role, "Admin", System.StringComparison.OrdinalIgnoreCase))

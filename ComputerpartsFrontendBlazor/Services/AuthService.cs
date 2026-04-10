@@ -29,7 +29,7 @@ namespace ComputerpartsFrontendBlazor.Services
             _js = js;
         }
 
-        // Expose a PUT helper that includes the current token explicitly on the request
+        // PUT segéd: explicit Authorization fejléccel a kérésen
         public async Task<HttpResponseMessage> PutAsJsonAsync<T>(string url, T payload)
         {
             var req = new HttpRequestMessage(HttpMethod.Put, url)
@@ -45,7 +45,7 @@ namespace ComputerpartsFrontendBlazor.Services
             return await _http.SendAsync(req);
         }
 
-        // Expose a DELETE helper that includes the current token explicitly on the request
+        // DELETE segéd: explicit Authorization fejléccel a kérésen
         public async Task<HttpResponseMessage> DeleteAsync(string url)
         {
             var req = new HttpRequestMessage(HttpMethod.Delete, url);
@@ -56,7 +56,7 @@ namespace ComputerpartsFrontendBlazor.Services
             return await _http.SendAsync(req);
         }
 
-        // Expose a POST helper that includes the current token explicitly on the request
+        // POST segéd: explicit Authorization fejléccel a kérésen
         public async Task<HttpResponseMessage> PostAsJsonAsync<T>(string url, T payload)
         {
             // build request with explicit Authorization header to avoid relying on DefaultRequestHeaders
@@ -78,7 +78,7 @@ namespace ComputerpartsFrontendBlazor.Services
             return await _http.SendAsync(req);
         }
 
-        // GET helper that includes the current token explicitly on the request and deserializes JSON
+        // GET segéd: explicit Authorization fejléccel lekéri és deserializálja a JSON-t
         public async Task<T?> GetJsonAsync<T>(string url)
         {
             var req = new HttpRequestMessage(HttpMethod.Get, url);
@@ -109,7 +109,7 @@ namespace ComputerpartsFrontendBlazor.Services
                 var user = await resp.Content.ReadFromJsonAsync<ComputerpartsLibrary.MODEL.Users>();
                 if (user != null)
                 {
-                    // prefer token claims as source of truth; update in-memory values from server only if missing
+                    // a tokenban lévõ claim-eket tekintjük fõ forrásnak; a szerverrõl csak hiányzó mezõket töltünk be
                     if (string.IsNullOrEmpty(Username) && !string.IsNullOrEmpty(user.username)) Username = user.username;
                     if (string.IsNullOrEmpty(Email) && !string.IsNullOrEmpty(user.email)) Email = user.email;
                     if (string.IsNullOrEmpty(Role) && !string.IsNullOrEmpty(user.role)) Role = user.role;
@@ -140,19 +140,19 @@ namespace ComputerpartsFrontendBlazor.Services
                     return;
                 }
 
-                // Basic client-side validation: try to decode token and check expiry
+                // Alapvetõ kliens oldali ellenõrzés: dekódoljuk a tokent és ellenõrizzük a lejáratot
                 try
                 {
                     var handler = new System.IdentityModel.Tokens.Jwt.JwtSecurityTokenHandler();
                     var jwt = handler.ReadJwtToken(token);
                     if (jwt.ValidTo < DateTime.UtcNow)
                     {
-                        // token expired client-side -> force logout
+                    // token lejárt kliens oldalon -> kijelentkeztetjük a felhasználót
                         await LogoutAsync();
                         return;
                     }
 
-                    // token looks valid locally: set and extract claims as source of user info
+                    // token helyileg érvényesnek tûnik: beállítjuk és kinyerjük a claim-eket
                     Token = token;
                     PopulateFromToken(token);
                     _http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", Token);
@@ -165,8 +165,8 @@ namespace ComputerpartsFrontendBlazor.Services
                     return;
                 }
 
-                // Verify server will accept the token: request current user
-                // Optionally verify token on server; if server rejects, force logout
+                // Ellenõrizzük, hogy a szerver is elfogadja-e a tokent: kérjük le a jelenlegi felhasználót
+                // Ha a szerver elutasítja, kijelentkeztetjük a felhasználót
                 try
                 {
                     var resp = await _http.GetAsync("api/auth/me");
@@ -183,7 +183,7 @@ namespace ComputerpartsFrontendBlazor.Services
                     return;
                 }
 
-                // notify subscribers that auth state may have changed
+                // értesítjük az elõfizetõket, hogy az auth állapot megváltozhatott
                 AuthStateChanged?.Invoke();
             }
             catch

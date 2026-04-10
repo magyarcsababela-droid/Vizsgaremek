@@ -11,7 +11,7 @@ using System.Collections.Generic;
 namespace ComputerpartsLibrary.SERVICE
 {
     /// <summary>
-    /// JWT (JSON Web Token) token generation and validation service
+    /// JWT (JSON Web Token) token generálásért és validálásért felelős szolgáltatás
     /// </summary>
     public class JwtTokenService
     {
@@ -106,7 +106,7 @@ namespace ComputerpartsLibrary.SERVICE
         }
         
         /// <summary>
-        /// Creates a JWT token string
+        /// Létrehoz egy JWT token stringet
         /// </summary>
         private string CreateJwtTokenString(Claim[] claims)
         {
@@ -118,17 +118,17 @@ namespace ComputerpartsLibrary.SERVICE
         }
         
         /// <summary>
-        /// Creates the JWT header
+        /// Létrehozza a JWT fejlécet
         /// </summary>
         private string CreateHeader()
         {
-            // JsonSerializer is a static class - call Serialize() directly
+            // A JsonSerializer statikus osztály - közvetlenül meghívjuk a Serialize()-t
             var headerJson = System.Text.Json.JsonSerializer.Serialize(new { alg = "HS256", typ = "JWT" });
             return Convert.ToBase64String(Encoding.UTF8.GetBytes(headerJson));
         }
         
         /// <summary>
-        /// Creates the JWT payload
+        /// Létrehozza a JWT payload-ot
         /// </summary>
         private string CreatePayload(Claim[] claims)
         {
@@ -138,13 +138,13 @@ namespace ComputerpartsLibrary.SERVICE
                 payload[claim.Type] = claim.Value;
             }
             
-            // JsonSerializer is a static class - call Serialize() directly
+            // A JsonSerializer statikus osztály - közvetlenül meghívjuk a Serialize()-t
             var payloadJson = System.Text.Json.JsonSerializer.Serialize(payload);
             return Convert.ToBase64String(Encoding.UTF8.GetBytes(payloadJson));
         }
         
         /// <summary>
-        /// Creates the JWT signature
+        /// Létrehozza a JWT aláírást
         /// </summary>
         private string CreateSignature(string header, string payload)
         {
@@ -155,11 +155,11 @@ namespace ComputerpartsLibrary.SERVICE
         }
         
         /// <summary>
-        /// Creates a symmetric key for signing
+        /// Létrehoz egy szimmetrikus kulcsot az aláíráshoz
         /// </summary>
         private SymmetricSecurityKey CreateSymmetricKey()
         {
-            // Derive a 256-bit key from the secret using SHA256 so it is stable across restarts
+            // 256-bites kulcsot állítunk elő a titoktól SHA256 használatával, így stabil marad újraindítások között
             using var sha = System.Security.Cryptography.SHA256.Create();
             var hash = sha.ComputeHash(Encoding.UTF8.GetBytes(_secretKey));
             return new SymmetricSecurityKey(hash);

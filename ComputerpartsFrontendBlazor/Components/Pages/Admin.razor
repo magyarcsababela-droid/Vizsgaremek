@@ -18,7 +18,7 @@ else if (!isAdmin)
 }
 else
 {
-    <main style="min-height:75vh;">
+    <main>
         <section class="page-header_custom page-header hero-mini">
             <h1>Admin - Alkatrészek kezelése</h1>
             <p>Új alkatrészek hozzáadása, meglévők módosítása vagy törlése.</p>
@@ -27,10 +27,10 @@ else
         <section class="page-section">
             <div class="admin-toolbar" style="margin-bottom:1rem;">
                 <div class="admin-sections">
-                    <button style="margin: 5px" class="btn @(currentSection == ManagerSection.Components ? "btn-secondary" : "")" @onclick="() => SetSection(ManagerSection.Components)">Alkatrészek</button>
-                    <button style="margin: 5px" class="btn @(currentSection == ManagerSection.Products ? "btn-secondary" : "")" @onclick="() => SetSection(ManagerSection.Products)">Termékek</button>
-                    <button style="margin: 5px" class="btn @(currentSection == ManagerSection.Deals ? "btn-secondary" : "")" @onclick="() => SetSection(ManagerSection.Deals)">Ajánlatok</button>
-                    <button style="margin: 5px" class="btn @(currentSection == ManagerSection.Users ? "btn-secondary" : "")" @onclick="() => SetSection(ManagerSection.Users)">Felhasználók</button>
+                    <button style="margin: 0.5rem" class="btn @(currentSection == ManagerSection.Components ? "btn-secondary" : "")" @onclick="() => SetSection(ManagerSection.Components)">Alkatrészek</button>
+                    <button style="margin: 0.5rem" class="btn @(currentSection == ManagerSection.Products ? "btn-secondary" : "")" @onclick="() => SetSection(ManagerSection.Products)">Termékek</button>
+                    <button style="margin: 0.5rem" class="btn @(currentSection == ManagerSection.Deals ? "btn-secondary" : "")" @onclick="() => SetSection(ManagerSection.Deals)">Ajánlatok</button>
+                    <button style="margin: 0.5rem" class="btn @(currentSection == ManagerSection.Users ? "btn-secondary" : "")" @onclick="() => SetSection(ManagerSection.Users)">Felhasználók</button>
                 </div>
                 <div class="admin-actions" style="margin: 15px">
                     <input class="admin-search" style="margin: 5px" placeholder="Keresés név alapján" @bind="search" />
@@ -67,14 +67,16 @@ else
                             @foreach (var c in components)
                             {
                                 <tr>
-                                    <td>@c.id</td>
-                                    <td>@($"{c.type_id} ({GetTypeName(c.type_id)})")</td>
-                                    <td>@c.sku</td>
-                                    <td>@c.name</td>
-                                    <td>@c.price.ToString("C", currencyformat)</td>
-                                    <td>
-                                        <button class="btn btn-sm btn-secondary" @onclick="() => EditComponent(c)">Szerkeszt</button>
-                                        <button class="btn btn-sm btn-secondary" @onclick="() => ShowDeleteConfirm(c.id)">Töröl</button>
+                                    <td data-label="Id">@c.id</td>
+                                    <td data-label="Típus">@($"{c.type_id} ({GetTypeName(c.type_id)})")</td>
+                                    <td data-label="SKU">@c.sku</td>
+                                    <td data-label="Név">@c.name</td>
+                                    <td data-label="Ár">@c.price.ToString("C", currencyformat)</td>
+                                    <td data-label="Műveletek">
+                                        <div style="display:flex; gap:.4rem;">
+                                            <button class="btn btn-sm btn-secondary" @onclick="() => EditComponent(c)">Szerkeszt</button>
+                                            <button class="btn btn-sm btn-secondary" @onclick="() => ShowDeleteConfirm(c.id)">Töröl</button>
+                                        </div>
                                     </td>
                                 </tr>
                             }
@@ -99,16 +101,18 @@ else
                             @foreach (var u in users)
                             {
                                 <tr>
-                                    <td>@u.id</td>
-                                    <td>@u.username</td>
-                                    <td>@u.email</td>
-                                    <td>@u.role</td>
-                                    <td>
-                                        <button class="btn btn-sm btn-secondary" @onclick="() => EditUser(u)">Szerkeszt</button>
-                                        @if (!string.Equals(u.role, "Admin", StringComparison.OrdinalIgnoreCase))
-                                        {
-                                            <button class="btn btn-sm btn-secondary" @onclick="() => ShowDeleteConfirm(u.id)">Töröl</button>
-                                        }
+                                    <td data-label="Id">@u.id</td>
+                                    <td data-label="Felhasználónév">@u.username</td>
+                                    <td data-label="Email">@u.email</td>
+                                    <td data-label="Szerepkör">@u.role</td>
+                                    <td data-label="Műveletek">
+                                        <div style="display:flex; gap:.4rem;">
+                                            <button class="btn btn-sm btn-secondary" @onclick="() => EditUser(u)">Szerkeszt</button>
+                                            @if (!string.Equals(u.role, "Admin", StringComparison.OrdinalIgnoreCase))
+                                            {
+                                                <button class="btn btn-sm btn-secondary" @onclick="() => ShowDeleteConfirm(u.id)">Töröl</button>
+                                            }
+                                        </div>
                                     </td>
                                 </tr>
                             }
@@ -134,14 +138,16 @@ else
                             @foreach (var p in products)
                             {
                                 <tr>
-                                    <td>@p.id</td>
-                                    <td>@p.category_id</td>
-                                    <td>@p.name</td>
-                                    <td>@p.sku</td>
-                                    <td>@p.base_price.ToString("C", currencyformat)</td>
-                                    <td>
-                                        <button class="btn btn-sm btn-secondary" @onclick="() => EditProduct(p)">Szerkeszt</button>
-                                        <button class="btn btn-sm btn-secondary" @onclick="() => DeleteItem(p.id)">Töröl</button>
+                                    <td data-label="Id">@p.id</td>
+                                    <td data-label="Kategória">@p.category_id</td>
+                                    <td data-label="Név">@p.name</td>
+                                    <td data-label="SKU">@p.sku</td>
+                                    <td data-label="Ár">@p.base_price.ToString("C", currencyformat)</td>
+                                    <td data-label="Műveletek">
+                                        <div style="display:flex; gap:.4rem;">
+                                            <button class="btn btn-sm btn-secondary" @onclick="() => EditProduct(p)">Szerkeszt</button>
+                                            <button class="btn btn-sm btn-secondary" @onclick="() => ShowDeleteConfirm(p.id)">Töröl</button>
+                                        </div>
                                     </td>
                                 </tr>
                             }
@@ -166,13 +172,15 @@ else
                             @foreach (var d in deals)
                             {
                                 <tr>
-                                    <td>@d.id</td>
-                                    <td>@d.name</td>
-                                    <td>@d.description</td>
-                                    <td>@d.price.ToString("C", currencyformat)</td>
-                                    <td>
-                                        <button class="btn btn-sm btn-secondary" @onclick="() => EditDeal(d)">Szerkeszt</button>
-                                        <button class="btn btn-sm btn-secondary" @onclick="() => DeleteItem(d.id)">Töröl</button>
+                                    <td data-label="Id">@d.id</td>
+                                    <td data-label="Név">@d.name</td>
+                                    <td data-label="Leírás">@d.description</td>
+                                    <td data-label="Ár">@d.price.ToString("C", currencyformat)</td>
+                                    <td data-label="Műveletek">
+                                        <div style="display:flex; gap:.4rem;">
+                                            <button class="btn btn-sm btn-secondary" @onclick="() => EditDeal(d)">Szerkeszt</button>
+                                            <button class="btn btn-sm btn-secondary" @onclick="() => ShowDeleteConfirm(d.id)">Töröl</button>
+                                        </div>
                                     </td>
                                 </tr>
                             }
@@ -207,7 +215,7 @@ else
 
         @if (showForm)
         {
-            <section class="page-section" style="border: 1px solid #3498db; border-radius: 10px; padding: 20px; background-color: #2b2b2b; box-shadow: 1px 1px 20px black; max-width: 500px">
+            <section class="page-section admin-form">
                 <h3>@(editing ? "Módosítás" : "Új") - @currentSection</h3>
                 @if (currentSection == ManagerSection.Components)
                 {
@@ -344,7 +352,7 @@ else
         {
             var all = await Http.GetFromJsonAsync<List<ComputerpartsLibrary.MODEL.Users>>("api/users");
             users = all ?? new List<ComputerpartsLibrary.MODEL.Users>();
-        }
+    }
         catch (Exception ex)
         {
             errorMessage = ex.Message;
