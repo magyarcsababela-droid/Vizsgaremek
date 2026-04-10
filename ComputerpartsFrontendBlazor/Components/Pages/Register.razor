@@ -24,7 +24,7 @@
             </div>
             <div>
                 <label for="regPassword2">Jelszó megerősítése</label>
-                <input id="regPassword2" @bind="Model.ConfirmPassword" type="password" placeholder="Leszó megerősítése" />
+                <input id="regPassword2" @bind="Model.ConfirmPassword" type="password" placeholder="Jelszó megerősítése" />
             </div>
         </div>
 
@@ -65,7 +65,7 @@
         StatusMessage = null;
 
         // Alapvető, kliens oldali validáció a gyakori hibák elkerüléséhez
-        if (string.IsNullOrWhiteSpace(Model.FirstName) || string.IsNullOrWhiteSpace(Model.LastName))
+        if (string.IsNullOrWhiteSpace(Model.Username))
         {
             StatusMessage = "Please enter your first and last name.";
             return;
@@ -94,7 +94,7 @@
         try
         {
             // Derive a username from first and last name (fallback to email local-part)
-            var username = (Model.FirstName + Model.LastName).Replace(" ", "").ToLowerInvariant();
+            var username = (Model.Username).Replace(" ", "").ToLowerInvariant();
             if (string.IsNullOrWhiteSpace(username))
             {
                 var at = Model.Email.IndexOf('@');
