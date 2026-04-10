@@ -7,7 +7,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\ComputerpartsAPI\ComputerpartsAPI.csproj" />
     <ProjectReference Include="..\ComputerpartsLibrary\ComputerpartsLibrary.csproj" />
   </ItemGroup>
 
