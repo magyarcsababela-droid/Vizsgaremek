@@ -102,7 +102,7 @@
 
                                 @if (string.Equals(AuthService.Role, "Admin", System.StringComparison.OrdinalIgnoreCase))
                                 {
-                                    <NavLink style="margin: 1%" class="dropdown-item btn btn-sm btn-danger" href="/admin">Admin oldal</NavLink>
+                                    <a style="margin: 1%" class="dropdown-item btn btn-sm btn-danger" href="/admin">Admin oldal</a>
                                 }
                                 <button style="margin: 1%" class="dropdown-item btn btn-sm btn-danger" @onclick="OpenProfileModal">Profil megtekintése</button>
                                 <button style="margin: 1%" class="dropdown-item btn btn-sm btn-danger" @onclick="LogoutAsync">Kijelentkezés</button>
