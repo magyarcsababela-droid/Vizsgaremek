@@ -46,7 +46,7 @@ namespace ComputerpartsLibrary.SERVICE
             // prevent deleting Admin users
             if (!string.IsNullOrEmpty(entity.role) && string.Equals(entity.role, "Admin", StringComparison.OrdinalIgnoreCase))
             {
-                throw new InvalidOperationException("Cannot delete users with Admin role.");
+                throw new InvalidOperationException("Cannot delete users with Admin role."); 
             }
 
             // Remove related Addresses
