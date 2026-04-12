@@ -110,7 +110,15 @@ else
                                             <button class="btn btn-sm btn-secondary" @onclick="() => EditUser(u)">Szerkeszt</button>
                                             @if (!string.Equals(u.role, "Admin", StringComparison.OrdinalIgnoreCase))
                                             {
-                                                <button class="btn btn-sm btn-secondary" @onclick="() => ShowDeleteConfirm(u.id)">Töröl</button>
+                                                @if (AuthService.UserId.HasValue && AuthService.UserId.Value == u.id)
+                                                {
+                                                    // prevent deleting the currently authenticated user from this UI
+                                                    <button class="btn btn-sm btn-secondary" disabled title="A bejelentkezett felhasználó nem törölhető">Töröl</button>
+                                                }
+                                                else
+                                                {
+                                                    <button class="btn btn-sm btn-secondary" @onclick="() => ShowDeleteConfirm(u.id)">Töröl</button>
+                                                }
                                             }
                                         </div>
                                     </td>
